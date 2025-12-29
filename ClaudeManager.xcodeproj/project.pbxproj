@@ -29,6 +29,7 @@
 		A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000002110000010000000F /* ExecutionStateMachine.swift */; };
 		A3000003210000010000000F /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000003110000010000000F /* AppState.swift */; };
 		A6000001210000010000000F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000001110000010000000F /* SetupView.swift */; };
+		A6000002210000010000000F /* PhaseIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000002110000010000000F /* PhaseIndicatorView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +67,7 @@
 		A3000002110000010000000F /* ExecutionStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionStateMachine.swift; sourceTree = "<group>"; };
 		A3000003110000010000000F /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		A6000001110000010000000F /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		A6000002110000010000000F /* PhaseIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseIndicatorView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				A6000001110000010000000F /* SetupView.swift */,
+				A6000002110000010000000F /* PhaseIndicatorView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -301,6 +304,7 @@
 				A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */,
 				A3000003210000010000000F /* AppState.swift in Sources */,
 				A6000001210000010000000F /* SetupView.swift in Sources */,
+				A6000002210000010000000F /* PhaseIndicatorView.swift in Sources */,
 				A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */,
 				A4000002210000010000000F /* GitServiceProtocol.swift in Sources */,
 			);

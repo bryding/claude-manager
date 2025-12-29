@@ -13,8 +13,12 @@ struct SetupView: View {
 
     // MARK: - Computed Properties
 
+    private var hasProjectPath: Bool {
+        appState.context.projectPath != nil
+    }
+
     private var canStart: Bool {
-        appState.context.projectPath != nil &&
+        hasProjectPath &&
         !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         !isStarting
     }
@@ -35,18 +39,16 @@ struct SetupView: View {
         }
         .padding(32)
         .frame(minWidth: 600, minHeight: 500)
-        .alert("Error", isPresented: .init(
+        .alert("Error", isPresented: showingError, actions: {}) {
+            Text(errorMessage ?? "")
+        }
+    }
+
+    private var showingError: Binding<Bool> {
+        Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
-        )) {
-            Button("OK") {
-                errorMessage = nil
-            }
-        } message: {
-            if let errorMessage {
-                Text(errorMessage)
-            }
-        }
+        )
     }
 
     // MARK: - View Sections
@@ -75,10 +77,10 @@ struct SetupView: View {
                 }
 
                 HStack {
-                    Image(systemName: appState.context.projectPath != nil ? "folder.fill" : "folder")
-                        .foregroundStyle(appState.context.projectPath != nil ? .blue : .secondary)
+                    Image(systemName: hasProjectPath ? "folder.fill" : "folder")
+                        .foregroundStyle(hasProjectPath ? .blue : .secondary)
                     Text(projectPathDisplay)
-                        .foregroundStyle(appState.context.projectPath != nil ? .primary : .secondary)
+                        .foregroundStyle(hasProjectPath ? .primary : .secondary)
                         .lineLimit(1)
                         .truncationMode(.middle)
                     Spacer()
@@ -133,7 +135,6 @@ struct SetupView: View {
 
     // MARK: - Actions
 
-    @MainActor
     private func selectDirectory() async {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
