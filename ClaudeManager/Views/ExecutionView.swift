@@ -22,7 +22,7 @@ struct ExecutionView: View {
         }
     }
 
-    // MARK: - Left Pane
+    // MARK: - View Sections
 
     private var leftPane: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -42,8 +42,6 @@ struct ExecutionView: View {
         }
         .padding()
     }
-
-    // MARK: - Progress Section
 
     private var progressSection: some View {
         VStack(alignment: .leading, spacing: 8) {
