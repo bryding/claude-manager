@@ -30,6 +30,10 @@
 		A3000003210000010000000F /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000003110000010000000F /* AppState.swift */; };
 		A6000001210000010000000F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000001110000010000000F /* SetupView.swift */; };
 		A6000002210000010000000F /* PhaseIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000002110000010000000F /* PhaseIndicatorView.swift */; };
+		A6000003210000010000000F /* TaskListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000003110000010000000F /* TaskListView.swift */; };
+		A6000004210000010000000F /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000004110000010000000F /* LogView.swift */; };
+		A6000005210000010000000F /* UserQuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000005110000010000000F /* UserQuestionView.swift */; };
+		A6000006210000010000000F /* ControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000006110000010000000F /* ControlsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +72,10 @@
 		A3000003110000010000000F /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		A6000001110000010000000F /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		A6000002110000010000000F /* PhaseIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseIndicatorView.swift; sourceTree = "<group>"; };
+		A6000003110000010000000F /* TaskListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListView.swift; sourceTree = "<group>"; };
+		A6000004110000010000000F /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
+		A6000005110000010000000F /* UserQuestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserQuestionView.swift; sourceTree = "<group>"; };
+		A6000006110000010000000F /* ControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,6 +175,10 @@
 			children = (
 				A6000001110000010000000F /* SetupView.swift */,
 				A6000002110000010000000F /* PhaseIndicatorView.swift */,
+				A6000003110000010000000F /* TaskListView.swift */,
+				A6000004110000010000000F /* LogView.swift */,
+				A6000005110000010000000F /* UserQuestionView.swift */,
+				A6000006110000010000000F /* ControlsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -305,6 +317,10 @@
 				A3000003210000010000000F /* AppState.swift in Sources */,
 				A6000001210000010000000F /* SetupView.swift in Sources */,
 				A6000002210000010000000F /* PhaseIndicatorView.swift in Sources */,
+				A6000003210000010000000F /* TaskListView.swift in Sources */,
+				A6000004210000010000000F /* LogView.swift in Sources */,
+				A6000005210000010000000F /* UserQuestionView.swift in Sources */,
+				A6000006210000010000000F /* ControlsView.swift in Sources */,
 				A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */,
 				A4000002210000010000000F /* GitServiceProtocol.swift in Sources */,
 			);

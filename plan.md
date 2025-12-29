@@ -323,32 +323,32 @@ User describes feature → Claude generates plan → Plan rewritten to tasks →
 
 ---
 
-## Task 21: Implement User Question View
+## Task 21: Implement User Question View ✅
 
 **Description:** Modal sheet for answering Claude's questions.
 
 **Acceptance Criteria:**
-- [ ] Create `UserQuestionView` taking PendingQuestion
-- [ ] Show question header and text
-- [ ] If options provided, show selectable option buttons with descriptions
-- [ ] If no options, show TextEditor for freeform input
-- [ ] Add Skip and Submit buttons
-- [ ] Call stateMachine.answerQuestion() on submit
+- [x] Create `UserQuestionView` taking PendingQuestion
+- [x] Show question header and text
+- [x] If options provided, show selectable option buttons with descriptions
+- [x] If no options, show TextEditor for freeform input
+- [x] Add Skip and Submit buttons
+- [x] Call stateMachine.answerQuestion() on submit
 
 **File:** `ClaudeManager/Views/UserQuestionView.swift`
 
 ---
 
-## Task 22: Implement Controls View
+## Task 22: Implement Controls View ✅
 
 **Description:** Pause/resume/stop controls with cost display.
 
 **Acceptance Criteria:**
-- [ ] Create `ControlsView` with @Environment access to AppState
-- [ ] Add Pause/Resume toggle button
-- [ ] Add Stop button
-- [ ] Show total cost with dollar formatting
-- [ ] Disable controls appropriately based on phase
+- [x] Create `ControlsView` with @Environment access to AppState
+- [x] Add Pause/Resume toggle button
+- [x] Add Stop button
+- [x] Show total cost with dollar formatting
+- [x] Disable controls appropriately based on phase
 
 **File:** `ClaudeManager/Views/ControlsView.swift`
 
