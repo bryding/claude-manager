@@ -63,18 +63,6 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
         return result
     }
 
-    func reset() {
-        executeResult = nil
-        executeError = nil
-        messagesToSend = []
-        executeCalled = false
-        lastPrompt = nil
-        lastPermissionMode = nil
-        lastTimeout = nil
-        executeCallCount = 0
-        failuresBeforeSuccess = 0
-    }
-
     func terminate() {
         _isRunning = false
     }

@@ -531,8 +531,7 @@ final class ExecutionStateMachineTests: XCTestCase {
         context.featureDescription = "Build feature"
         context.timeoutConfiguration = TimeoutConfiguration(
             planModeTimeout: 120,
-            executionTimeout: 600,
-            commitTimeout: 30
+            executionTimeout: 600
         )
         configureMockWithPlan(tasks: [(1, "Implement Service", "Core logic")])
 
@@ -595,23 +594,17 @@ final class ExecutionStateMachineTests: XCTestCase {
 
     // MARK: - Task Failure Handling Tests
 
-    func testPendingTaskFailureCreatedOnHandlePhaseError() async throws {
-        context.projectPath = URL(fileURLWithPath: "/tmp/project")
-        context.featureDescription = "Build feature"
-        context.phase = .waitingForUser
-        context.pendingTaskFailure = PendingTaskFailure(
-            taskNumber: 1,
-            taskTitle: "Test Task",
-            error: "Operation timed out"
+    func testPendingTaskFailureHasCorrectData() async throws {
+        let failure = PendingTaskFailure(
+            taskNumber: 5,
+            taskTitle: "Implement Feature",
+            error: "Connection timed out"
         )
-        context.plan = Plan(rawText: "", tasks: [
-            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .inProgress, subtasks: [])
-        ])
-        context.currentTaskIndex = 0
 
-        XCTAssertEqual(context.phase, .waitingForUser)
-        XCTAssertNotNil(context.pendingTaskFailure)
-        XCTAssertEqual(context.pendingTaskFailure?.taskTitle, "Test Task")
+        XCTAssertEqual(failure.taskNumber, 5)
+        XCTAssertEqual(failure.taskTitle, "Implement Feature")
+        XCTAssertEqual(failure.error, "Connection timed out")
+        XCTAssertNotNil(failure.id)
     }
 
     func testTaskFailureRetryResponse() async throws {

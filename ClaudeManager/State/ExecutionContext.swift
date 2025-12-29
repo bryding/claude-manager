@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Task Failure Response
 
-enum TaskFailureResponse: String, CaseIterable {
+enum TaskFailureResponse: String {
     case retry = "Retry"
     case skip = "Skip"
     case stop = "Stop"
@@ -15,20 +15,17 @@ struct PendingTaskFailure: Identifiable, Sendable {
     let taskNumber: Int
     let taskTitle: String
     let error: String
-    let timestamp: Date
 
     init(
         id: UUID = UUID(),
         taskNumber: Int,
         taskTitle: String,
-        error: String,
-        timestamp: Date = Date()
+        error: String
     ) {
         self.id = id
         self.taskNumber = taskNumber
         self.taskTitle = taskTitle
         self.error = error
-        self.timestamp = timestamp
     }
 }
 
