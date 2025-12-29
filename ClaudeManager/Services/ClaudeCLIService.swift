@@ -35,8 +35,9 @@ enum ClaudeCLIServiceError: Error {
 
 // MARK: - Claude CLI Service
 
-final class ClaudeCLIService: Sendable {
+final class ClaudeCLIService: @unchecked Sendable {
     let executablePath: String
+    private var currentProcess: ClaudeProcess?
 
     init(executablePath: String = "/usr/local/bin/claude") {
         self.executablePath = executablePath
@@ -60,6 +61,7 @@ final class ClaudeCLIService: Sendable {
             arguments: arguments,
             workingDirectory: workingDirectory
         )
+        currentProcess = process
 
         var resultMessage: ResultMessage?
 
@@ -72,8 +74,11 @@ final class ClaudeCLIService: Sendable {
                 }
             }
         } catch let error as ClaudeProcessError {
+            currentProcess = nil
             throw ClaudeCLIServiceError.processError(error)
         }
+
+        currentProcess = nil
 
         guard let result = resultMessage else {
             throw ClaudeCLIServiceError.noResultMessage
@@ -86,6 +91,18 @@ final class ClaudeCLIService: Sendable {
             durationMs: result.durationMs,
             isError: result.isError
         )
+    }
+
+    func terminate() {
+        currentProcess?.terminate()
+    }
+
+    func interrupt() {
+        currentProcess?.interrupt()
+    }
+
+    var isRunning: Bool {
+        currentProcess?.isRunning ?? false
     }
 
     private func buildArguments(
