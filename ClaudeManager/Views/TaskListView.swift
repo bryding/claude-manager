@@ -2,16 +2,12 @@ import SwiftUI
 
 struct TaskListView: View {
     let tasks: [PlanTask]
-    let currentTaskIndex: Int
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(tasks) { task in
-                    TaskRowView(
-                        task: task,
-                        isCurrentTask: tasks.firstIndex(where: { $0.id == task.id }) == currentTaskIndex
-                    )
+                    TaskRowView(task: task)
                 }
             }
             .padding(.vertical, 8)
@@ -23,7 +19,6 @@ struct TaskListView: View {
 
 private struct TaskRowView: View {
     let task: PlanTask
-    let isCurrentTask: Bool
 
     @State private var isPulsing = false
 
@@ -94,18 +89,15 @@ private struct TaskRowView: View {
 
 #if DEBUG
 #Preview("Task List") {
-    TaskListView(
-        tasks: [
-            PlanTask(number: 1, title: "Create project structure", description: "Set up folders and files", status: .completed),
-            PlanTask(number: 2, title: "Implement models", description: "Create data models for the app", status: .completed),
-            PlanTask(number: 3, title: "Build services layer", description: "This is the current task being worked on with a longer description that might wrap to multiple lines.", status: .inProgress),
-            PlanTask(number: 4, title: "Create state management", description: "Add app state", status: .pending),
-            PlanTask(number: 5, title: "Build UI views", description: "Create SwiftUI views", status: .pending),
-            PlanTask(number: 6, title: "Skipped task", description: "This was skipped", status: .skipped),
-            PlanTask(number: 7, title: "Failed task", description: "This failed", status: .failed),
-        ],
-        currentTaskIndex: 2
-    )
+    TaskListView(tasks: [
+        PlanTask(number: 1, title: "Create project structure", description: "Set up folders and files", status: .completed),
+        PlanTask(number: 2, title: "Implement models", description: "Create data models for the app", status: .completed),
+        PlanTask(number: 3, title: "Build services layer", description: "This is the current task being worked on with a longer description that might wrap to multiple lines.", status: .inProgress),
+        PlanTask(number: 4, title: "Create state management", description: "Add app state", status: .pending),
+        PlanTask(number: 5, title: "Build UI views", description: "Create SwiftUI views", status: .pending),
+        PlanTask(number: 6, title: "Skipped task", description: "This was skipped", status: .skipped),
+        PlanTask(number: 7, title: "Failed task", description: "This failed", status: .failed),
+    ])
     .frame(width: 400, height: 500)
 }
 #endif
