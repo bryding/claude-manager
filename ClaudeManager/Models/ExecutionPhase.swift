@@ -13,6 +13,7 @@ enum ExecutionPhase: String, Sendable, Equatable {
     case writingTests
     case committingTests
     case clearingContext
+    case handlingContextExhaustion
     case waitingForUser
     case paused
     case completed
@@ -26,7 +27,7 @@ extension ExecutionPhase {
         switch self {
         case .generatingInitialPlan, .rewritingPlan, .reviewingCode, .writingTests:
             return "plan"
-        case .executingTask, .committingImplementation, .committingReview, .committingTests, .clearingContext:
+        case .executingTask, .committingImplementation, .committingReview, .committingTests, .clearingContext, .handlingContextExhaustion:
             return "acceptEdits"
         case .idle, .waitingForUser, .paused, .completed, .failed:
             return nil
@@ -64,6 +65,8 @@ extension ExecutionPhase {
             return 0.85
         case .clearingContext:
             return 0.95
+        case .handlingContextExhaustion:
+            return 0.4
         case .completed:
             return 1.0
         }
@@ -91,6 +94,8 @@ extension ExecutionPhase {
             return "Committing Tests"
         case .clearingContext:
             return "Clearing Context"
+        case .handlingContextExhaustion:
+            return "Handling Context Limit"
         case .waitingForUser:
             return "Waiting for User"
         case .paused:
@@ -124,6 +129,8 @@ extension ExecutionPhase {
             return "Saving tests to git"
         case .clearingContext:
             return "Preparing for the next task"
+        case .handlingContextExhaustion:
+            return "Saving progress and preparing continuation"
         case .waitingForUser:
             return "Claude needs your input"
         case .paused:

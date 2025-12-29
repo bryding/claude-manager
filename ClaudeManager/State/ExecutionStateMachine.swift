@@ -156,9 +156,17 @@ final class ExecutionStateMachine {
                 break
             }
 
+            if context.isHandoffInProgress && context.phase != .handlingContextExhaustion {
+                context.phase = .handlingContextExhaustion
+            }
+
             do {
                 try await executeCurrentPhase()
             } catch {
+                if context.isHandoffInProgress {
+                    context.phase = .handlingContextExhaustion
+                    continue
+                }
                 handlePhaseError(error)
                 return
             }
@@ -205,6 +213,9 @@ final class ExecutionStateMachine {
 
         case .clearingContext:
             try await clearContext()
+
+        case .handlingContextExhaustion:
+            try await handleContextExhaustion()
 
         case .waitingForUser, .paused, .completed, .failed:
             break
@@ -260,6 +271,9 @@ final class ExecutionStateMachine {
 
         case .clearingContext:
             advanceToNextTaskOrComplete()
+
+        case .handlingContextExhaustion:
+            context.phase = .executingTask
 
         case .waitingForUser, .paused, .completed, .failed:
             break
@@ -345,6 +359,17 @@ final class ExecutionStateMachine {
         return "test: add tests for \(task.title)"
     }
 
+    // MARK: - Context Handoff Helpers
+
+    private var canTriggerContextHandoff: Bool {
+        switch context.phase {
+        case .executingTask, .reviewingCode, .writingTests:
+            return true
+        default:
+            return false
+        }
+    }
+
     // MARK: - Message Handling
 
     private func handleStreamMessage(_ message: ClaudeStreamMessage) {
@@ -381,6 +406,7 @@ final class ExecutionStateMachine {
                     inputTokens: usage.inputTokens,
                     outputTokens: usage.outputTokens
                 )
+                checkForContextExhaustion()
             }
 
         case .result(let resultMsg):
@@ -390,6 +416,7 @@ final class ExecutionStateMachine {
                 inputTokens: resultMsg.usage.inputTokens,
                 outputTokens: resultMsg.usage.outputTokens
             )
+            checkForContextExhaustion()
 
         case .user:
             break
@@ -502,8 +529,15 @@ final class ExecutionStateMachine {
             ? "No specific subtasks defined."
             : task.subtasks.enumerated().map { "- \($0.element)" }.joined(separator: "\n")
 
+        var continuationContext = ""
+        if let summary = context.continuationSummary {
+            continuationContext = summary.promptContext
+            context.addLog(type: .info, message: "Resuming task with continuation context")
+            context.continuationSummary = nil
+        }
+
         let prompt = """
-            Execute the following task:
+            \(continuationContext)Execute the following task:
 
             ## Task \(task.number): \(task.title)
             \(task.description)
@@ -527,6 +561,11 @@ final class ExecutionStateMachine {
                 }
             }
         )
+
+        if context.isHandoffInProgress {
+            context.phase = .handlingContextExhaustion
+            return
+        }
 
         if result.isError {
             context.addLog(type: .error, message: "Task execution failed")
@@ -647,5 +686,159 @@ final class ExecutionStateMachine {
     private func clearContext() async throws {
         context.sessionId = nil
         context.addLog(type: .info, message: "Context cleared for next task")
+    }
+
+    // MARK: - Context Exhaustion Handling
+
+    private func checkForContextExhaustion() {
+        guard context.isContextLow,
+              !context.isHandoffInProgress,
+              canTriggerContextHandoff else {
+            return
+        }
+
+        context.isHandoffInProgress = true
+        let usagePercent = Int(context.contextPercentUsed * 100)
+        context.addLog(
+            type: .info,
+            message: "Context usage high (\(usagePercent)%), initiating handoff"
+        )
+        claudeService.interrupt()
+    }
+
+    private func handleContextExhaustion() async throws {
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        guard let task = context.currentTask else {
+            context.addLog(type: .error, message: "No current task during context exhaustion")
+            context.isHandoffInProgress = false
+            return
+        }
+
+        context.addLog(type: .info, message: "Creating WIP commit before context clear")
+
+        // Step 1: Create WIP commit
+        try await createWIPCommit(for: task, in: projectPath)
+
+        // Step 2: Generate continuation summary
+        try await generateContinuationSummary(for: task, in: projectPath)
+
+        // Step 3: Clear context
+        context.sessionId = nil
+        context.lastInputTokenCount = 0
+        context.isHandoffInProgress = false
+
+        context.addLog(type: .info, message: "Context cleared, resuming with continuation summary")
+    }
+
+    private func createWIPCommit(for task: PlanTask, in projectPath: URL) async throws {
+        let message = "WIP: Task \(task.number) - \(task.title) (context handoff)"
+
+        let result = try await gitService.commitAll(message: message, in: projectPath)
+
+        switch result {
+        case .committed(let output):
+            let outputText = output?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            context.addLog(type: .info, message: "WIP commit created: \(outputText)")
+        case .noChanges:
+            context.addLog(type: .info, message: "No changes to commit during handoff")
+        }
+    }
+
+    private func generateContinuationSummary(for task: PlanTask, in projectPath: URL) async throws {
+        let prompt = """
+            Generate a concise continuation summary for the current task progress.
+
+            Task: \(task.number) - \(task.title)
+            Description: \(task.description)
+
+            Analyze the current state and provide:
+            1. A brief description of what has been accomplished (2-3 sentences max)
+            2. List of files that were modified (file paths only)
+            3. What remains to be done to complete this task (2-3 sentences max)
+
+            Output ONLY in this exact JSON format, nothing else:
+            {
+                "progressDescription": "...",
+                "filesModified": ["path1", "path2"],
+                "pendingWork": "..."
+            }
+            """
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .plan,
+            sessionId: nil,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    if case .assistant(let assistantMsg) = message {
+                        for block in assistantMsg.message.content {
+                            if case .text(let textContent) = block {
+                                self.context.addLog(type: .output, message: "[Summary] \(textContent.text)")
+                            }
+                        }
+                    }
+                }
+            }
+        )
+
+        if result.isError {
+            context.addLog(type: .error, message: "Failed to generate continuation summary")
+            context.continuationSummary = createFallbackSummary(for: task)
+            return
+        }
+
+        if let summary = parseContinuationSummary(from: result.result, task: task) {
+            context.continuationSummary = summary
+            context.addLog(type: .info, message: "Continuation summary generated successfully")
+        } else {
+            context.continuationSummary = createFallbackSummary(for: task, with: result.result)
+        }
+    }
+
+    private func createFallbackSummary(for task: PlanTask, with rawText: String? = nil) -> ContinuationSummary {
+        let progressDescription = rawText.map { String($0.prefix(500)) }
+            ?? "Previous session was interrupted due to context limits."
+
+        return ContinuationSummary(
+            taskNumber: task.number,
+            taskTitle: task.title,
+            progressDescription: progressDescription,
+            filesModified: [],
+            pendingWork: "Continue implementing \(task.title) as described in the task requirements."
+        )
+    }
+
+    private func parseContinuationSummary(from jsonString: String, task: PlanTask) -> ContinuationSummary? {
+        var cleanedJSON = jsonString
+
+        if let startRange = jsonString.range(of: "{"),
+           let endRange = jsonString.range(of: "}", options: .backwards) {
+            cleanedJSON = String(jsonString[startRange.lowerBound...endRange.upperBound])
+        }
+
+        guard let data = cleanedJSON.data(using: .utf8) else { return nil }
+
+        struct SummaryResponse: Decodable {
+            let progressDescription: String
+            let filesModified: [String]
+            let pendingWork: String
+        }
+
+        guard let response = try? JSONDecoder().decode(SummaryResponse.self, from: data) else {
+            return nil
+        }
+
+        return ContinuationSummary(
+            taskNumber: task.number,
+            taskTitle: task.title,
+            progressDescription: response.progressDescription,
+            filesModified: response.filesModified,
+            pendingWork: response.pendingWork
+        )
     }
 }

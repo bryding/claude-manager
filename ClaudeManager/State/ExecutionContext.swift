@@ -89,6 +89,14 @@ final class ExecutionContext {
 
     var totalInputTokens: Int = 0
     var totalOutputTokens: Int = 0
+    var lastInputTokenCount: Int = 0
+
+    // MARK: - Context Window Management
+
+    var continuationSummary: ContinuationSummary?
+    var isHandoffInProgress: Bool = false
+
+    static let contextWindowSize: Int = 200_000
 
     // MARK: - Initialization
 
@@ -147,6 +155,20 @@ final class ExecutionContext {
         return Date().timeIntervalSince(startTime)
     }
 
+    var contextPercentRemaining: Double {
+        guard lastInputTokenCount > 0 else { return 1.0 }
+        let used = Double(lastInputTokenCount) / Double(Self.contextWindowSize)
+        return max(0.0, 1.0 - used)
+    }
+
+    var contextPercentUsed: Double {
+        1.0 - contextPercentRemaining
+    }
+
+    var isContextLow: Bool {
+        contextPercentRemaining < 0.10
+    }
+
     // MARK: - Mutation Methods
 
     func reset() {
@@ -163,6 +185,9 @@ final class ExecutionContext {
         errors = []
         totalInputTokens = 0
         totalOutputTokens = 0
+        lastInputTokenCount = 0
+        continuationSummary = nil
+        isHandoffInProgress = false
     }
 
     func addLog(_ entry: LogEntry) {
@@ -219,5 +244,6 @@ final class ExecutionContext {
     func accumulateUsage(inputTokens: Int, outputTokens: Int) {
         totalInputTokens += inputTokens
         totalOutputTokens += outputTokens
+        lastInputTokenCount = inputTokens
     }
 }

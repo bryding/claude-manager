@@ -22,6 +22,7 @@ struct ControlsView: View {
             pauseResumeButton
             stopButton
             Spacer()
+            contextIndicator
             costDisplay
         }
         .alert("Error", isPresented: showingError, actions: {}) {
@@ -63,6 +64,24 @@ struct ControlsView: View {
         .disabled(!context.canStop)
     }
 
+    private var contextIndicator: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(contextStatusColor)
+                .frame(width: 8, height: 8)
+
+            Text("Context:")
+                .foregroundStyle(.secondary)
+
+            Text(formattedContextUsage)
+                .fontWeight(.medium)
+                .monospacedDigit()
+                .foregroundStyle(contextTextColor)
+        }
+        .font(.callout)
+        .help("Context window usage: \(formattedContextUsage) used")
+    }
+
     private var costDisplay: some View {
         HStack(spacing: 4) {
             Text("Cost:")
@@ -78,6 +97,33 @@ struct ControlsView: View {
 
     private var formattedCost: String {
         String(format: "$%.2f", context.totalCost)
+    }
+
+    private var formattedContextUsage: String {
+        let percentage = Int(context.contextPercentUsed * 100)
+        return "\(percentage)%"
+    }
+
+    private var contextStatusColor: Color {
+        let remaining = context.contextPercentRemaining
+        if remaining < 0.10 {
+            return .red
+        } else if remaining < 0.25 {
+            return .orange
+        } else {
+            return .green
+        }
+    }
+
+    private var contextTextColor: Color {
+        let remaining = context.contextPercentRemaining
+        if remaining < 0.10 {
+            return .red
+        } else if remaining < 0.25 {
+            return .orange
+        } else {
+            return .primary
+        }
     }
 
     // MARK: - Actions
@@ -126,6 +172,26 @@ struct ControlsView: View {
     let appState = AppState()
     appState.context.phase = .idle
     appState.context.totalCost = 0.0
+    return ControlsView()
+        .environment(appState)
+        .padding()
+}
+
+#Preview("Controls - High Context Usage") {
+    let appState = AppState()
+    appState.context.phase = .executingTask
+    appState.context.totalCost = 0.42
+    appState.context.lastInputTokenCount = 180_000
+    return ControlsView()
+        .environment(appState)
+        .padding()
+}
+
+#Preview("Controls - Medium Context Usage") {
+    let appState = AppState()
+    appState.context.phase = .executingTask
+    appState.context.totalCost = 0.25
+    appState.context.lastInputTokenCount = 160_000
     return ControlsView()
         .environment(appState)
         .padding()
