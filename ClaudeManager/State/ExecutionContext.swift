@@ -140,6 +140,10 @@ final class ExecutionContext {
 
     var pendingTaskFailure: PendingTaskFailure?
 
+    // MARK: - UI State
+
+    var showStopConfirmation: Bool = false
+
     // MARK: - Initialization
 
     init() {}
@@ -232,6 +236,7 @@ final class ExecutionContext {
         isHandoffInProgress = false
         currentRetryAttempt = 0
         pendingTaskFailure = nil
+        showStopConfirmation = false
     }
 
     func resetRetryAttempt() {

@@ -42,6 +42,12 @@ struct SetupView: View {
         .alert("Error", isPresented: showingError, actions: {}) {
             Text(errorMessage ?? "")
         }
+        .onAppear {
+            if appState.context.projectPath == nil,
+               let lastPath = appState.userPreferences.lastProjectPath {
+                appState.context.projectPath = lastPath
+            }
+        }
     }
 
     private var showingError: Binding<Bool> {
@@ -73,6 +79,11 @@ struct SetupView: View {
                             await selectDirectory()
                         }
                     }
+
+                    if !appState.userPreferences.recentProjects.isEmpty {
+                        recentProjectsMenu
+                    }
+
                     Spacer()
                 }
 
@@ -116,6 +127,20 @@ struct SetupView: View {
         }
     }
 
+    private var recentProjectsMenu: some View {
+        Menu {
+            ForEach(appState.userPreferences.recentProjects, id: \.self) { url in
+                Button(action: { selectRecentProject(url) }) {
+                    Label(url.lastPathComponent, systemImage: "folder")
+                }
+            }
+        } label: {
+            Image(systemName: "clock.arrow.circlepath")
+        }
+        .menuStyle(.borderlessButton)
+        .help("Recent Projects")
+    }
+
     private var startButton: some View {
         Button(action: startDevelopmentLoop) {
             HStack(spacing: 8) {
@@ -144,9 +169,15 @@ struct SetupView: View {
         panel.prompt = "Select"
 
         let response = await panel.begin()
-        if response == .OK {
-            appState.context.projectPath = panel.url
+        if response == .OK, let url = panel.url {
+            appState.context.projectPath = url
+            appState.userPreferences.lastProjectPath = url
         }
+    }
+
+    private func selectRecentProject(_ url: URL) {
+        appState.context.projectPath = url
+        appState.userPreferences.lastProjectPath = url
     }
 
     private func startDevelopmentLoop() {

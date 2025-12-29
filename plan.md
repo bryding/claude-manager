@@ -427,14 +427,22 @@ User describes feature → Claude generates plan → Plan rewritten to tasks →
 
 ---
 
-## Task 27: Polish and UX Improvements
+## ✅ Task 27: Polish and UX Improvements
 
 **Description:** Final polish and user experience improvements.
 
 **Acceptance Criteria:**
-- [ ] Add app icon
-- [ ] Add keyboard shortcuts (Cmd+P pause, Cmd+. stop)
-- [ ] Add recent projects list in sidebar
-- [ ] Persist last used project path
-- [ ] Add elapsed time display
-- [ ] Add confirmation dialog before stopping mid-task
+- [x] Add app icon
+- [x] Add keyboard shortcuts (Cmd+P pause, Cmd+. stop)
+- [x] Add recent projects list in sidebar
+- [x] Persist last used project path
+- [x] Add elapsed time display
+- [x] Add confirmation dialog before stopping mid-task
+
+**Implementation Notes:**
+- Created `UserPreferences.swift` for persisting last project path and recent projects (max 10)
+- Added recent projects dropdown menu next to "Select Folder..." button in SetupView
+- Added elapsed time display using `TimelineView` for live updates in ControlsView
+- Added keyboard shortcuts via `.commands` modifier in ClaudeManagerApp (Cmd+P pause/resume, Cmd+. stop)
+- Added `.confirmationDialog()` for stop confirmation with destructive action
+- Generated SF Symbol-based app icon (terminal + gear motif) at all required macOS sizes

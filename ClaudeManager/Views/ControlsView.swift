@@ -22,12 +22,32 @@ struct ControlsView: View {
             pauseResumeButton
             stopButton
             Spacer()
+            elapsedTimeDisplay
             contextIndicator
             costDisplay
         }
         .alert("Error", isPresented: showingError, actions: {}) {
             Text(errorMessage ?? "")
         }
+        .confirmationDialog(
+            "Stop Execution?",
+            isPresented: showStopConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Stop", role: .destructive) {
+                appState.stateMachine.stop()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to stop? Current task progress will be lost.")
+        }
+    }
+
+    private var showStopConfirmation: Binding<Bool> {
+        Binding(
+            get: { appState.context.showStopConfirmation },
+            set: { appState.context.showStopConfirmation = $0 }
+        )
     }
 
     private var showingError: Binding<Bool> {
@@ -49,10 +69,11 @@ struct ControlsView: View {
         .buttonStyle(.bordered)
         .controlSize(.regular)
         .disabled(!context.canPause && !context.canResume)
+        .keyboardShortcut("p", modifiers: .command)
     }
 
     private var stopButton: some View {
-        Button(action: stop) {
+        Button(action: requestStop) {
             HStack(spacing: 6) {
                 Image(systemName: "stop.circle.fill")
                 Text("Stop")
@@ -62,6 +83,20 @@ struct ControlsView: View {
         .controlSize(.regular)
         .tint(.red)
         .disabled(!context.canStop)
+        .keyboardShortcut(".", modifiers: .command)
+    }
+
+    private var elapsedTimeDisplay: some View {
+        TimelineView(.periodic(from: .now, by: 1.0)) { _ in
+            HStack(spacing: 4) {
+                Image(systemName: "clock")
+                    .foregroundStyle(.secondary)
+                Text(formattedElapsedTime)
+                    .fontWeight(.medium)
+                    .monospacedDigit()
+            }
+            .font(.callout)
+        }
     }
 
     private var contextIndicator: some View {
@@ -97,6 +132,19 @@ struct ControlsView: View {
 
     private var formattedCost: String {
         String(format: "$%.2f", context.totalCost)
+    }
+
+    private var formattedElapsedTime: String {
+        guard let elapsed = context.elapsedTime else { return "--:--" }
+        let hours = Int(elapsed) / 3600
+        let minutes = (Int(elapsed) % 3600) / 60
+        let seconds = Int(elapsed) % 60
+
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%02d:%02d", minutes, seconds)
+        }
     }
 
     private var formattedContextUsage: String {
@@ -142,8 +190,8 @@ struct ControlsView: View {
         }
     }
 
-    private func stop() {
-        appState.stateMachine.stop()
+    private func requestStop() {
+        appState.context.showStopConfirmation = true
     }
 }
 

@@ -7,6 +7,7 @@ final class AppState {
 
     let context: ExecutionContext
     let stateMachine: ExecutionStateMachine
+    let userPreferences: UserPreferences
 
     // MARK: - Initialization
 
@@ -14,10 +15,12 @@ final class AppState {
         context: ExecutionContext? = nil,
         claudeService: (any ClaudeCLIServiceProtocol)? = nil,
         planService: PlanService? = nil,
-        gitService: (any GitServiceProtocol)? = nil
+        gitService: (any GitServiceProtocol)? = nil,
+        userPreferences: UserPreferences? = nil
     ) {
         let resolvedContext = context ?? ExecutionContext()
         self.context = resolvedContext
+        self.userPreferences = userPreferences ?? UserPreferences()
         self.stateMachine = ExecutionStateMachine(
             context: resolvedContext,
             claudeService: claudeService ?? ClaudeCLIService(),
