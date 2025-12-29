@@ -20,6 +20,8 @@
 		A100000D210000010000000F /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000D110000010000000F /* LogEntry.swift */; };
 		A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001110000010000000F /* ClaudeStreamMessageTests.swift */; };
 		A2000003210000010000000F /* PlanServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003110000010000000F /* PlanServiceTests.swift */; };
+		A3000001210000010000000F /* ExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000001110000010000000F /* ExecutionContext.swift */; };
+		A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000002110000010000000F /* ExecutionStateMachine.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +50,8 @@
 		A2000000010000010000000F /* ClaudeManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClaudeManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000001110000010000000F /* ClaudeStreamMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStreamMessageTests.swift; sourceTree = "<group>"; };
 		A2000003110000010000000F /* PlanServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanServiceTests.swift; sourceTree = "<group>"; };
+		A3000001110000010000000F /* ExecutionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContext.swift; sourceTree = "<group>"; };
+		A3000002110000010000000F /* ExecutionStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionStateMachine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +129,8 @@
 		A1000005110000010000000F /* State */ = {
 			isa = PBXGroup;
 			children = (
+				A3000001110000010000000F /* ExecutionContext.swift */,
+				A3000002110000010000000F /* ExecutionStateMachine.swift */,
 			);
 			path = State;
 			sourceTree = "<group>";
@@ -254,6 +260,8 @@
 				A100000C210000010000000F /* ExecutionPhase.swift in Sources */,
 				A100000D210000010000000F /* LogEntry.swift in Sources */,
 				A100000E210000010000000F /* GitService.swift in Sources */,
+				A3000001210000010000000F /* ExecutionContext.swift in Sources */,
+				A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
