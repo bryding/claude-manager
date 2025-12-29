@@ -326,6 +326,106 @@ final class ExecutionStateMachineTests: XCTestCase {
             ExecutionStateMachineError.noSessionId.errorDescription,
             "Cannot answer question: no active session"
         )
+        XCTAssertEqual(
+            ExecutionStateMachineError.noExistingPlan.errorDescription,
+            "No existing plan loaded"
+        )
+    }
+
+    // MARK: - Start With Existing Plan
+
+    func testStartWithExistingPlanThrowsWithoutProjectPath() async {
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Task", description: "Test", status: .pending, subtasks: [])
+        ])
+
+        do {
+            try await stateMachine.startWithExistingPlan()
+            XCTFail("Expected noProjectPath error")
+        } catch ExecutionStateMachineError.noProjectPath {
+            // Expected
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testStartWithExistingPlanThrowsWithoutExistingPlan() async {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.existingPlan = nil
+
+        do {
+            try await stateMachine.startWithExistingPlan()
+            XCTFail("Expected noExistingPlan error")
+        } catch ExecutionStateMachineError.noExistingPlan {
+            // Expected
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testStartWithExistingPlanSetsPlanFromExisting() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        let existingPlan = Plan(rawText: "Test plan", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .pending, subtasks: [])
+        ])
+        context.existingPlan = existingPlan
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertNotNil(context.plan)
+        XCTAssertEqual(context.plan?.tasks.count, 1)
+        XCTAssertEqual(context.plan?.tasks.first?.title, "Test Task")
+    }
+
+    func testStartWithExistingPlanSkipsPlanGeneration() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .pending, subtasks: [])
+        ])
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertFalse(context.logs.contains { $0.message.contains("Executing phase: generatingInitialPlan") })
+        XCTAssertFalse(context.logs.contains { $0.message.contains("Executing phase: rewritingPlan") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Starting execution from existing plan") })
+    }
+
+    func testStartWithExistingPlanSetsStartTime() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Task", description: "Test", status: .pending, subtasks: [])
+        ])
+
+        XCTAssertNil(context.startTime)
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertNotNil(context.startTime)
+    }
+
+    func testStartWithExistingPlanResumesFromFirstPendingTask() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Completed Task", description: "Test", status: .completed, subtasks: []),
+            PlanTask(id: UUID(), number: 2, title: "Pending Task", description: "Test", status: .pending, subtasks: [])
+        ])
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Resuming from task 2: Pending Task") })
+    }
+
+    func testStartWithExistingPlanCompletesImmediatelyIfAllTasksDone() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Task 1", description: "Test", status: .completed, subtasks: []),
+            PlanTask(id: UUID(), number: 2, title: "Task 2", description: "Test", status: .completed, subtasks: [])
+        ])
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("All tasks already completed") })
     }
 
     // MARK: - Phase Flow Tests
