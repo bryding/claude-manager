@@ -99,21 +99,21 @@ struct UserQuestionView: View {
 
     private var singleSelectOptions: some View {
         ForEach(question.options, id: \.label) { option in
-            OptionButton(
+            OptionRow(
                 option: option,
                 isSelected: selectedOptions.contains(option.label),
-                action: {
-                    selectedOptions = [option.label]
-                }
+                isMultiSelect: false,
+                action: { selectedOptions = [option.label] }
             )
         }
     }
 
     private var multiSelectOptions: some View {
         ForEach(question.options, id: \.label) { option in
-            OptionToggle(
+            OptionRow(
                 option: option,
                 isSelected: selectedOptions.contains(option.label),
+                isMultiSelect: true,
                 action: {
                     if selectedOptions.contains(option.label) {
                         selectedOptions.remove(option.label)
@@ -170,15 +170,21 @@ struct UserQuestionView: View {
     // MARK: - Actions
 
     private func submit() {
-        isSubmitting = true
-
         let answer: String
         if hasOptions {
             answer = selectedOptions.sorted().joined(separator: ", ")
         } else {
             answer = freeformText.trimmingCharacters(in: .whitespacesAndNewlines)
         }
+        sendAnswer(answer)
+    }
 
+    private func skip() {
+        sendAnswer("skipped")
+    }
+
+    private func sendAnswer(_ answer: String) {
+        isSubmitting = true
         Task {
             do {
                 try await appState.stateMachine.answerQuestion(answer)
@@ -189,73 +195,28 @@ struct UserQuestionView: View {
             isSubmitting = false
         }
     }
-
-    private func skip() {
-        isSubmitting = true
-
-        Task {
-            do {
-                try await appState.stateMachine.answerQuestion("skipped")
-                dismiss()
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-            isSubmitting = false
-        }
-    }
 }
 
-// MARK: - Option Button (Single Select)
+// MARK: - Option Row
 
-private struct OptionButton: View {
+private struct OptionRow: View {
     let option: AskUserQuestionInput.Option
     let isSelected: Bool
+    let isMultiSelect: Bool
     let action: () -> Void
+
+    private var iconName: String {
+        if isMultiSelect {
+            return isSelected ? "checkmark.square.fill" : "square"
+        } else {
+            return isSelected ? "circle.inset.filled" : "circle"
+        }
+    }
 
     var body: some View {
         Button(action: action) {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: isSelected ? "circle.inset.filled" : "circle")
-                    .foregroundStyle(isSelected ? .blue : .secondary)
-                    .font(.title3)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(option.label)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.primary)
-                    Text(option.description)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? Color.blue.opacity(0.1) : Color.clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isSelected ? Color.blue : Color(nsColor: .separatorColor), lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-// MARK: - Option Toggle (Multi Select)
-
-private struct OptionToggle: View {
-    let option: AskUserQuestionInput.Option
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: isSelected ? "checkmark.square.fill" : "square")
+                Image(systemName: iconName)
                     .foregroundStyle(isSelected ? .blue : .secondary)
                     .font(.title3)
 
