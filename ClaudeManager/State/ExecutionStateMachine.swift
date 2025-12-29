@@ -718,13 +718,9 @@ final class ExecutionStateMachine {
                 }
                 return result
             } catch {
-                let isRetryable = (error as? ClaudeProcessError)?.isRetryable ?? false
-                    || (error as? ClaudeCLIServiceError).map { serviceError in
-                        if case .processError(let processError) = serviceError {
-                            return processError.isRetryable
-                        }
-                        return false
-                    } ?? false
+                let isRetryable = (error as? ClaudeProcessError)?.isRetryable
+                    ?? (error as? ClaudeCLIServiceError)?.isRetryable
+                    ?? false
 
                 if !isRetryable || context.currentRetryAttempt >= config.maxAttempts {
                     context.addLog(

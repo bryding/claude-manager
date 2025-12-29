@@ -31,6 +31,15 @@ struct ClaudeExecutionResult: Sendable {
 enum ClaudeCLIServiceError: Error {
     case noResultMessage
     case processError(ClaudeProcessError)
+
+    var isRetryable: Bool {
+        switch self {
+        case .noResultMessage:
+            return false
+        case .processError(let error):
+            return error.isRetryable
+        }
+    }
 }
 
 // MARK: - Claude CLI Service

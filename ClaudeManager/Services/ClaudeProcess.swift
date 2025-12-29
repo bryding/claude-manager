@@ -72,14 +72,10 @@ final class ClaudeProcess: @unchecked Sendable {
 
             if let timeout = self.timeout {
                 timeoutTask = Task { [weak self] in
-                    do {
-                        try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
-                        if process.isRunning {
-                            self?.didTimeout = true
-                            process.terminate()
-                        }
-                    } catch {
-                        // Task was cancelled, no timeout needed
+                    try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                    if process.isRunning {
+                        self?.didTimeout = true
+                        process.terminate()
                     }
                 }
             }
