@@ -1,7 +1,6 @@
 import Foundation
 
 enum ClaudeProcessError: Error {
-    case processNotRunning
     case nonZeroExitCode(Int32, stderr: String?)
     case outputReadError(Error)
 }
@@ -12,8 +11,6 @@ final class ClaudeProcess: @unchecked Sendable {
     let workingDirectory: URL
 
     private var process: Process?
-    private var stdoutPipe: Pipe?
-    private var stderrPipe: Pipe?
 
     init(executablePath: String, arguments: [String], workingDirectory: URL) {
         self.executablePath = executablePath
@@ -35,8 +32,6 @@ final class ClaudeProcess: @unchecked Sendable {
             process.standardError = stderrPipe
 
             self.process = process
-            self.stdoutPipe = stdoutPipe
-            self.stderrPipe = stderrPipe
 
             Task {
                 do {
