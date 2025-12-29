@@ -1,0 +1,25 @@
+# Environment files
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.db
+venv/
+.venv/
+
+# Pangolin/Beyond projector files
+*.BeyondProjector
+*.csv
+
+# Node
+node_modules/
+dist/
+
+# Claude
+.claude/
+
+# Audio storage files
+backend/audio_storage/*
+!backend/audio_storage/.gitkeep
