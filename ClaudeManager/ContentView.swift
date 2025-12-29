@@ -15,6 +15,13 @@ struct ContentView: View {
         .sheet(item: Bindable(appState.context).pendingQuestion) { question in
             UserQuestionView(pendingQuestion: question)
         }
+        .sheet(item: Bindable(appState.context).pendingTaskFailure) { failure in
+            TaskFailureView(failure: failure) { response in
+                Task {
+                    await appState.stateMachine.handleTaskFailureResponse(response)
+                }
+            }
+        }
     }
 }
 

@@ -1,5 +1,37 @@
 import Foundation
 
+// MARK: - Task Failure Response
+
+enum TaskFailureResponse: String, CaseIterable {
+    case retry = "Retry"
+    case skip = "Skip"
+    case stop = "Stop"
+}
+
+// MARK: - Pending Task Failure
+
+struct PendingTaskFailure: Identifiable, Sendable {
+    let id: UUID
+    let taskNumber: Int
+    let taskTitle: String
+    let error: String
+    let timestamp: Date
+
+    init(
+        id: UUID = UUID(),
+        taskNumber: Int,
+        taskTitle: String,
+        error: String,
+        timestamp: Date = Date()
+    ) {
+        self.id = id
+        self.taskNumber = taskNumber
+        self.taskTitle = taskTitle
+        self.error = error
+        self.timestamp = timestamp
+    }
+}
+
 // MARK: - Pending Question
 
 struct PendingQuestion: Identifiable, Sendable {
@@ -103,6 +135,14 @@ final class ExecutionContext {
     var retryConfiguration: RetryConfiguration = .default
     var currentRetryAttempt: Int = 0
 
+    // MARK: - Timeout Configuration
+
+    var timeoutConfiguration: TimeoutConfiguration = .default
+
+    // MARK: - Task Failure State
+
+    var pendingTaskFailure: PendingTaskFailure?
+
     // MARK: - Initialization
 
     init() {}
@@ -194,6 +234,7 @@ final class ExecutionContext {
         continuationSummary = nil
         isHandoffInProgress = false
         currentRetryAttempt = 0
+        pendingTaskFailure = nil
     }
 
     func resetRetryAttempt() {

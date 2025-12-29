@@ -22,6 +22,8 @@
 		A100000D210000010000000F /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000D110000010000000F /* LogEntry.swift */; };
 		A7000001210000010000000F /* ContinuationSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7000001110000010000000F /* ContinuationSummary.swift */; };
 		A7000002210000010000000F /* RetryConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7000002110000010000000F /* RetryConfiguration.swift */; };
+		A8000001210000010000000F /* TimeoutConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000001110000010000000F /* TimeoutConfiguration.swift */; };
+		A8000002210000010000000F /* TaskFailureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000002110000010000000F /* TaskFailureView.swift */; };
 		A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001110000010000000F /* ClaudeStreamMessageTests.swift */; };
 		A2000003210000010000000F /* PlanServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003110000010000000F /* PlanServiceTests.swift */; };
 		A2000004210000010000000F /* ExecutionStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000004110000010000000F /* ExecutionStateMachineTests.swift */; };
@@ -66,6 +68,8 @@
 		A100000D110000010000000F /* LogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntry.swift; sourceTree = "<group>"; };
 		A7000001110000010000000F /* ContinuationSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuationSummary.swift; sourceTree = "<group>"; };
 		A7000002110000010000000F /* RetryConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetryConfiguration.swift; sourceTree = "<group>"; };
+		A8000001110000010000000F /* TimeoutConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeoutConfiguration.swift; sourceTree = "<group>"; };
+		A8000002110000010000000F /* TaskFailureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskFailureView.swift; sourceTree = "<group>"; };
 		A2000000010000010000000F /* ClaudeManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClaudeManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000001110000010000000F /* ClaudeStreamMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStreamMessageTests.swift; sourceTree = "<group>"; };
 		A2000003110000010000000F /* PlanServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanServiceTests.swift; sourceTree = "<group>"; };
@@ -142,6 +146,7 @@
 				A100000D110000010000000F /* LogEntry.swift */,
 				A7000001110000010000000F /* ContinuationSummary.swift */,
 				A7000002110000010000000F /* RetryConfiguration.swift */,
+				A8000001110000010000000F /* TimeoutConfiguration.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -188,6 +193,7 @@
 				A6000005110000010000000F /* UserQuestionView.swift */,
 				A6000006110000010000000F /* ControlsView.swift */,
 				A6000007110000010000000F /* ExecutionView.swift */,
+				A8000002110000010000000F /* TaskFailureView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -322,6 +328,7 @@
 				A100000D210000010000000F /* LogEntry.swift in Sources */,
 				A7000001210000010000000F /* ContinuationSummary.swift in Sources */,
 				A7000002210000010000000F /* RetryConfiguration.swift in Sources */,
+				A8000001210000010000000F /* TimeoutConfiguration.swift in Sources */,
 				A100000E210000010000000F /* GitService.swift in Sources */,
 				A3000001210000010000000F /* ExecutionContext.swift in Sources */,
 				A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */,
@@ -333,6 +340,7 @@
 				A6000005210000010000000F /* UserQuestionView.swift in Sources */,
 				A6000006210000010000000F /* ControlsView.swift in Sources */,
 				A6000007210000010000000F /* ExecutionView.swift in Sources */,
+				A8000002210000010000000F /* TaskFailureView.swift in Sources */,
 				A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */,
 				A4000002210000010000000F /* GitServiceProtocol.swift in Sources */,
 			);

@@ -406,17 +406,24 @@ User describes feature → Claude generates plan → Plan rewritten to tasks →
 
 ---
 
-## Task 26: Integration Testing and Error Handling
+## ✅ Task 26: Integration Testing and Error Handling
 
 **Description:** Test the full loop and add robust error handling.
 
 **Acceptance Criteria:**
-- [ ] Test full execution loop with a simple feature
-- [ ] Add retry logic for transient failures
-- [ ] Handle empty plan gracefully
-- [ ] Handle failed tasks (skip vs retry)
-- [ ] Add timeout handling for long-running operations
-- [ ] Test pause/resume/stop functionality
+- [x] Test full execution loop with a simple feature
+- [x] Add retry logic for transient failures
+- [x] Handle empty plan gracefully
+- [x] Handle failed tasks (skip vs retry)
+- [x] Add timeout handling for long-running operations
+- [x] Test pause/resume/stop functionality
+
+**Implementation Notes:**
+- Added `TimeoutConfiguration` struct with configurable timeouts for plan/execution/commit
+- All Claude CLI calls now pass appropriate timeouts based on operation type
+- Added `PendingTaskFailure` to pause execution and ask user to retry/skip/stop on task failure
+- Created `TaskFailureView` for user interaction when tasks fail
+- Added 10 new tests for timeout/retry/task failure handling
 
 ---
 

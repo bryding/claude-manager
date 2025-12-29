@@ -523,4 +523,157 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertTrue(context.logs.contains { $0.message.contains("refactor: code review fixes for Add Authentication") })
         XCTAssertTrue(context.logs.contains { $0.message.contains("test: add tests for Add Authentication") })
     }
+
+    // MARK: - Timeout Configuration Tests
+
+    func testTimeoutConfigurationIsUsed() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.timeoutConfiguration = TimeoutConfiguration(
+            planModeTimeout: 120,
+            executionTimeout: 600,
+            commitTimeout: 30
+        )
+        configureMockWithPlan(tasks: [(1, "Implement Service", "Core logic")])
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertNotNil(mockClaudeService.lastTimeout)
+    }
+
+    func testTimeoutDefaultConfigurationWorks() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        configureMockWithPlan(tasks: [(1, "Implement Service", "Core logic")])
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .completed)
+    }
+
+    // MARK: - Retry Logic Tests
+
+    func testRetryOnTransientError() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        mockClaudeService.failuresBeforeSuccess = 2
+        configureMockWithPlan(tasks: [(1, "Implement Service", "Core logic")])
+
+        try await stateMachine.start()
+
+        XCTAssertGreaterThan(mockClaudeService.executeCallCount, 2)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("retrying") })
+    }
+
+    func testNonRetryableErrorFailsPlanGeneration() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        mockClaudeService.executeError = ClaudeCLIServiceError.noResultMessage
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .failed)
+        XCTAssertTrue(context.errors.contains { $0.message.contains("generatingInitialPlan") })
+    }
+
+    func testRetryExhaustsMaxAttemptsInPlanGeneration() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.retryConfiguration = RetryConfiguration(
+            maxAttempts: 2,
+            initialDelay: 0.01,
+            backoffMultiplier: 1.0,
+            maxDelay: 0.01
+        )
+        mockClaudeService.failuresBeforeSuccess = 10
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .failed)
+    }
+
+    // MARK: - Task Failure Handling Tests
+
+    func testPendingTaskFailureCreatedOnHandlePhaseError() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.phase = .waitingForUser
+        context.pendingTaskFailure = PendingTaskFailure(
+            taskNumber: 1,
+            taskTitle: "Test Task",
+            error: "Operation timed out"
+        )
+        context.plan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .inProgress, subtasks: [])
+        ])
+        context.currentTaskIndex = 0
+
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertNotNil(context.pendingTaskFailure)
+        XCTAssertEqual(context.pendingTaskFailure?.taskTitle, "Test Task")
+    }
+
+    func testTaskFailureRetryResponse() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.phase = .waitingForUser
+        context.pendingTaskFailure = PendingTaskFailure(
+            taskNumber: 1,
+            taskTitle: "Test Task",
+            error: "Test error"
+        )
+        context.plan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .inProgress, subtasks: [])
+        ])
+        context.currentTaskIndex = 0
+
+        await stateMachine.handleTaskFailureResponse(.retry)
+
+        XCTAssertNil(context.pendingTaskFailure)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Retrying task") })
+    }
+
+    func testTaskFailureSkipResponse() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.phase = .waitingForUser
+        context.pendingTaskFailure = PendingTaskFailure(
+            taskNumber: 1,
+            taskTitle: "Test Task",
+            error: "Test error"
+        )
+        context.plan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .inProgress, subtasks: []),
+            PlanTask(id: UUID(), number: 2, title: "Next Task", description: "Test", status: .pending, subtasks: [])
+        ])
+        context.currentTaskIndex = 0
+
+        await stateMachine.handleTaskFailureResponse(.skip)
+
+        XCTAssertNil(context.pendingTaskFailure)
+        XCTAssertEqual(context.plan?.tasks[0].status, .skipped)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Skipping task") })
+    }
+
+    func testTaskFailureStopResponse() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.phase = .waitingForUser
+        context.pendingTaskFailure = PendingTaskFailure(
+            taskNumber: 1,
+            taskTitle: "Test Task",
+            error: "Test error"
+        )
+        context.plan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .inProgress, subtasks: [])
+        ])
+        context.currentTaskIndex = 0
+
+        await stateMachine.handleTaskFailureResponse(.stop)
+
+        XCTAssertNil(context.pendingTaskFailure)
+        XCTAssertEqual(context.phase, .failed)
+        XCTAssertEqual(context.plan?.tasks[0].status, .failed)
+    }
 }

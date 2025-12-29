@@ -129,6 +129,32 @@ final class ExecutionStateMachine {
         await runLoop()
     }
 
+    func handleTaskFailureResponse(_ response: TaskFailureResponse) async {
+        guard context.pendingTaskFailure != nil else { return }
+
+        context.pendingTaskFailure = nil
+        context.addLog(type: .info, message: "User selected: \(response.rawValue)")
+
+        switch response {
+        case .retry:
+            context.resetRetryAttempt()
+            context.phase = .executingTask
+            context.addLog(type: .info, message: "Retrying task")
+            await runLoop()
+
+        case .skip:
+            context.updateTaskStatus(.skipped)
+            context.addLog(type: .info, message: "Skipping task")
+            context.phase = .clearingContext
+            await runLoop()
+
+        case .stop:
+            markCurrentTaskFailed()
+            context.phase = .failed
+            context.addLog(type: .info, message: "Execution stopped by user after task failure")
+        }
+    }
+
     // MARK: - Private Methods
 
     private func resetState() {
@@ -141,11 +167,22 @@ final class ExecutionStateMachine {
         context.addError(
             message: "Execution failed during \(context.phase.rawValue)",
             underlyingError: error.localizedDescription,
-            isRecoverable: false
+            isRecoverable: true
         )
         context.addLog(type: .error, message: "Phase failed: \(error.localizedDescription)")
-        markCurrentTaskFailed()
-        context.phase = .failed
+
+        if let task = context.currentTask, context.phase == .executingTask {
+            context.pendingTaskFailure = PendingTaskFailure(
+                taskNumber: task.number,
+                taskTitle: task.title,
+                error: error.localizedDescription
+            )
+            context.phase = .waitingForUser
+            context.addLog(type: .info, message: "Waiting for user input on task failure")
+        } else {
+            markCurrentTaskFailed()
+            context.phase = .failed
+        }
     }
 
     // MARK: - Main Loop
@@ -463,6 +500,7 @@ final class ExecutionStateMachine {
             workingDirectory: projectPath,
             permissionMode: .plan,
             sessionId: nil,
+            timeout: context.timeoutConfiguration.planModeTimeout,
             onMessage: { [weak self] message in
                 guard let self = self else { return }
                 await MainActor.run {
@@ -507,6 +545,7 @@ final class ExecutionStateMachine {
             workingDirectory: projectPath,
             permissionMode: .plan,
             sessionId: context.sessionId,
+            timeout: context.timeoutConfiguration.planModeTimeout,
             onMessage: { [weak self] message in
                 guard let self = self else { return }
                 await MainActor.run {
@@ -564,6 +603,7 @@ final class ExecutionStateMachine {
             workingDirectory: projectPath,
             permissionMode: .acceptEdits,
             sessionId: context.sessionId,
+            timeout: context.timeoutConfiguration.executionTimeout,
             onMessage: { [weak self] message in
                 guard let self = self else { return }
                 await MainActor.run {
@@ -613,6 +653,7 @@ final class ExecutionStateMachine {
             workingDirectory: projectPath,
             permissionMode: .acceptEdits,
             sessionId: context.sessionId,
+            timeout: context.timeoutConfiguration.executionTimeout,
             onMessage: { [weak self] message in
                 guard let self = self else { return }
                 await MainActor.run {
@@ -657,6 +698,7 @@ final class ExecutionStateMachine {
             workingDirectory: projectPath,
             permissionMode: .acceptEdits,
             sessionId: context.sessionId,
+            timeout: context.timeoutConfiguration.executionTimeout,
             onMessage: { [weak self] message in
                 guard let self = self else { return }
                 await MainActor.run {
@@ -825,6 +867,7 @@ final class ExecutionStateMachine {
             workingDirectory: projectPath,
             permissionMode: .plan,
             sessionId: nil,
+            timeout: context.timeoutConfiguration.planModeTimeout,
             onMessage: { [weak self] message in
                 guard let self = self else { return }
                 await MainActor.run {

@@ -8,6 +8,9 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
     var executeCalled = false
     var lastPrompt: String?
     var lastPermissionMode: PermissionMode?
+    var lastTimeout: TimeInterval?
+    var executeCallCount = 0
+    var failuresBeforeSuccess = 0
 
     private var _isRunning = false
     var isRunning: Bool { _isRunning }
@@ -21,14 +24,21 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
         onMessage: @escaping @Sendable (ClaudeStreamMessage) async -> Void
     ) async throws -> ClaudeExecutionResult {
         executeCalled = true
+        executeCallCount += 1
         lastPrompt = prompt
         lastPermissionMode = permissionMode
+        lastTimeout = timeout
         _isRunning = true
 
         defer { _isRunning = false }
 
         for message in messagesToSend {
             await onMessage(message)
+        }
+
+        if failuresBeforeSuccess > 0 {
+            failuresBeforeSuccess -= 1
+            throw ClaudeProcessError.timedOut
         }
 
         if let error = executeError {
@@ -51,6 +61,18 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
         }
 
         return result
+    }
+
+    func reset() {
+        executeResult = nil
+        executeError = nil
+        messagesToSend = []
+        executeCalled = false
+        lastPrompt = nil
+        lastPermissionMode = nil
+        lastTimeout = nil
+        executeCallCount = 0
+        failuresBeforeSuccess = 0
     }
 
     func terminate() {
