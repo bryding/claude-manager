@@ -11,6 +11,10 @@ enum PlanServiceError: Error {
 
 final class PlanService: Sendable {
 
+    private static let taskPattern = /## Task (\d+): (.+)/
+    private static let descriptionPattern = /\*\*Description:\*\*\s*(.+)/
+    private static let subtaskPattern = /- \[[ xX]?\] (.+)/
+
     func parsePlanFromFile(at url: URL) throws -> Plan {
         let text: String
         do {
@@ -23,11 +27,6 @@ final class PlanService: Sendable {
 
     func parsePlanFromText(_ text: String) -> Plan {
         var tasks: [PlanTask] = []
-
-        let taskPattern = /## Task (\d+): (.+)/
-        let descriptionPattern = /\*\*Description:\*\*\s*(.+)/
-        let subtaskPattern = /- \[[ xX]?\] (.+)/
-
         let lines = text.components(separatedBy: .newlines)
         var currentTaskNumber: Int?
         var currentTitle: String?
@@ -48,16 +47,16 @@ final class PlanService: Sendable {
         }
 
         for line in lines {
-            if let match = line.wholeMatch(of: taskPattern) {
+            if let match = line.wholeMatch(of: Self.taskPattern) {
                 saveCurrentTask()
 
                 currentTaskNumber = Int(match.1)
                 currentTitle = String(match.2)
                 currentDescription = nil
                 currentSubtasks = []
-            } else if let match = line.wholeMatch(of: descriptionPattern) {
+            } else if let match = line.wholeMatch(of: Self.descriptionPattern) {
                 currentDescription = String(match.1)
-            } else if let match = line.wholeMatch(of: subtaskPattern) {
+            } else if let match = line.wholeMatch(of: Self.subtaskPattern) {
                 currentSubtasks.append(String(match.1))
             }
         }
