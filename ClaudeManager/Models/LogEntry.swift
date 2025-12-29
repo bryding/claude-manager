@@ -26,6 +26,16 @@ extension LogType {
             return .secondary
         }
     }
+
+    var badgeLabel: String {
+        switch self {
+        case .output: return "OUTPUT"
+        case .toolUse: return "TOOL"
+        case .result: return "RESULT"
+        case .error: return "ERROR"
+        case .info: return "INFO"
+        }
+    }
 }
 
 // MARK: - Log Entry

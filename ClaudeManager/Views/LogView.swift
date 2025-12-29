@@ -144,23 +144,13 @@ private struct LogEntryView: View {
     }
 
     private var typeBadge: some View {
-        Text(badgeLabel)
+        Text(entry.type.badgeLabel)
             .font(.caption2.weight(.medium))
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(entry.type.color.opacity(0.15))
             .foregroundStyle(entry.type.color)
             .cornerRadius(4)
-    }
-
-    private var badgeLabel: String {
-        switch entry.type {
-        case .output: return "OUTPUT"
-        case .toolUse: return "TOOL"
-        case .result: return "RESULT"
-        case .error: return "ERROR"
-        case .info: return "INFO"
-        }
     }
 }
 
