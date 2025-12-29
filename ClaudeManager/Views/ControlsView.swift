@@ -69,7 +69,6 @@ struct ControlsView: View {
         .buttonStyle(.bordered)
         .controlSize(.regular)
         .disabled(!context.canPause && !context.canResume)
-        .keyboardShortcut("p", modifiers: .command)
     }
 
     private var stopButton: some View {
@@ -83,7 +82,6 @@ struct ControlsView: View {
         .controlSize(.regular)
         .tint(.red)
         .disabled(!context.canStop)
-        .keyboardShortcut(".", modifiers: .command)
     }
 
     private var elapsedTimeDisplay: some View {
@@ -202,6 +200,7 @@ struct ControlsView: View {
     let appState = AppState()
     appState.context.phase = .executingTask
     appState.context.totalCost = 0.42
+    appState.context.startTime = Date().addingTimeInterval(-125)
     return ControlsView()
         .environment(appState)
         .padding()
