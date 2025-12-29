@@ -48,6 +48,7 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
         workingDirectory: URL,
         permissionMode: PermissionMode,
         sessionId: String? = nil,
+        timeout: TimeInterval? = nil,
         onMessage: @escaping @Sendable (ClaudeStreamMessage) async -> Void
     ) async throws -> ClaudeExecutionResult {
         let arguments = buildArguments(
@@ -59,7 +60,8 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
         let process = ClaudeProcess(
             executablePath: executablePath,
             arguments: arguments,
-            workingDirectory: workingDirectory
+            workingDirectory: workingDirectory,
+            timeout: timeout
         )
         currentProcess = process
 

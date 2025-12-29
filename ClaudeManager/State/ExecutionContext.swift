@@ -98,6 +98,11 @@ final class ExecutionContext {
 
     static let contextWindowSize: Int = 200_000
 
+    // MARK: - Retry Configuration
+
+    var retryConfiguration: RetryConfiguration = .default
+    var currentRetryAttempt: Int = 0
+
     // MARK: - Initialization
 
     init() {}
@@ -188,6 +193,11 @@ final class ExecutionContext {
         lastInputTokenCount = 0
         continuationSummary = nil
         isHandoffInProgress = false
+        currentRetryAttempt = 0
+    }
+
+    func resetRetryAttempt() {
+        currentRetryAttempt = 0
     }
 
     func addLog(_ entry: LogEntry) {

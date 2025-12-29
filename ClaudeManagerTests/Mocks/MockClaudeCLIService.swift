@@ -17,6 +17,7 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
         workingDirectory: URL,
         permissionMode: PermissionMode,
         sessionId: String?,
+        timeout: TimeInterval?,
         onMessage: @escaping @Sendable (ClaudeStreamMessage) async -> Void
     ) async throws -> ClaudeExecutionResult {
         executeCalled = true

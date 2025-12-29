@@ -384,23 +384,23 @@ User describes feature → Claude generates plan → Plan rewritten to tasks →
 
 ---
 
-## Task 25: Context Window Management
+## Task 25: Context Window Management ✅
 
 **Description:** Detect when context window is running low and gracefully handle it by creating a WIP commit and continuation summary before clearing context. Never use compaction - always clear and resume with summary.
 
 **Acceptance Criteria:**
-- [ ] Track context usage from Claude's stream-json output (usage.input_tokens, usage.output_tokens)
-- [ ] Calculate approximate context percentage remaining
-- [ ] When below 10% remaining, trigger graceful handoff:
+- [x] Track context usage from Claude's stream-json output (usage.input_tokens, usage.output_tokens)
+- [x] Calculate approximate context percentage remaining
+- [x] When below 10% remaining, trigger graceful handoff:
   1. Interrupt current Claude process
   2. Run Claude with prompt to create WIP commit with current progress
   3. Run Claude with prompt to generate concise continuation summary
   4. Store summary in ExecutionContext
   5. Clear context (new session)
   6. Resume task with continuation summary as context
-- [ ] Add `ContinuationSummary` struct with essential info fields
-- [ ] Add `contextPercentRemaining` computed property to ExecutionContext
-- [ ] Show context usage indicator in UI
+- [x] Add `ContinuationSummary` struct with essential info fields
+- [x] Add `contextPercentRemaining` computed property to ExecutionContext
+- [x] Show context usage indicator in UI
 
 **File:** `ClaudeManager/State/ExecutionStateMachine.swift` (extend existing)
 

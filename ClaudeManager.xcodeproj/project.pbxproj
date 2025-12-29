@@ -21,6 +21,7 @@
 		A100000C210000010000000F /* ExecutionPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000C110000010000000F /* ExecutionPhase.swift */; };
 		A100000D210000010000000F /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000D110000010000000F /* LogEntry.swift */; };
 		A7000001210000010000000F /* ContinuationSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7000001110000010000000F /* ContinuationSummary.swift */; };
+		A7000002210000010000000F /* RetryConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7000002110000010000000F /* RetryConfiguration.swift */; };
 		A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001110000010000000F /* ClaudeStreamMessageTests.swift */; };
 		A2000003210000010000000F /* PlanServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003110000010000000F /* PlanServiceTests.swift */; };
 		A2000004210000010000000F /* ExecutionStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000004110000010000000F /* ExecutionStateMachineTests.swift */; };
@@ -64,6 +65,7 @@
 		A100000C110000010000000F /* ExecutionPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionPhase.swift; sourceTree = "<group>"; };
 		A100000D110000010000000F /* LogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntry.swift; sourceTree = "<group>"; };
 		A7000001110000010000000F /* ContinuationSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuationSummary.swift; sourceTree = "<group>"; };
+		A7000002110000010000000F /* RetryConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetryConfiguration.swift; sourceTree = "<group>"; };
 		A2000000010000010000000F /* ClaudeManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClaudeManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000001110000010000000F /* ClaudeStreamMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStreamMessageTests.swift; sourceTree = "<group>"; };
 		A2000003110000010000000F /* PlanServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanServiceTests.swift; sourceTree = "<group>"; };
@@ -139,6 +141,7 @@
 				A100000C110000010000000F /* ExecutionPhase.swift */,
 				A100000D110000010000000F /* LogEntry.swift */,
 				A7000001110000010000000F /* ContinuationSummary.swift */,
+				A7000002110000010000000F /* RetryConfiguration.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -318,6 +321,7 @@
 				A100000C210000010000000F /* ExecutionPhase.swift in Sources */,
 				A100000D210000010000000F /* LogEntry.swift in Sources */,
 				A7000001210000010000000F /* ContinuationSummary.swift in Sources */,
+				A7000002210000010000000F /* RetryConfiguration.swift in Sources */,
 				A100000E210000010000000F /* GitService.swift in Sources */,
 				A3000001210000010000000F /* ExecutionContext.swift in Sources */,
 				A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */,

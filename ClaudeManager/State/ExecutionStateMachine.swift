@@ -187,26 +187,36 @@ final class ExecutionStateMachine {
             break
 
         case .generatingInitialPlan:
-            try await generateInitialPlan()
+            try await executeWithRetry(operationName: "Generate plan") {
+                try await generateInitialPlan()
+            }
 
         case .rewritingPlan:
-            try await rewritePlanToFormat()
+            try await executeWithRetry(operationName: "Rewrite plan") {
+                try await rewritePlanToFormat()
+            }
 
         case .executingTask:
             markCurrentTaskInProgress()
-            try await executeCurrentTask()
+            try await executeWithRetry(operationName: "Execute task") {
+                try await executeCurrentTask()
+            }
 
         case .committingImplementation:
             try await commitChanges(message: commitMessageForImplementation())
 
         case .reviewingCode:
-            try await runCodeReview()
+            try await executeWithRetry(operationName: "Code review") {
+                try await runCodeReview()
+            }
 
         case .committingReview:
             try await commitChanges(message: commitMessageForReview())
 
         case .writingTests:
-            try await writeTests()
+            try await executeWithRetry(operationName: "Write tests") {
+                try await writeTests()
+            }
 
         case .committingTests:
             try await commitChanges(message: commitMessageForTests())
@@ -685,7 +695,54 @@ final class ExecutionStateMachine {
 
     private func clearContext() async throws {
         context.sessionId = nil
+        context.resetRetryAttempt()
         context.addLog(type: .info, message: "Context cleared for next task")
+    }
+
+    // MARK: - Retry Logic
+
+    private func executeWithRetry<T>(
+        operationName: String,
+        operation: () async throws -> T
+    ) async throws -> T {
+        let config = context.retryConfiguration
+        context.currentRetryAttempt = 0
+
+        while true {
+            context.currentRetryAttempt += 1
+
+            do {
+                let result = try await operation()
+                if context.currentRetryAttempt > 1 {
+                    context.addLog(type: .info, message: "\(operationName) succeeded on attempt \(context.currentRetryAttempt)")
+                }
+                return result
+            } catch {
+                let isRetryable = (error as? ClaudeProcessError)?.isRetryable ?? false
+                    || (error as? ClaudeCLIServiceError).map { serviceError in
+                        if case .processError(let processError) = serviceError {
+                            return processError.isRetryable
+                        }
+                        return false
+                    } ?? false
+
+                if !isRetryable || context.currentRetryAttempt >= config.maxAttempts {
+                    context.addLog(
+                        type: .error,
+                        message: "\(operationName) failed after \(context.currentRetryAttempt) attempt(s): \(error.localizedDescription)"
+                    )
+                    throw error
+                }
+
+                let delay = config.delay(for: context.currentRetryAttempt)
+                context.addLog(
+                    type: .info,
+                    message: "\(operationName) failed (attempt \(context.currentRetryAttempt)/\(config.maxAttempts)), retrying in \(Int(delay))s..."
+                )
+
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            }
+        }
     }
 
     // MARK: - Context Exhaustion Handling
