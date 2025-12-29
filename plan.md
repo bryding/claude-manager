@@ -306,18 +306,18 @@ User describes feature → Claude generates plan → Plan rewritten to tasks →
 
 ---
 
-## Task 20: Implement Log View
+## Task 20: Implement Log View ✅
 
 **Description:** Real-time scrolling log of Claude's output.
 
 **Acceptance Criteria:**
-- [ ] Create `LogView` taking array of LogEntry
-- [ ] Add search field for filtering
-- [ ] Add type filter picker (All, Output, Tool Use, Error)
-- [ ] Add auto-scroll toggle
-- [ ] Create `LogEntryView` showing timestamp, type badge, message
-- [ ] Use monospace font for messages
-- [ ] Auto-scroll to bottom on new entries when enabled
+- [x] Create `LogView` taking array of LogEntry
+- [x] Add search field for filtering
+- [x] Add type filter picker (All, Output, Tool Use, Error)
+- [x] Add auto-scroll toggle
+- [x] Create `LogEntryView` showing timestamp, type badge, message
+- [x] Use monospace font for messages
+- [x] Auto-scroll to bottom on new entries when enabled
 
 **File:** `ClaudeManager/Views/LogView.swift`
 
