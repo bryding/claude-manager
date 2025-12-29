@@ -11,17 +11,18 @@ final class AppState {
     // MARK: - Initialization
 
     init(
-        context: ExecutionContext = ExecutionContext(),
-        claudeService: any ClaudeCLIServiceProtocol = ClaudeCLIService(),
-        planService: PlanService = PlanService(),
-        gitService: any GitServiceProtocol = GitService()
+        context: ExecutionContext? = nil,
+        claudeService: (any ClaudeCLIServiceProtocol)? = nil,
+        planService: PlanService? = nil,
+        gitService: (any GitServiceProtocol)? = nil
     ) {
-        self.context = context
+        let resolvedContext = context ?? ExecutionContext()
+        self.context = resolvedContext
         self.stateMachine = ExecutionStateMachine(
-            context: context,
-            claudeService: claudeService,
-            planService: planService,
-            gitService: gitService
+            context: resolvedContext,
+            claudeService: claudeService ?? ClaudeCLIService(),
+            planService: planService ?? PlanService(),
+            gitService: gitService ?? GitService()
         )
     }
 }
