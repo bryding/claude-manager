@@ -17,16 +17,16 @@ struct PhaseIndicatorView: View {
             }
         }
         .onAppear {
-            isPulsing = phase.isActive
+            isPulsing = isActive
         }
-        .onChange(of: phase) { _, newPhase in
-            isPulsing = newPhase.isActive
+        .onChange(of: phase) { _, _ in
+            isPulsing = isActive
         }
     }
 
     private var statusDot: some View {
         Circle()
-            .fill(phase.statusColor)
+            .fill(statusColor)
             .frame(width: 12, height: 12)
             .scaleEffect(isPulsing ? 1.3 : 1.0)
             .animation(
@@ -35,6 +35,30 @@ struct PhaseIndicatorView: View {
                     : .default,
                 value: isPulsing
             )
+    }
+
+    private var statusColor: Color {
+        switch phase {
+        case .idle, .paused:
+            return .gray
+        case .waitingForUser:
+            return .yellow
+        case .completed:
+            return .green
+        case .failed:
+            return .red
+        default:
+            return .blue
+        }
+    }
+
+    private var isActive: Bool {
+        switch phase {
+        case .idle, .paused, .waitingForUser, .completed, .failed:
+            return false
+        default:
+            return true
+        }
     }
 }
 

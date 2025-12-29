@@ -1,5 +1,4 @@
 import Foundation
-import SwiftUI
 
 // MARK: - Execution Phase
 
@@ -136,27 +135,4 @@ extension ExecutionPhase {
         }
     }
 
-    var statusColor: Color {
-        switch self {
-        case .idle, .paused:
-            return .gray
-        case .waitingForUser:
-            return .yellow
-        case .completed:
-            return .green
-        case .failed:
-            return .red
-        default:
-            return .blue
-        }
-    }
-
-    var isActive: Bool {
-        switch self {
-        case .idle, .paused, .waitingForUser, .completed, .failed:
-            return false
-        default:
-            return true
-        }
-    }
 }
