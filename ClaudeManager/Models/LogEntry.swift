@@ -30,7 +30,7 @@ extension LogType {
 
 // MARK: - Log Entry
 
-struct LogEntry: Identifiable, Sendable {
+struct LogEntry: Identifiable, Equatable, Sendable {
     let id: UUID
     let timestamp: Date
     let phase: ExecutionPhase
