@@ -20,6 +20,7 @@
 		A100000D210000010000000F /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000D110000010000000F /* LogEntry.swift */; };
 		A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001110000010000000F /* ClaudeStreamMessageTests.swift */; };
 		A2000003210000010000000F /* PlanServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003110000010000000F /* PlanServiceTests.swift */; };
+		A2000004210000010000000F /* ExecutionStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000004110000010000000F /* ExecutionStateMachineTests.swift */; };
 		A3000001210000010000000F /* ExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000001110000010000000F /* ExecutionContext.swift */; };
 		A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000002110000010000000F /* ExecutionStateMachine.swift */; };
 /* End PBXBuildFile section */
@@ -50,6 +51,7 @@
 		A2000000010000010000000F /* ClaudeManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClaudeManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000001110000010000000F /* ClaudeStreamMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStreamMessageTests.swift; sourceTree = "<group>"; };
 		A2000003110000010000000F /* PlanServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanServiceTests.swift; sourceTree = "<group>"; };
+		A2000004110000010000000F /* ExecutionStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionStateMachineTests.swift; sourceTree = "<group>"; };
 		A3000001110000010000000F /* ExecutionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContext.swift; sourceTree = "<group>"; };
 		A3000002110000010000000F /* ExecutionStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionStateMachine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -146,6 +148,7 @@
 			isa = PBXGroup;
 			children = (
 				A2000001110000010000000F /* ClaudeStreamMessageTests.swift */,
+				A2000004110000010000000F /* ExecutionStateMachineTests.swift */,
 				A2000003110000010000000F /* PlanServiceTests.swift */,
 			);
 			path = ClaudeManagerTests;
@@ -270,6 +273,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */,
+				A2000004210000010000000F /* ExecutionStateMachineTests.swift in Sources */,
 				A2000003210000010000000F /* PlanServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

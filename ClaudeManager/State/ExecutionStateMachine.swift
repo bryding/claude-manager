@@ -160,6 +160,8 @@ final class ExecutionStateMachine {
     // MARK: - Phase Transitions (Placeholder for Task 13)
 
     private func transitionToNextPhase() {
-        // Placeholder - will be implemented in Task 13
+        // Placeholder - transitions to completed to avoid infinite loop
+        // Will be replaced with proper phase flow in Task 13
+        context.phase = .completed
     }
 }
