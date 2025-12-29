@@ -8,8 +8,7 @@ struct ContentView: View {
             if appState.context.phase == .idle && appState.context.projectPath == nil {
                 SetupView()
             } else {
-                // Placeholder for ExecutionView (Task 23)
-                Text("Execution View - Phase: \(appState.context.phase.rawValue)")
+                ExecutionView()
                     .frame(minWidth: 800, minHeight: 600)
             }
         }

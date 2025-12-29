@@ -34,6 +34,7 @@
 		A6000004210000010000000F /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000004110000010000000F /* LogView.swift */; };
 		A6000005210000010000000F /* UserQuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000005110000010000000F /* UserQuestionView.swift */; };
 		A6000006210000010000000F /* ControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000006110000010000000F /* ControlsView.swift */; };
+		A6000007210000010000000F /* ExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000007110000010000000F /* ExecutionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +77,7 @@
 		A6000004110000010000000F /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		A6000005110000010000000F /* UserQuestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserQuestionView.swift; sourceTree = "<group>"; };
 		A6000006110000010000000F /* ControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsView.swift; sourceTree = "<group>"; };
+		A6000007110000010000000F /* ExecutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +181,7 @@
 				A6000004110000010000000F /* LogView.swift */,
 				A6000005110000010000000F /* UserQuestionView.swift */,
 				A6000006110000010000000F /* ControlsView.swift */,
+				A6000007110000010000000F /* ExecutionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -321,6 +324,7 @@
 				A6000004210000010000000F /* LogView.swift in Sources */,
 				A6000005210000010000000F /* UserQuestionView.swift in Sources */,
 				A6000006210000010000000F /* ControlsView.swift in Sources */,
+				A6000007210000010000000F /* ExecutionView.swift in Sources */,
 				A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */,
 				A4000002210000010000000F /* GitServiceProtocol.swift in Sources */,
 			);
