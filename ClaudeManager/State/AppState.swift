@@ -8,22 +8,15 @@ final class AppState {
     let context: ExecutionContext
     let stateMachine: ExecutionStateMachine
 
-    // MARK: - Private Services
-
-    private let claudeService: ClaudeCLIService
-    private let planService: PlanService
-    private let gitService: GitService
-
     // MARK: - Initialization
 
-    init() {
-        let context = ExecutionContext()
+    init(
+        context: ExecutionContext = ExecutionContext(),
+        claudeService: any ClaudeCLIServiceProtocol = ClaudeCLIService(),
+        planService: PlanService = PlanService(),
+        gitService: any GitServiceProtocol = GitService()
+    ) {
         self.context = context
-
-        self.claudeService = ClaudeCLIService()
-        self.planService = PlanService()
-        self.gitService = GitService()
-
         self.stateMachine = ExecutionStateMachine(
             context: context,
             claudeService: claudeService,
