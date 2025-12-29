@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Main Stream Message
 
-enum ClaudeStreamMessage: Decodable {
+enum ClaudeStreamMessage: Decodable, Sendable {
     case system(SystemMessage)
     case assistant(AssistantMessage)
     case user(UserMessage)
@@ -37,7 +37,7 @@ enum ClaudeStreamMessage: Decodable {
 
 // MARK: - System Message
 
-struct SystemMessage: Decodable {
+struct SystemMessage: Decodable, Sendable {
     let subtype: String
     let sessionId: String
     let cwd: String
@@ -65,7 +65,7 @@ struct SystemMessage: Decodable {
 
 // MARK: - Assistant Message
 
-struct AssistantMessage: Decodable {
+struct AssistantMessage: Decodable, Sendable {
     let message: MessageContent
     let sessionId: String
     let parentToolUseId: String?
@@ -77,7 +77,7 @@ struct AssistantMessage: Decodable {
     }
 }
 
-struct MessageContent: Decodable {
+struct MessageContent: Decodable, Sendable {
     let id: String
     let model: String
     let role: String
@@ -97,7 +97,7 @@ struct MessageContent: Decodable {
 
 // MARK: - Content Blocks
 
-enum ContentBlock: Decodable {
+enum ContentBlock: Decodable, Sendable {
     case text(TextContent)
     case toolUse(ToolUseContent)
 
@@ -124,11 +124,11 @@ enum ContentBlock: Decodable {
     }
 }
 
-struct TextContent: Decodable {
+struct TextContent: Decodable, Sendable {
     let text: String
 }
 
-struct ToolUseContent: Decodable {
+struct ToolUseContent: Decodable, @unchecked Sendable {
     let id: String
     let name: String
     let input: AnyCodable
@@ -136,7 +136,7 @@ struct ToolUseContent: Decodable {
 
 // MARK: - User Message
 
-struct UserMessage: Decodable {
+struct UserMessage: Decodable, @unchecked Sendable {
     let message: UserMessageContent
     let sessionId: String
     let parentToolUseId: String?
@@ -150,12 +150,12 @@ struct UserMessage: Decodable {
     }
 }
 
-struct UserMessageContent: Decodable {
+struct UserMessageContent: Decodable, Sendable {
     let role: String
     let content: [ToolResultContent]
 }
 
-struct ToolResultContent: Decodable {
+struct ToolResultContent: Decodable, Sendable {
     let toolUseId: String
     let type: String
     let content: String
@@ -171,7 +171,7 @@ struct ToolResultContent: Decodable {
 
 // MARK: - Result Message
 
-struct ResultMessage: Decodable {
+struct ResultMessage: Decodable, Sendable {
     let subtype: String
     let isError: Bool
     let durationMs: Int
@@ -180,7 +180,7 @@ struct ResultMessage: Decodable {
     let result: String
     let sessionId: String
     let totalCostUsd: Double
-    let usage: ResultUsage
+    let usage: UsageInfo
 
     enum CodingKeys: String, CodingKey {
         case subtype
@@ -195,23 +195,9 @@ struct ResultMessage: Decodable {
     }
 }
 
-struct ResultUsage: Decodable {
-    let inputTokens: Int
-    let outputTokens: Int
-    let cacheCreationInputTokens: Int?
-    let cacheReadInputTokens: Int?
-
-    enum CodingKeys: String, CodingKey {
-        case inputTokens = "input_tokens"
-        case outputTokens = "output_tokens"
-        case cacheCreationInputTokens = "cache_creation_input_tokens"
-        case cacheReadInputTokens = "cache_read_input_tokens"
-    }
-}
-
 // MARK: - Usage Info
 
-struct UsageInfo: Decodable {
+struct UsageInfo: Decodable, Sendable {
     let inputTokens: Int
     let outputTokens: Int
     let cacheCreationInputTokens: Int?
@@ -227,17 +213,17 @@ struct UsageInfo: Decodable {
 
 // MARK: - AskUserQuestion Input
 
-struct AskUserQuestionInput: Decodable {
+struct AskUserQuestionInput: Decodable, Sendable {
     let questions: [Question]
 
-    struct Question: Decodable {
+    struct Question: Decodable, Sendable {
         let question: String
         let header: String
         let options: [Option]
         let multiSelect: Bool
     }
 
-    struct Option: Decodable {
+    struct Option: Decodable, Sendable {
         let label: String
         let description: String
     }
@@ -245,7 +231,7 @@ struct AskUserQuestionInput: Decodable {
 
 // MARK: - AnyCodable
 
-struct AnyCodable: Decodable {
+struct AnyCodable: Decodable, @unchecked Sendable {
     let value: Any
 
     init(_ value: Any) {
