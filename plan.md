@@ -354,33 +354,33 @@ User describes feature → Claude generates plan → Plan rewritten to tasks →
 
 ---
 
-## Task 23: Implement Execution View
+## Task 23: Implement Execution View ✅
 
 **Description:** Main dashboard view during execution.
 
 **Acceptance Criteria:**
-- [ ] Create `ExecutionView` with HSplitView layout
-- [ ] Left side: PhaseIndicatorView, ProgressView, TaskListView, ControlsView
-- [ ] Right side: LogView
-- [ ] Wire up data from AppState context
+- [x] Create `ExecutionView` with HSplitView layout
+- [x] Left side: PhaseIndicatorView, ProgressView, TaskListView, ControlsView
+- [x] Right side: LogView
+- [x] Wire up data from AppState context
 
 **File:** `ClaudeManager/Views/ExecutionView.swift`
 
 ---
 
-## Task 24: Implement Main View and App Entry
+## Task 24: Implement Main View and App Entry ✅
 
 **Description:** Root view and app entry point.
 
 **Acceptance Criteria:**
-- [ ] Create `MainView` with NavigationSplitView
-- [ ] Show SetupView when no project selected
-- [ ] Show ExecutionView when project selected
-- [ ] Add sheet modifier for UserQuestionView bound to pendingQuestion
-- [ ] Create `ClaudeManagerApp` with @main
-- [ ] Initialize and inject AppState as environment
+- [x] Create `MainView` with NavigationSplitView (implemented as ContentView with Group)
+- [x] Show SetupView when no project selected
+- [x] Show ExecutionView when project selected
+- [x] Add sheet modifier for UserQuestionView bound to pendingQuestion
+- [x] Create `ClaudeManagerApp` with @main
+- [x] Initialize and inject AppState as environment
 
-**Files:** `ClaudeManager/Views/MainView.swift`, `ClaudeManager/ClaudeManagerApp.swift`
+**Files:** `ClaudeManager/ContentView.swift`, `ClaudeManager/ClaudeManagerApp.swift`
 
 ---
 

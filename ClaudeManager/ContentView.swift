@@ -12,6 +12,9 @@ struct ContentView: View {
                     .frame(minWidth: 800, minHeight: 600)
             }
         }
+        .sheet(item: Bindable(appState.context).pendingQuestion) { question in
+            UserQuestionView(pendingQuestion: question)
+        }
     }
 }
 
