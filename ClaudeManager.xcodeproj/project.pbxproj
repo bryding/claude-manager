@@ -10,6 +10,7 @@
 		A1000001210000010000000F /* ClaudeManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001110000010000000F /* ClaudeManagerApp.swift */; };
 		A1000002210000010000000F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002110000010000000F /* ContentView.swift */; };
 		A1000003210000010000000F /* ClaudeStreamMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000003210000010000000A /* ClaudeStreamMessage.swift */; };
+		A1000007210000010000000F /* ClaudeMessageParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000007110000010000000F /* ClaudeMessageParser.swift */; };
 		A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001110000010000000F /* ClaudeStreamMessageTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 		A1000001110000010000000F /* ClaudeManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeManagerApp.swift; sourceTree = "<group>"; };
 		A1000002110000010000000F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1000003210000010000000A /* ClaudeStreamMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStreamMessage.swift; sourceTree = "<group>"; };
+		A1000007110000010000000F /* ClaudeMessageParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeMessageParser.swift; sourceTree = "<group>"; };
 		A2000000010000010000000F /* ClaudeManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClaudeManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000001110000010000000F /* ClaudeStreamMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStreamMessageTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -92,6 +94,7 @@
 		A1000004110000010000000F /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				A1000007110000010000000F /* ClaudeMessageParser.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -219,6 +222,7 @@
 				A1000001210000010000000F /* ClaudeManagerApp.swift in Sources */,
 				A1000002210000010000000F /* ContentView.swift in Sources */,
 				A1000003210000010000000F /* ClaudeStreamMessage.swift in Sources */,
+				A1000007210000010000000F /* ClaudeMessageParser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
