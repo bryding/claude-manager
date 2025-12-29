@@ -449,18 +449,25 @@ User describes feature → Claude generates plan → Plan rewritten to tasks →
 
 ---
 
-## Task 28: Support Existing plan.md Files
+## ✅ Task 28: Support Existing plan.md Files
 
 **Description:** Detect existing plan.md when a folder is selected and allow resuming from it instead of requiring a new feature description.
 
 **Acceptance Criteria:**
-- [ ] Add `existingPlan: Plan?` property to ExecutionContext
-- [ ] Add `checkForExistingPlan()` method to SetupView that loads plan.md if it exists
-- [ ] Call `checkForExistingPlan()` after folder selection and on appear
-- [ ] Add `existingPlanSection` UI showing task count with "Resume Plan" / "Start Fresh" buttons
-- [ ] Update `canStart` to allow starting when existingPlan is set (no feature description required)
-- [ ] Add `startWithExistingPlan()` to ExecutionStateMachine that skips plan generation
-- [ ] Add `findFirstPendingTask(in:)` helper to resume from first incomplete task
+- [x] Add `existingPlan: Plan?` property to ExecutionContext
+- [x] Add `checkForExistingPlan()` method to SetupView that loads plan.md if it exists
+- [x] Call `checkForExistingPlan()` after folder selection and on appear
+- [x] Add `existingPlanSection` UI showing task count with "Resume Plan" / "Start Fresh" buttons
+- [x] Update `canStart` to allow starting when existingPlan is set (no feature description required)
+- [x] Add `startWithExistingPlan()` to ExecutionStateMachine that skips plan generation
+- [x] Add `findFirstPendingTask(in:)` helper to resume from first incomplete task
+
+**Implementation Notes:**
+- Added `existingPlan` property to ExecutionContext (cleared on reset)
+- SetupView now detects plan.md on folder selection, recent project selection, and onAppear
+- "Existing Plan Detected" GroupBox shows task count with Resume/Start Fresh buttons
+- `startWithExistingPlan()` skips plan generation phases and jumps directly to `.executingTask`
+- Uses `findFirstPendingTask()` to find first task with `.pending` status
 
 **Files:**
 - `ClaudeManager/State/ExecutionContext.swift`

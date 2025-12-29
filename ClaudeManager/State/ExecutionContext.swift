@@ -90,6 +90,7 @@ final class ExecutionContext {
     // MARK: - Plan State
 
     var plan: Plan?
+    var existingPlan: Plan?
     var currentTaskIndex: Int = 0
 
     // MARK: - Execution State
@@ -225,6 +226,7 @@ final class ExecutionContext {
         projectPath = nil
         featureDescription = ""
         plan = nil
+        existingPlan = nil
         currentTaskIndex = 0
         phase = .idle
         sessionId = nil

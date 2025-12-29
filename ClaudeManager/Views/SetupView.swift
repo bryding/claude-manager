@@ -11,6 +11,10 @@ struct SetupView: View {
     @State private var isStarting = false
     @State private var errorMessage: String?
 
+    // MARK: - Dependencies
+
+    private let planService = PlanService()
+
     // MARK: - Computed Properties
 
     private var hasProjectPath: Bool {
@@ -18,9 +22,9 @@ struct SetupView: View {
     }
 
     private var canStart: Bool {
-        hasProjectPath &&
-        !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !isStarting
+        let hasFeature = !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let hasExistingPlan = appState.context.existingPlan != nil
+        return hasProjectPath && (hasExistingPlan || hasFeature) && !isStarting
     }
 
     private var projectPathDisplay: String {
@@ -33,6 +37,9 @@ struct SetupView: View {
         VStack(spacing: 24) {
             headerSection
             projectSelectionSection
+            if appState.context.existingPlan != nil {
+                existingPlanSection
+            }
             featureDescriptionSection
             startButton
             Spacer()
@@ -46,6 +53,9 @@ struct SetupView: View {
             if appState.context.projectPath == nil,
                let lastPath = appState.userPreferences.lastProjectPath {
                 appState.context.projectPath = lastPath
+                checkForExistingPlan()
+            } else if appState.context.projectPath != nil {
+                checkForExistingPlan()
             }
         }
     }
@@ -141,6 +151,30 @@ struct SetupView: View {
         .help("Recent Projects")
     }
 
+    private var existingPlanSection: some View {
+        GroupBox("Existing Plan Detected") {
+            VStack(alignment: .leading, spacing: 12) {
+                if let plan = appState.context.existingPlan {
+                    let taskCount = plan.tasks.count
+                    Text("Found plan.md with \(taskCount) task\(taskCount == 1 ? "" : "s")")
+                        .font(.callout)
+
+                    HStack {
+                        Button("Resume Plan") {
+                            startWithExistingPlan()
+                        }
+                        .buttonStyle(.borderedProminent)
+
+                        Button("Start Fresh") {
+                            appState.context.existingPlan = nil
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 8)
+        }
+    }
+
     private var startButton: some View {
         Button(action: startDevelopmentLoop) {
             HStack(spacing: 8) {
@@ -172,12 +206,47 @@ struct SetupView: View {
         if response == .OK, let url = panel.url {
             appState.context.projectPath = url
             appState.userPreferences.lastProjectPath = url
+            checkForExistingPlan()
         }
     }
 
     private func selectRecentProject(_ url: URL) {
         appState.context.projectPath = url
         appState.userPreferences.lastProjectPath = url
+        checkForExistingPlan()
+    }
+
+    private func checkForExistingPlan() {
+        guard let projectPath = appState.context.projectPath else {
+            appState.context.existingPlan = nil
+            return
+        }
+
+        let planURL = projectPath.appendingPathComponent("plan.md")
+
+        if FileManager.default.fileExists(atPath: planURL.path) {
+            do {
+                let plan = try planService.parsePlanFromFile(at: planURL)
+                appState.context.existingPlan = plan
+            } catch {
+                appState.context.existingPlan = nil
+            }
+        } else {
+            appState.context.existingPlan = nil
+        }
+    }
+
+    private func startWithExistingPlan() {
+        isStarting = true
+
+        Task {
+            do {
+                try await appState.stateMachine.startWithExistingPlan()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isStarting = false
+        }
     }
 
     private func startDevelopmentLoop() {

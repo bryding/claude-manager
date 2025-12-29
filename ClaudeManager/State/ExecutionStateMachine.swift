@@ -8,6 +8,7 @@ enum ExecutionStateMachineError: Error, LocalizedError {
     case notPaused
     case noSessionId
     case executionFailed(String)
+    case noExistingPlan
 
     var errorDescription: String? {
         switch self {
@@ -21,6 +22,8 @@ enum ExecutionStateMachineError: Error, LocalizedError {
             return "Cannot answer question: no active session"
         case .executionFailed(let phase):
             return "Execution failed during \(phase)"
+        case .noExistingPlan:
+            return "No existing plan loaded"
         }
     }
 }
@@ -71,6 +74,32 @@ final class ExecutionStateMachine {
         context.startTime = Date()
         context.phase = .generatingInitialPlan
         context.addLog(type: .info, message: "Starting execution loop")
+
+        await runLoop()
+    }
+
+    func startWithExistingPlan() async throws {
+        guard context.projectPath != nil else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        guard let existingPlan = context.existingPlan else {
+            throw ExecutionStateMachineError.noExistingPlan
+        }
+
+        resetState()
+        context.plan = existingPlan
+        context.startTime = Date()
+        context.addLog(type: .info, message: "Starting execution from existing plan")
+
+        if let firstPendingIndex = findFirstPendingTask(in: existingPlan) {
+            context.currentTaskIndex = firstPendingIndex
+            context.phase = .executingTask
+            context.addLog(type: .info, message: "Resuming from task \(firstPendingIndex + 1): \(existingPlan.tasks[firstPendingIndex].title)")
+        } else {
+            context.phase = .completed
+            context.addLog(type: .info, message: "All tasks already completed")
+        }
 
         await runLoop()
     }
@@ -381,6 +410,10 @@ final class ExecutionStateMachine {
 
     private func markCurrentTaskFailed() {
         context.updateTaskStatus(.failed)
+    }
+
+    private func findFirstPendingTask(in plan: Plan) -> Int? {
+        return plan.tasks.firstIndex { $0.status == .pending }
     }
 
     // MARK: - Commit Message Helpers
