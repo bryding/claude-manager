@@ -2,11 +2,24 @@ import Foundation
 
 // MARK: - Execution State Machine Error
 
-enum ExecutionStateMachineError: Error {
+enum ExecutionStateMachineError: Error, LocalizedError {
     case noProjectPath
     case emptyFeatureDescription
     case notPaused
     case noSessionId
+
+    var errorDescription: String? {
+        switch self {
+        case .noProjectPath:
+            return "No project path selected"
+        case .emptyFeatureDescription:
+            return "Feature description cannot be empty"
+        case .notPaused:
+            return "Cannot resume: execution is not paused"
+        case .noSessionId:
+            return "Cannot answer question: no active session"
+        }
+    }
 }
 
 // MARK: - Execution State Machine
@@ -22,10 +35,9 @@ final class ExecutionStateMachine {
 
     // MARK: - Private State
 
-    private var isPaused: Bool = false
-    private var shouldStop: Bool = false
+    private var isPaused = false
+    private var shouldStop = false
     private var phaseBeforePause: ExecutionPhase?
-    private var pendingAnswer: String?
 
     // MARK: - Initialization
 
@@ -52,12 +64,8 @@ final class ExecutionStateMachine {
             throw ExecutionStateMachineError.emptyFeatureDescription
         }
 
+        resetState()
         context.startTime = Date()
-        isPaused = false
-        shouldStop = false
-        phaseBeforePause = nil
-        pendingAnswer = nil
-
         context.phase = .generatingInitialPlan
         context.addLog(type: .info, message: "Starting execution loop")
 
@@ -112,12 +120,18 @@ final class ExecutionStateMachine {
             throw ExecutionStateMachineError.noSessionId
         }
 
-        pendingAnswer = answer
         context.pendingQuestion = nil
-
         context.addLog(type: .info, message: "User answered: \(answer)")
 
         await runLoop()
+    }
+
+    // MARK: - Private Methods
+
+    private func resetState() {
+        isPaused = false
+        shouldStop = false
+        phaseBeforePause = nil
     }
 
     // MARK: - Main Loop (Placeholder for Task 13)
