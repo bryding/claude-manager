@@ -15,12 +15,16 @@
 		A1000009210000010000000F /* ClaudeCLIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000009110000010000000F /* ClaudeCLIService.swift */; };
 		A100000A210000010000000F /* PlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000A110000010000000F /* PlanService.swift */; };
 		A100000E210000010000000F /* GitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000E110000010000000F /* GitService.swift */; };
+		A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */; };
+		A4000002210000010000000F /* GitServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4000002110000010000000F /* GitServiceProtocol.swift */; };
 		A100000B210000010000000F /* Plan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000B110000010000000F /* Plan.swift */; };
 		A100000C210000010000000F /* ExecutionPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000C110000010000000F /* ExecutionPhase.swift */; };
 		A100000D210000010000000F /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000D110000010000000F /* LogEntry.swift */; };
 		A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001110000010000000F /* ClaudeStreamMessageTests.swift */; };
 		A2000003210000010000000F /* PlanServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003110000010000000F /* PlanServiceTests.swift */; };
 		A2000004210000010000000F /* ExecutionStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000004110000010000000F /* ExecutionStateMachineTests.swift */; };
+		A5000001210000010000000F /* MockClaudeCLIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5000001110000010000000F /* MockClaudeCLIService.swift */; };
+		A5000002210000010000000F /* MockGitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5000002110000010000000F /* MockGitService.swift */; };
 		A3000001210000010000000F /* ExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000001110000010000000F /* ExecutionContext.swift */; };
 		A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000002110000010000000F /* ExecutionStateMachine.swift */; };
 /* End PBXBuildFile section */
@@ -45,6 +49,8 @@
 		A1000009110000010000000F /* ClaudeCLIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCLIService.swift; sourceTree = "<group>"; };
 		A100000A110000010000000F /* PlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanService.swift; sourceTree = "<group>"; };
 		A100000E110000010000000F /* GitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitService.swift; sourceTree = "<group>"; };
+		A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCLIServiceProtocol.swift; sourceTree = "<group>"; };
+		A4000002110000010000000F /* GitServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitServiceProtocol.swift; sourceTree = "<group>"; };
 		A100000B110000010000000F /* Plan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plan.swift; sourceTree = "<group>"; };
 		A100000C110000010000000F /* ExecutionPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionPhase.swift; sourceTree = "<group>"; };
 		A100000D110000010000000F /* LogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntry.swift; sourceTree = "<group>"; };
@@ -52,6 +58,8 @@
 		A2000001110000010000000F /* ClaudeStreamMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStreamMessageTests.swift; sourceTree = "<group>"; };
 		A2000003110000010000000F /* PlanServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanServiceTests.swift; sourceTree = "<group>"; };
 		A2000004110000010000000F /* ExecutionStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionStateMachineTests.swift; sourceTree = "<group>"; };
+		A5000001110000010000000F /* MockClaudeCLIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockClaudeCLIService.swift; sourceTree = "<group>"; };
+		A5000002110000010000000F /* MockGitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGitService.swift; sourceTree = "<group>"; };
 		A3000001110000010000000F /* ExecutionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContext.swift; sourceTree = "<group>"; };
 		A3000002110000010000000F /* ExecutionStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionStateMachine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -119,6 +127,7 @@
 		A1000004110000010000000F /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				A4000003110000010000000F /* Protocols */,
 				A1000007110000010000000F /* ClaudeMessageParser.swift */,
 				A1000008110000010000000F /* ClaudeProcess.swift */,
 				A1000009110000010000000F /* ClaudeCLIService.swift */,
@@ -126,6 +135,15 @@
 				A100000E110000010000000F /* GitService.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		A4000003110000010000000F /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */,
+				A4000002110000010000000F /* GitServiceProtocol.swift */,
+			);
+			path = Protocols;
 			sourceTree = "<group>";
 		};
 		A1000005110000010000000F /* State */ = {
@@ -147,11 +165,21 @@
 		A2000000510000010000000F /* ClaudeManagerTests */ = {
 			isa = PBXGroup;
 			children = (
+				A5000003110000010000000F /* Mocks */,
 				A2000001110000010000000F /* ClaudeStreamMessageTests.swift */,
 				A2000004110000010000000F /* ExecutionStateMachineTests.swift */,
 				A2000003110000010000000F /* PlanServiceTests.swift */,
 			);
 			path = ClaudeManagerTests;
+			sourceTree = "<group>";
+		};
+		A5000003110000010000000F /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				A5000001110000010000000F /* MockClaudeCLIService.swift */,
+				A5000002110000010000000F /* MockGitService.swift */,
+			);
+			path = Mocks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,6 +293,8 @@
 				A100000E210000010000000F /* GitService.swift in Sources */,
 				A3000001210000010000000F /* ExecutionContext.swift in Sources */,
 				A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */,
+				A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */,
+				A4000002210000010000000F /* GitServiceProtocol.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,6 +305,8 @@
 				A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */,
 				A2000004210000010000000F /* ExecutionStateMachineTests.swift in Sources */,
 				A2000003210000010000000F /* PlanServiceTests.swift in Sources */,
+				A5000001210000010000000F /* MockClaudeCLIService.swift in Sources */,
+				A5000002210000010000000F /* MockGitService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

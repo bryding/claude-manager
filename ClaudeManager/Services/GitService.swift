@@ -15,7 +15,7 @@ enum GitServiceResult: Sendable {
 
 // MARK: - Git Service
 
-final class GitService: @unchecked Sendable {
+final class GitService: GitServiceProtocol, @unchecked Sendable {
     private let gitPath: String
 
     init(gitPath: String = "/usr/bin/git") {

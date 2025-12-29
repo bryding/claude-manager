@@ -7,6 +7,7 @@ enum ExecutionStateMachineError: Error, LocalizedError {
     case emptyFeatureDescription
     case notPaused
     case noSessionId
+    case executionFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -18,6 +19,8 @@ enum ExecutionStateMachineError: Error, LocalizedError {
             return "Cannot resume: execution is not paused"
         case .noSessionId:
             return "Cannot answer question: no active session"
+        case .executionFailed(let phase):
+            return "Execution failed during \(phase)"
         }
     }
 }
@@ -29,9 +32,9 @@ final class ExecutionStateMachine {
     // MARK: - Dependencies
 
     let context: ExecutionContext
-    let claudeService: ClaudeCLIService
+    let claudeService: any ClaudeCLIServiceProtocol
     let planService: PlanService
-    let gitService: GitService
+    let gitService: any GitServiceProtocol
 
     // MARK: - Private State
 
@@ -43,9 +46,9 @@ final class ExecutionStateMachine {
 
     init(
         context: ExecutionContext,
-        claudeService: ClaudeCLIService,
+        claudeService: any ClaudeCLIServiceProtocol,
         planService: PlanService,
-        gitService: GitService
+        gitService: any GitServiceProtocol
     ) {
         self.context = context
         self.claudeService = claudeService
@@ -342,31 +345,303 @@ final class ExecutionStateMachine {
         return "test: add tests for \(task.title)"
     }
 
-    // MARK: - Phase Handlers (Placeholders for Task 14)
+    // MARK: - Message Handling
+
+    private func handleStreamMessage(_ message: ClaudeStreamMessage) {
+        switch message {
+        case .system(let systemMsg):
+            context.sessionId = systemMsg.sessionId
+
+        case .assistant(let assistantMsg):
+            context.sessionId = assistantMsg.sessionId
+
+            for block in assistantMsg.message.content {
+                switch block {
+                case .text(let textContent):
+                    context.addLog(type: .output, message: textContent.text)
+
+                case .toolUse(let toolUse):
+                    if toolUse.isAskUserQuestion {
+                        if let input = toolUse.askUserQuestionInput,
+                           let firstQuestion = input.questions.first {
+                            context.pendingQuestion = PendingQuestion(
+                                toolUseId: toolUse.id,
+                                question: firstQuestion
+                            )
+                            context.phase = .waitingForUser
+                        }
+                    } else {
+                        context.addLog(type: .toolUse, message: "Tool: \(toolUse.name)")
+                    }
+                }
+            }
+
+            if let usage = assistantMsg.message.usage {
+                context.accumulateUsage(
+                    inputTokens: usage.inputTokens,
+                    outputTokens: usage.outputTokens
+                )
+            }
+
+        case .result(let resultMsg):
+            context.sessionId = resultMsg.sessionId
+            context.totalCost += resultMsg.totalCostUsd
+            context.accumulateUsage(
+                inputTokens: resultMsg.usage.inputTokens,
+                outputTokens: resultMsg.usage.outputTokens
+            )
+
+        case .user:
+            break
+        }
+    }
+
+    // MARK: - Phase Handlers
 
     private func generateInitialPlan() async throws {
-        context.addLog(type: .info, message: "Generating initial plan...")
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        let prompt = """
+            Analyze the following feature request and create a high-level implementation plan:
+
+            \(context.featureDescription)
+
+            Create a structured plan with discrete, implementable tasks. Use this format:
+
+            ## Task 1: Task Title
+            **Description:** Brief description of what this task accomplishes
+            - [ ] Subtask or acceptance criteria
+            - [ ] Another subtask
+
+            ## Task 2: Next Task Title
+            ...and so on.
+
+            Focus on breaking down the work into small, focused tasks that can be completed independently.
+            """
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .plan,
+            sessionId: nil,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleStreamMessage(message)
+                }
+            }
+        )
+
+        if result.isError {
+            throw ExecutionStateMachineError.executionFailed("generateInitialPlan")
+        }
+
+        let plan = planService.parsePlanFromText(result.result)
+        context.plan = plan
+        context.addLog(type: .info, message: "Initial plan generated with \(plan.tasks.count) tasks")
     }
 
     private func rewritePlanToFormat() async throws {
-        context.addLog(type: .info, message: "Rewriting plan to task format...")
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        let prompt = """
+            Review the plan and ensure it follows this exact format for each task:
+
+            ## Task N: Task Title
+            **Description:** Brief description of what this task accomplishes
+            - [ ] Subtask or acceptance criteria
+            - [ ] Another subtask
+
+            Make sure:
+            1. Tasks are numbered sequentially starting from 1
+            2. Each task has a clear, actionable title
+            3. Each task has a description
+            4. Subtasks are concrete acceptance criteria
+
+            Output only the reformatted plan, nothing else.
+            """
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .plan,
+            sessionId: context.sessionId,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleStreamMessage(message)
+                }
+            }
+        )
+
+        if result.isError {
+            context.addLog(type: .error, message: "Failed to rewrite plan")
+            return
+        }
+
+        let plan = planService.parsePlanFromText(result.result)
+        context.plan = plan
+        context.addLog(type: .info, message: "Plan reformatted with \(plan.tasks.count) tasks")
     }
 
     private func executeCurrentTask() async throws {
-        guard let task = context.currentTask else { return }
-        context.addLog(type: .info, message: "Executing task: \(task.title)")
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        guard let task = context.currentTask else {
+            context.addLog(type: .error, message: "No current task to execute")
+            return
+        }
+
+        let subtasksText = task.subtasks.isEmpty
+            ? "No specific subtasks defined."
+            : task.subtasks.enumerated().map { "- \($0.element)" }.joined(separator: "\n")
+
+        let prompt = """
+            Execute the following task:
+
+            ## Task \(task.number): \(task.title)
+            \(task.description)
+
+            Acceptance Criteria:
+            \(subtasksText)
+
+            Implement this task completely. Write the necessary code, create or modify files as needed.
+            Make sure to follow existing code patterns and conventions in the project.
+            """
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .acceptEdits,
+            sessionId: context.sessionId,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleStreamMessage(message)
+                }
+            }
+        )
+
+        if result.isError {
+            context.addLog(type: .error, message: "Task execution failed")
+            throw ExecutionStateMachineError.executionFailed("executeCurrentTask")
+        }
+
+        context.addLog(type: .info, message: "Task \(task.number) execution completed")
     }
 
     private func runCodeReview() async throws {
-        context.addLog(type: .info, message: "Running code review...")
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        guard let task = context.currentTask else {
+            context.addLog(type: .info, message: "Skipping code review: no current task")
+            return
+        }
+
+        let prompt = """
+            Review the code changes just made for task "\(task.title)".
+
+            Run /codereview to check for:
+            - Code quality and maintainability
+            - Potential bugs or edge cases
+            - Adherence to Swift best practices
+            - DRY principles and code duplication
+            - Proper error handling
+
+            If you find issues, fix them. If the code looks good, confirm it meets quality standards.
+            """
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .acceptEdits,
+            sessionId: context.sessionId,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleStreamMessage(message)
+                }
+            }
+        )
+
+        if result.isError {
+            context.addLog(type: .error, message: "Code review encountered an error")
+        } else {
+            context.addLog(type: .info, message: "Code review completed")
+        }
     }
 
     private func writeTests() async throws {
-        context.addLog(type: .info, message: "Writing tests...")
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        guard let task = context.currentTask else {
+            context.addLog(type: .info, message: "Skipping tests: no current task")
+            return
+        }
+
+        context.addLog(type: .info, message: "Writing tests for \(task.title)")
+
+        let prompt = """
+            Write unit tests for the code implemented in task "\(task.title)".
+
+            Run /writetests to:
+            - Test the main functionality
+            - Cover edge cases and error conditions
+            - Follow existing test patterns in the project
+            - Use XCTest framework
+
+            Focus on testing the core logic, not UI components or simple getters/setters.
+            """
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .acceptEdits,
+            sessionId: context.sessionId,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleStreamMessage(message)
+                }
+            }
+        )
+
+        if result.isError {
+            context.addLog(type: .error, message: "Test writing encountered an error")
+        } else {
+            context.addLog(type: .info, message: "Tests written successfully")
+        }
     }
 
     private func commitChanges(message: String) async throws {
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
         context.addLog(type: .info, message: "Committing: \(message)")
+
+        let result = try await gitService.commitAll(message: message, in: projectPath)
+
+        switch result {
+        case .committed(let output):
+            if let output = output {
+                context.addLog(type: .info, message: "Commit successful: \(output.trimmingCharacters(in: .whitespacesAndNewlines))")
+            } else {
+                context.addLog(type: .info, message: "Commit successful")
+            }
+        case .noChanges:
+            context.addLog(type: .info, message: "No changes to commit")
+        }
     }
 
     private func clearContext() async throws {

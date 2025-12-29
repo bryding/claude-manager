@@ -35,7 +35,7 @@ enum ClaudeCLIServiceError: Error {
 
 // MARK: - Claude CLI Service
 
-final class ClaudeCLIService: @unchecked Sendable {
+final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
     let executablePath: String
     private var currentProcess: ClaudeProcess?
 

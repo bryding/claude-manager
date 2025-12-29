@@ -5,22 +5,41 @@ import XCTest
 final class ExecutionStateMachineTests: XCTestCase {
 
     private var context: ExecutionContext!
-    private var claudeService: ClaudeCLIService!
+    private var mockClaudeService: MockClaudeCLIService!
     private var planService: PlanService!
-    private var gitService: GitService!
+    private var mockGitService: MockGitService!
     private var stateMachine: ExecutionStateMachine!
 
     override func setUp() async throws {
         try await super.setUp()
         context = ExecutionContext()
-        claudeService = ClaudeCLIService()
+        mockClaudeService = MockClaudeCLIService()
         planService = PlanService()
-        gitService = GitService()
+        mockGitService = MockGitService()
         stateMachine = ExecutionStateMachine(
             context: context,
-            claudeService: claudeService,
+            claudeService: mockClaudeService,
             planService: planService,
-            gitService: gitService
+            gitService: mockGitService
+        )
+    }
+
+    private func configureMockWithPlan(tasks: [(number: Int, title: String, description: String)]) {
+        var planText = ""
+        for task in tasks {
+            planText += """
+            ## Task \(task.number): \(task.title)
+            **Description:** \(task.description)
+            - [ ] Complete the implementation
+
+            """
+        }
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: planText,
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
         )
     }
 
@@ -314,9 +333,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testFullLoopWithValidPlanEndsCompleted() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Implement Service", description: "Core logic")
-        ])
+        configureMockWithPlan(tasks: [(1, "Implement Service", "Core logic")])
 
         try await stateMachine.start()
 
@@ -327,7 +344,13 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testLoopFailsWithNoPlanAfterRewriting() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = nil
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "No tasks here",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
 
         try await stateMachine.start()
 
@@ -338,7 +361,13 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testLoopFailsWithEmptyTasksInPlan() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [])
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "No valid task format",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
 
         try await stateMachine.start()
 
@@ -349,9 +378,9 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testMultipleTasksAdvanceCorrectly() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Implement Service", description: "Core logic"),
-            PlanTask(number: 2, title: "Add Validation", description: "Input validation")
+        configureMockWithPlan(tasks: [
+            (1, "Implement Service", "Core logic"),
+            (2, "Add Validation", "Input validation")
         ])
 
         try await stateMachine.start()
@@ -363,9 +392,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testTaskMarkedInProgressDuringExecution() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Implement Service", description: "Core logic")
-        ])
+        configureMockWithPlan(tasks: [(1, "Implement Service", "Core logic")])
 
         try await stateMachine.start()
 
@@ -376,9 +403,9 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testTaskMarkedCompletedAfterExecution() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Implement Service", description: "Core logic"),
-            PlanTask(number: 2, title: "Add Validation", description: "Input validation")
+        configureMockWithPlan(tasks: [
+            (1, "Implement Service", "Core logic"),
+            (2, "Add Validation", "Input validation")
         ])
 
         try await stateMachine.start()
@@ -394,9 +421,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testUITaskSkipsTests() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Implement Setup View", description: "Create UI")
-        ])
+        configureMockWithPlan(tasks: [(1, "Implement Setup View", "Create UI")])
 
         try await stateMachine.start()
 
@@ -407,9 +432,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testViewKeywordSkipsTests() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Build MainView", description: "Root component")
-        ])
+        configureMockWithPlan(tasks: [(1, "Build MainView", "Root component")])
 
         try await stateMachine.start()
 
@@ -419,9 +442,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testButtonKeywordSkipsTests() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Add Submit Button", description: "Form submission")
-        ])
+        configureMockWithPlan(tasks: [(1, "Add Submit Button", "Form submission")])
 
         try await stateMachine.start()
 
@@ -431,9 +452,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testServiceTaskWritesTests() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Implement Plan Service", description: "Parse plans")
-        ])
+        configureMockWithPlan(tasks: [(1, "Implement Plan Service", "Parse plans")])
 
         try await stateMachine.start()
 
@@ -444,9 +463,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testModelTaskWritesTests() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Create Data Model", description: "Core data structures")
-        ])
+        configureMockWithPlan(tasks: [(1, "Create Data Model", "Core data structures")])
 
         try await stateMachine.start()
 
@@ -457,9 +474,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testUIKeywordInDescriptionSkipsTests() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Implement Controls", description: "Create UI elements for control panel")
-        ])
+        configureMockWithPlan(tasks: [(1, "Implement Controls", "Create UI elements for control panel")])
 
         try await stateMachine.start()
 
@@ -471,9 +486,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testPhaseTransitionsAreLogged() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Implement Service", description: "Core logic")
-        ])
+        configureMockWithPlan(tasks: [(1, "Implement Service", "Core logic")])
 
         try await stateMachine.start()
 
@@ -486,9 +499,9 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testContextClearedBetweenTasks() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Implement Service", description: "Core logic"),
-            PlanTask(number: 2, title: "Add Validation", description: "Input validation")
+        configureMockWithPlan(tasks: [
+            (1, "Implement Service", "Core logic"),
+            (2, "Add Validation", "Input validation")
         ])
         context.sessionId = "initial-session"
 
@@ -502,9 +515,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testCommitMessagesInLogs() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
-        context.plan = Plan(rawText: "test", tasks: [
-            PlanTask(number: 1, title: "Add Authentication", description: "Auth logic")
-        ])
+        configureMockWithPlan(tasks: [(1, "Add Authentication", "Auth logic")])
 
         try await stateMachine.start()
 
