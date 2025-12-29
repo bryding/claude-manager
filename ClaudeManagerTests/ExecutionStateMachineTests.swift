@@ -308,4 +308,224 @@ final class ExecutionStateMachineTests: XCTestCase {
             "Cannot answer question: no active session"
         )
     }
+
+    func testNewErrorDescriptions() {
+        XCTAssertEqual(
+            ExecutionStateMachineError.noPlan.errorDescription,
+            "No plan available after plan generation"
+        )
+        XCTAssertEqual(
+            ExecutionStateMachineError.noTasksInPlan.errorDescription,
+            "Plan contains no tasks to execute"
+        )
+
+        let underlyingError = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "test error"])
+        let phaseError = ExecutionStateMachineError.phaseExecutionFailed(.executingTask, underlyingError)
+        XCTAssertTrue(phaseError.errorDescription?.contains("executingTask") ?? false)
+        XCTAssertTrue(phaseError.errorDescription?.contains("test error") ?? false)
+    }
+
+    // MARK: - Phase Flow Tests
+
+    func testFullLoopWithValidPlanEndsCompleted() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Implement Service", description: "Core logic")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("All tasks completed") })
+    }
+
+    func testLoopFailsWithNoPlanAfterRewriting() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = nil
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .failed)
+        XCTAssertTrue(context.errors.contains { $0.message.contains("No tasks found in plan") })
+    }
+
+    func testLoopFailsWithEmptyTasksInPlan() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [])
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .failed)
+        XCTAssertTrue(context.errors.contains { $0.message.contains("No tasks found in plan") })
+    }
+
+    func testMultipleTasksAdvanceCorrectly() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Implement Service", description: "Core logic"),
+            PlanTask(number: 2, title: "Add Validation", description: "Input validation")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Moving to task 2") })
+    }
+
+    func testTaskMarkedInProgressDuringExecution() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Implement Service", description: "Core logic")
+        ])
+
+        try await stateMachine.start()
+
+        let task = context.plan?.tasks.first
+        XCTAssertEqual(task?.status, .completed)
+    }
+
+    func testTaskMarkedCompletedAfterExecution() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Implement Service", description: "Core logic"),
+            PlanTask(number: 2, title: "Add Validation", description: "Input validation")
+        ])
+
+        try await stateMachine.start()
+
+        let firstTask = context.plan?.tasks[0]
+        let secondTask = context.plan?.tasks[1]
+        XCTAssertEqual(firstTask?.status, .completed)
+        XCTAssertEqual(secondTask?.status, .completed)
+    }
+
+    // MARK: - shouldWriteTests Heuristic Tests
+
+    func testUITaskSkipsTests() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Implement Setup View", description: "Create UI")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Skipping tests for UI-related task") })
+        XCTAssertFalse(context.logs.contains { $0.message.contains("Writing tests") })
+    }
+
+    func testViewKeywordSkipsTests() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Build MainView", description: "Root component")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Skipping tests for UI-related task") })
+    }
+
+    func testButtonKeywordSkipsTests() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Add Submit Button", description: "Form submission")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Skipping tests for UI-related task") })
+    }
+
+    func testServiceTaskWritesTests() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Implement Plan Service", description: "Parse plans")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertFalse(context.logs.contains { $0.message.contains("Skipping tests") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Writing tests") })
+    }
+
+    func testModelTaskWritesTests() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Create Data Model", description: "Core data structures")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertFalse(context.logs.contains { $0.message.contains("Skipping tests") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Writing tests") })
+    }
+
+    func testUIKeywordInDescriptionSkipsTests() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Implement Controls", description: "Create UI elements for control panel")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Skipping tests for UI-related task") })
+    }
+
+    // MARK: - Phase Transition Logging
+
+    func testPhaseTransitionsAreLogged() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Implement Service", description: "Core logic")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Transitioned to phase: rewritingPlan") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Transitioned to phase: executingTask") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Transitioned to phase: committingImplementation") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Transitioned to phase: completed") })
+    }
+
+    func testContextClearedBetweenTasks() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Implement Service", description: "Core logic"),
+            PlanTask(number: 2, title: "Add Validation", description: "Input validation")
+        ])
+        context.sessionId = "initial-session"
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Context cleared for next task") })
+    }
+
+    // MARK: - Commit Message Generation
+
+    func testCommitMessagesInLogs() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.plan = Plan(rawText: "test", tasks: [
+            PlanTask(number: 1, title: "Add Authentication", description: "Auth logic")
+        ])
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("feat: implement Add Authentication") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("refactor: code review fixes for Add Authentication") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("test: add tests for Add Authentication") })
+    }
 }
