@@ -8,17 +8,9 @@ enum GitServiceError: Error {
 
 // MARK: - Result Types
 
-struct GitServiceResult: Sendable {
-    let success: Bool
-    let message: String?
-
-    static func committed(output: String?) -> GitServiceResult {
-        GitServiceResult(success: true, message: output)
-    }
-
-    static func noChanges() -> GitServiceResult {
-        GitServiceResult(success: true, message: "nothing to commit, working tree clean")
-    }
+enum GitServiceResult: Sendable {
+    case committed(output: String?)
+    case noChanges
 }
 
 // MARK: - Git Service
@@ -38,7 +30,7 @@ final class GitService: @unchecked Sendable {
             return .committed(output: output)
         } catch GitServiceError.commandFailed(let code, let stderr) {
             if code == 1, let stderr = stderr, stderr.contains("nothing to commit") {
-                return .noChanges()
+                return .noChanges
             }
             throw GitServiceError.commandFailed(code, stderr: stderr)
         }
@@ -46,28 +38,41 @@ final class GitService: @unchecked Sendable {
 
     @discardableResult
     private func runGit(arguments: [String], in directory: URL) async throws -> String? {
-        let process = Process()
-        let stdoutPipe = Pipe()
-        let stderrPipe = Pipe()
+        let gitPath = self.gitPath
 
-        process.executableURL = URL(fileURLWithPath: gitPath)
-        process.arguments = arguments
-        process.currentDirectoryURL = directory
-        process.standardOutput = stdoutPipe
-        process.standardError = stderrPipe
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global().async {
+                let process = Process()
+                let stdoutPipe = Pipe()
+                let stderrPipe = Pipe()
 
-        try process.run()
-        process.waitUntilExit()
+                process.executableURL = URL(fileURLWithPath: gitPath)
+                process.arguments = arguments
+                process.currentDirectoryURL = directory
+                process.standardOutput = stdoutPipe
+                process.standardError = stderrPipe
 
-        let exitCode = process.terminationStatus
+                do {
+                    try process.run()
+                } catch {
+                    continuation.resume(throwing: GitServiceError.commandFailed(-1, stderr: error.localizedDescription))
+                    return
+                }
 
-        if exitCode != 0 {
-            let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
-            let stderrString = String(data: stderrData, encoding: .utf8)
-            throw GitServiceError.commandFailed(exitCode, stderr: stderrString)
+                process.waitUntilExit()
+
+                let exitCode = process.terminationStatus
+
+                if exitCode != 0 {
+                    let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+                    let stderrString = String(data: stderrData, encoding: .utf8)
+                    continuation.resume(throwing: GitServiceError.commandFailed(exitCode, stderr: stderrString))
+                    return
+                }
+
+                let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+                continuation.resume(returning: String(data: stdoutData, encoding: .utf8))
+            }
         }
-
-        let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
-        return String(data: stdoutData, encoding: .utf8)
     }
 }
