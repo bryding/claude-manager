@@ -192,6 +192,10 @@ final class ExecutionContext {
         phase != .idle && phase != .completed && phase != .failed
     }
 
+    var canStart: Bool {
+        phase == .idle
+    }
+
     var hasUnrecoverableError: Bool {
         errors.contains { !$0.isRecoverable }
     }

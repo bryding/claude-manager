@@ -19,8 +19,12 @@ struct ControlsView: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            pauseResumeButton
-            stopButton
+            if context.canStart {
+                startButton
+            } else {
+                pauseResumeButton
+                stopButton
+            }
             Spacer()
             elapsedTimeDisplay
             contextIndicator
@@ -82,6 +86,17 @@ struct ControlsView: View {
         .controlSize(.regular)
         .tint(.red)
         .disabled(!context.canStop)
+    }
+
+    private var startButton: some View {
+        Button(action: startExecution) {
+            HStack(spacing: 6) {
+                Image(systemName: "play.circle.fill")
+                Text("Start")
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.regular)
     }
 
     private var elapsedTimeDisplay: some View {
@@ -190,6 +205,16 @@ struct ControlsView: View {
 
     private func requestStop() {
         appState.context.showStopConfirmation = true
+    }
+
+    private func startExecution() {
+        Task {
+            do {
+                try await appState.stateMachine.start()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
     }
 }
 
