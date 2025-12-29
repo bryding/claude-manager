@@ -309,22 +309,6 @@ final class ExecutionStateMachineTests: XCTestCase {
         )
     }
 
-    func testNewErrorDescriptions() {
-        XCTAssertEqual(
-            ExecutionStateMachineError.noPlan.errorDescription,
-            "No plan available after plan generation"
-        )
-        XCTAssertEqual(
-            ExecutionStateMachineError.noTasksInPlan.errorDescription,
-            "Plan contains no tasks to execute"
-        )
-
-        let underlyingError = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "test error"])
-        let phaseError = ExecutionStateMachineError.phaseExecutionFailed(.executingTask, underlyingError)
-        XCTAssertTrue(phaseError.errorDescription?.contains("executingTask") ?? false)
-        XCTAssertTrue(phaseError.errorDescription?.contains("test error") ?? false)
-    }
-
     // MARK: - Phase Flow Tests
 
     func testFullLoopWithValidPlanEndsCompleted() async throws {

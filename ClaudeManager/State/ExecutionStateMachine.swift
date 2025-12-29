@@ -7,9 +7,6 @@ enum ExecutionStateMachineError: Error, LocalizedError {
     case emptyFeatureDescription
     case notPaused
     case noSessionId
-    case noPlan
-    case noTasksInPlan
-    case phaseExecutionFailed(ExecutionPhase, Error)
 
     var errorDescription: String? {
         switch self {
@@ -21,12 +18,6 @@ enum ExecutionStateMachineError: Error, LocalizedError {
             return "Cannot resume: execution is not paused"
         case .noSessionId:
             return "Cannot answer question: no active session"
-        case .noPlan:
-            return "No plan available after plan generation"
-        case .noTasksInPlan:
-            return "Plan contains no tasks to execute"
-        case .phaseExecutionFailed(let phase, let error):
-            return "Phase \(phase.rawValue) failed: \(error.localizedDescription)"
         }
     }
 }
@@ -252,6 +243,9 @@ final class ExecutionStateMachine {
             if shouldWriteTests() {
                 context.phase = .writingTests
             } else {
+                if let task = context.currentTask {
+                    context.addLog(type: .info, message: "Skipping tests for UI-related task: \(task.title)")
+                }
                 context.phase = .clearingContext
             }
 
@@ -293,6 +287,10 @@ final class ExecutionStateMachine {
             return false
         }
 
+        return !isUIRelatedTask(task)
+    }
+
+    private func isUIRelatedTask(_ task: PlanTask) -> Bool {
         let uiKeywords = [
             "view", "ui", "layout", "animation", "style", "color", "font",
             "icon", "image", "button", "label", "text", "visual", "display",
@@ -302,14 +300,9 @@ final class ExecutionStateMachine {
         let titleLower = task.title.lowercased()
         let descriptionLower = task.description.lowercased()
 
-        for keyword in uiKeywords {
-            if titleLower.contains(keyword) || descriptionLower.contains(keyword) {
-                context.addLog(type: .info, message: "Skipping tests for UI-related task: \(task.title)")
-                return false
-            }
+        return uiKeywords.contains { keyword in
+            titleLower.contains(keyword) || descriptionLower.contains(keyword)
         }
-
-        return true
     }
 
     // MARK: - Task Status Helpers
