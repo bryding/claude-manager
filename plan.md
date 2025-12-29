@@ -14,293 +14,293 @@ User describes feature → Claude generates plan → Plan rewritten to tasks →
 
 ---
 
-## Task 1: Create Xcode Project Structure
+## Task 1: Create Xcode Project Structure ✅
 
 **Description:** Set up the Xcode project with proper folder organization.
 
 **Acceptance Criteria:**
-- [ ] Create new SwiftUI macOS app named "ClaudeManager"
-- [ ] Set deployment target to macOS 14.0+
-- [ ] Create folder structure: Models/, Services/, State/, Views/
-- [ ] Add empty placeholder files for organization
+- [x] Create new SwiftUI macOS app named "ClaudeManager"
+- [x] Set deployment target to macOS 14.0+
+- [x] Create folder structure: Models/, Services/, State/, Views/
+- [x] Add empty placeholder files for organization
 
 ---
 
-## Task 2: Implement Claude Stream Message Models
+## Task 2: Implement Claude Stream Message Models ✅
 
 **Description:** Create Codable types that match Claude's `--output-format stream-json` output.
 
 **Acceptance Criteria:**
-- [ ] Create `ClaudeStreamMessage` enum with cases: system, assistant, user, result
-- [ ] Create `SystemMessage` struct with sessionId, cwd, tools, model, permissionMode
-- [ ] Create `AssistantMessage` struct with content blocks array
-- [ ] Create `ContentBlock` enum with text and toolUse cases
-- [ ] Create `ToolUseContent` struct with id, name, input dictionary
-- [ ] Create `ResultMessage` struct with result, totalCostUsd, durationMs, isError
-- [ ] Create `AskUserQuestionInput` struct for parsing question tool calls
-- [ ] Add AnyCodable helper for dynamic JSON values
+- [x] Create `ClaudeStreamMessage` enum with cases: system, assistant, user, result
+- [x] Create `SystemMessage` struct with sessionId, cwd, tools, model, permissionMode
+- [x] Create `AssistantMessage` struct with content blocks array
+- [x] Create `ContentBlock` enum with text and toolUse cases
+- [x] Create `ToolUseContent` struct with id, name, input dictionary
+- [x] Create `ResultMessage` struct with result, totalCostUsd, durationMs, isError
+- [x] Create `AskUserQuestionInput` struct for parsing question tool calls
+- [x] Add AnyCodable helper for dynamic JSON values
 
 **File:** `ClaudeManager/Models/ClaudeStreamMessage.swift`
 
 ---
 
-## Task 3: Implement Plan and Task Models
+## Task 3: Implement Plan and Task Models ✅
 
 **Description:** Create models for representing parsed plan.md content.
 
 **Acceptance Criteria:**
-- [ ] Create `Plan` struct with rawText and tasks array
-- [ ] Create `PlanTask` struct with id, number, title, description, status, subtasks
-- [ ] Create `TaskStatus` enum: pending, inProgress, completed, failed, skipped
-- [ ] Make models Identifiable and Equatable as needed
+- [x] Create `Plan` struct with rawText and tasks array
+- [x] Create `PlanTask` struct with id, number, title, description, status, subtasks
+- [x] Create `TaskStatus` enum: pending, inProgress, completed, failed, skipped
+- [x] Make models Identifiable and Equatable as needed
 
 **File:** `ClaudeManager/Models/Plan.swift`
 
 ---
 
-## Task 4: Implement Execution Phase Model
+## Task 4: Implement Execution Phase Model ✅
 
 **Description:** Create enum representing all phases of the execution loop.
 
 **Acceptance Criteria:**
-- [ ] Create `ExecutionPhase` enum with all phases: idle, generatingInitialPlan, rewritingPlan, executingTask, committingImplementation, reviewingCode, committingReview, writingTests, committingTests, clearingContext, waitingForUser, paused, completed, failed
-- [ ] Add `permissionMode` computed property returning "plan" or "acceptEdits"
-- [ ] Add `isTerminal` computed property for completed/failed states
+- [x] Create `ExecutionPhase` enum with all phases: idle, generatingInitialPlan, rewritingPlan, executingTask, committingImplementation, reviewingCode, committingReview, writingTests, committingTests, clearingContext, waitingForUser, paused, completed, failed
+- [x] Add `permissionMode` computed property returning "plan" or "acceptEdits"
+- [x] Add `isTerminal` computed property for completed/failed states
 
 **File:** `ClaudeManager/Models/ExecutionPhase.swift`
 
 ---
 
-## Task 5: Implement Log Entry Model
+## Task 5: Implement Log Entry Model ✅
 
 **Description:** Create model for structured log entries.
 
 **Acceptance Criteria:**
-- [ ] Create `LogEntry` struct with id, timestamp, phase, type, message
-- [ ] Create `LogType` enum: output, toolUse, result, error, info
-- [ ] Add color property to LogType for UI display
+- [x] Create `LogEntry` struct with id, timestamp, phase, type, message
+- [x] Create `LogType` enum: output, toolUse, result, error, info
+- [x] Add color property to LogType for UI display
 
 **File:** `ClaudeManager/Models/LogEntry.swift`
 
 ---
 
-## Task 6: Implement Claude Message Parser
+## Task 6: Implement Claude Message Parser ✅
 
 **Description:** Create JSONL parser for Claude's streaming output.
 
 **Acceptance Criteria:**
-- [ ] Create `ClaudeMessageParser` class
-- [ ] Implement `parse(line:)` method returning optional ClaudeStreamMessage
-- [ ] Handle malformed JSON gracefully (log and skip)
-- [ ] Use JSONDecoder with appropriate settings
+- [x] Create `ClaudeMessageParser` class
+- [x] Implement `parse(line:)` method returning optional ClaudeStreamMessage
+- [x] Handle malformed JSON gracefully (log and skip)
+- [x] Use JSONDecoder with appropriate settings
 
 **File:** `ClaudeManager/Services/ClaudeMessageParser.swift`
 
 ---
 
-## Task 7: Implement Claude Process Wrapper
+## Task 7: Implement Claude Process Wrapper ✅
 
 **Description:** Create async wrapper for running Claude CLI as subprocess.
 
 **Acceptance Criteria:**
-- [ ] Create `ClaudeProcess` class with executablePath, arguments, workingDirectory
-- [ ] Implement `run()` returning AsyncThrowingStream of ClaudeStreamMessage
-- [ ] Set up stdout/stderr pipes on Foundation Process
-- [ ] Read stdout line-by-line and parse each line
-- [ ] Implement `terminate()` and `interrupt()` methods
-- [ ] Handle process exit codes
+- [x] Create `ClaudeProcess` class with executablePath, arguments, workingDirectory
+- [x] Implement `run()` returning AsyncThrowingStream of ClaudeStreamMessage
+- [x] Set up stdout/stderr pipes on Foundation Process
+- [x] Read stdout line-by-line and parse each line
+- [x] Implement `terminate()` and `interrupt()` methods
+- [x] Handle process exit codes
 
 **File:** `ClaudeManager/Services/ClaudeProcess.swift`
 
 ---
 
-## Task 8: Implement Claude CLI Service
+## Task 8: Implement Claude CLI Service ✅
 
 **Description:** Main service for executing Claude with different modes.
 
 **Acceptance Criteria:**
-- [ ] Create `ClaudeCLIService` class with claude executable path
-- [ ] Create `PermissionMode` enum: plan, acceptEdits, default
-- [ ] Create `ClaudeExecutionResult` struct with result, sessionId, totalCost, durationMs
-- [ ] Implement `execute(prompt:workingDirectory:permissionMode:sessionId:onMessage:)` async method
-- [ ] Build correct CLI arguments for each permission mode
-- [ ] Support session resumption with --resume flag
-- [ ] Return structured result after completion
+- [x] Create `ClaudeCLIService` class with claude executable path
+- [x] Create `PermissionMode` enum: plan, acceptEdits, default
+- [x] Create `ClaudeExecutionResult` struct with result, sessionId, totalCost, durationMs
+- [x] Implement `execute(prompt:workingDirectory:permissionMode:sessionId:onMessage:)` async method
+- [x] Build correct CLI arguments for each permission mode
+- [x] Support session resumption with --resume flag
+- [x] Return structured result after completion
 
 **File:** `ClaudeManager/Services/ClaudeCLIService.swift`
 
 ---
 
-## Task 9: Implement Plan Service
+## Task 9: Implement Plan Service ✅
 
 **Description:** Service for parsing and managing plan.md files.
 
 **Acceptance Criteria:**
-- [ ] Create `PlanService` class
-- [ ] Implement `parsePlanFromFile(at:)` to read and parse plan.md
-- [ ] Implement `parsePlanFromText(_:)` using regex to extract tasks
-- [ ] Parse task headers: `## Task N: Title`
-- [ ] Parse descriptions: `**Description:** ...`
-- [ ] Parse acceptance criteria: `- [ ] ...`
-- [ ] Implement `savePlan(_:to:)` to write plan.md
+- [x] Create `PlanService` class
+- [x] Implement `parsePlanFromFile(at:)` to read and parse plan.md
+- [x] Implement `parsePlanFromText(_:)` using regex to extract tasks
+- [x] Parse task headers: `## Task N: Title`
+- [x] Parse descriptions: `**Description:** ...`
+- [x] Parse acceptance criteria: `- [ ] ...`
+- [x] Implement `savePlan(_:to:)` to write plan.md
 
 **File:** `ClaudeManager/Services/PlanService.swift`
 
 ---
 
-## Task 10: Implement Git Service
+## Task 10: Implement Git Service ✅
 
 **Description:** Simple wrapper for git commit operations.
 
 **Acceptance Criteria:**
-- [ ] Create `GitService` class
-- [ ] Implement `commitAll(message:in:)` that stages and commits all changes
-- [ ] Run `git add -A` then `git commit -m "message"`
-- [ ] Handle case where there are no changes to commit
-- [ ] Return success/failure result
+- [x] Create `GitService` class
+- [x] Implement `commitAll(message:in:)` that stages and commits all changes
+- [x] Run `git add -A` then `git commit -m "message"`
+- [x] Handle case where there are no changes to commit
+- [x] Return success/failure result
 
 **File:** `ClaudeManager/Services/GitService.swift`
 
 ---
 
-## Task 11: Implement Execution Context
+## Task 11: Implement Execution Context ✅
 
 **Description:** Observable state container for current execution.
 
 **Acceptance Criteria:**
-- [ ] Create `ExecutionContext` class with @Observable macro
-- [ ] Add properties: projectPath, featureDescription, plan, currentTaskIndex, phase, sessionId, logs, pendingQuestion, totalCost, startTime, errors
-- [ ] Add computed `currentTask` property
-- [ ] Add computed `progress` property (0.0 to 1.0)
-- [ ] Create `PendingQuestion` struct for user input requests
-- [ ] Create `ExecutionError` struct for error tracking
+- [x] Create `ExecutionContext` class with @Observable macro
+- [x] Add properties: projectPath, featureDescription, plan, currentTaskIndex, phase, sessionId, logs, pendingQuestion, totalCost, startTime, errors
+- [x] Add computed `currentTask` property
+- [x] Add computed `progress` property (0.0 to 1.0)
+- [x] Create `PendingQuestion` struct for user input requests
+- [x] Create `ExecutionError` struct for error tracking
 
 **File:** `ClaudeManager/State/ExecutionContext.swift`
 
 ---
 
-## Task 12: Implement Execution State Machine - Core Structure
+## Task 12: Implement Execution State Machine - Core Structure ✅
 
 **Description:** Create the state machine class with control methods.
 
 **Acceptance Criteria:**
-- [ ] Create `ExecutionStateMachine` class with context, services as dependencies
-- [ ] Add private state: currentProcess, isPaused, shouldStop
-- [ ] Implement `start()` async method that begins the loop
-- [ ] Implement `pause()` method
-- [ ] Implement `resume()` async method
-- [ ] Implement `stop()` method that terminates current process
-- [ ] Implement `answerQuestion(_:)` async method
+- [x] Create `ExecutionStateMachine` class with context, services as dependencies
+- [x] Add private state: currentProcess, isPaused, shouldStop
+- [x] Implement `start()` async method that begins the loop
+- [x] Implement `pause()` method
+- [x] Implement `resume()` async method
+- [x] Implement `stop()` method that terminates current process
+- [x] Implement `answerQuestion(_:)` async method
 
 **File:** `ClaudeManager/State/ExecutionStateMachine.swift`
 
 ---
 
-## Task 13: Implement Execution State Machine - Main Loop
+## Task 13: Implement Execution State Machine - Main Loop ✅
 
 **Description:** Implement the main execution loop and phase transitions.
 
 **Acceptance Criteria:**
-- [ ] Implement `runLoop()` that executes phases until terminal state
-- [ ] Implement `executeCurrentPhase()` with switch over all phases
-- [ ] Implement `transitionToNextPhase()` with correct phase flow
-- [ ] Add `shouldWriteTests()` heuristic (skip for UI-related tasks)
-- [ ] Add `advanceToNextTask()` to move to next task or complete
+- [x] Implement `runLoop()` that executes phases until terminal state
+- [x] Implement `executeCurrentPhase()` with switch over all phases
+- [x] Implement `transitionToNextPhase()` with correct phase flow
+- [x] Add `shouldWriteTests()` heuristic (skip for UI-related tasks)
+- [x] Add `advanceToNextTask()` to move to next task or complete
 
 **File:** `ClaudeManager/State/ExecutionStateMachine.swift`
 
 ---
 
-## Task 14: Implement Execution State Machine - Phase Handlers
+## Task 14: Implement Execution State Machine - Phase Handlers ✅
 
 **Description:** Implement individual phase execution methods.
 
 **Acceptance Criteria:**
-- [ ] Implement `generateInitialPlan()` - run Claude in plan mode with feature description
-- [ ] Implement `rewritePlanToFormat()` - have Claude rewrite plan with discrete tasks
-- [ ] Implement `executeCurrentTask()` - run Claude to implement current task
-- [ ] Implement `runCodeReview()` - run Claude to review and fix code
-- [ ] Implement `writeTestsIfNeeded()` - run Claude to write tests for core logic
-- [ ] Implement `commitChanges(message:)` - call git service
-- [ ] Implement `clearContext()` - reset session for next task
+- [x] Implement `generateInitialPlan()` - run Claude in plan mode with feature description
+- [x] Implement `rewritePlanToFormat()` - have Claude rewrite plan with discrete tasks
+- [x] Implement `executeCurrentTask()` - run Claude to implement current task
+- [x] Implement `runCodeReview()` - run Claude to review and fix code
+- [x] Implement `writeTestsIfNeeded()` - run Claude to write tests for core logic
+- [x] Implement `commitChanges(message:)` - call git service
+- [x] Implement `clearContext()` - reset session for next task
 
 **File:** `ClaudeManager/State/ExecutionStateMachine.swift`
 
 ---
 
-## Task 15: Implement Execution State Machine - Message Handling
+## Task 15: Implement Execution State Machine - Message Handling ✅
 
 **Description:** Handle incoming Claude messages and detect user questions.
 
 **Acceptance Criteria:**
-- [ ] Implement `handleMessage(_:)` async method
-- [ ] Log text content to context.logs
-- [ ] Log tool uses to context.logs
-- [ ] Detect AskUserQuestion tool calls and extract questions
-- [ ] Implement `handleUserQuestion(_:toolUseId:)` to pause and show UI
-- [ ] Track total cost from result messages
-- [ ] Implement `handleError(_:)` with error categorization
+- [x] Implement `handleMessage(_:)` async method
+- [x] Log text content to context.logs
+- [x] Log tool uses to context.logs
+- [x] Detect AskUserQuestion tool calls and extract questions
+- [x] Implement `handleUserQuestion(_:toolUseId:)` to pause and show UI
+- [x] Track total cost from result messages
+- [x] Implement `handleError(_:)` with error categorization
 
 **File:** `ClaudeManager/State/ExecutionStateMachine.swift`
 
 ---
 
-## Task 16: Implement App State
+## Task 16: Implement App State ✅
 
 **Description:** Create global app state container.
 
 **Acceptance Criteria:**
-- [ ] Create `AppState` class with @Observable macro
-- [ ] Add context: ExecutionContext property
-- [ ] Add stateMachine: ExecutionStateMachine property
-- [ ] Initialize services and wire dependencies
+- [x] Create `AppState` class with @Observable macro
+- [x] Add context: ExecutionContext property
+- [x] Add stateMachine: ExecutionStateMachine property
+- [x] Initialize services and wire dependencies
 
 **File:** `ClaudeManager/State/AppState.swift`
 
 ---
 
-## Task 17: Implement Setup View
+## Task 17: Implement Setup View ✅
 
 **Description:** Initial view for project selection and feature input.
 
 **Acceptance Criteria:**
-- [ ] Create `SetupView` with @Environment access to AppState
-- [ ] Add directory picker using NSOpenPanel
-- [ ] Add TextEditor for feature description
-- [ ] Add "Start Development Loop" button
-- [ ] Disable button until project selected and description entered
-- [ ] Call stateMachine.start() on button press
+- [x] Create `SetupView` with @Environment access to AppState
+- [x] Add directory picker using NSOpenPanel
+- [x] Add TextEditor for feature description
+- [x] Add "Start Development Loop" button
+- [x] Disable button until project selected and description entered
+- [x] Call stateMachine.start() on button press
 
 **File:** `ClaudeManager/Views/SetupView.swift`
 
 ---
 
-## Task 18: Implement Phase Indicator View
+## Task 18: Implement Phase Indicator View ✅
 
 **Description:** Visual indicator showing current execution phase.
 
 **Acceptance Criteria:**
-- [ ] Create `PhaseIndicatorView` taking ExecutionPhase
-- [ ] Show colored status dot (gray=idle, blue=working, yellow=waiting, green=done, red=failed)
-- [ ] Show phase name as headline
-- [ ] Show phase description as caption
-- [ ] Add pulsing animation for active phases
+- [x] Create `PhaseIndicatorView` taking ExecutionPhase
+- [x] Show colored status dot (gray=idle, blue=working, yellow=waiting, green=done, red=failed)
+- [x] Show phase name as headline
+- [x] Show phase description as caption
+- [x] Add pulsing animation for active phases
 
 **File:** `ClaudeManager/Views/PhaseIndicatorView.swift`
 
 ---
 
-## Task 19: Implement Task List View
+## Task 19: Implement Task List View ✅
 
 **Description:** View showing all tasks with completion status.
 
 **Acceptance Criteria:**
-- [ ] Create `TaskListView` taking array of PlanTask
-- [ ] Create `TaskRowView` for individual task display
-- [ ] Show task number and title
-- [ ] Show status icon: circle (pending), spinner (in progress), checkmark (completed), X (failed)
-- [ ] Dim completed tasks
-- [ ] Expand description for in-progress task
+- [x] Create `TaskListView` taking array of PlanTask
+- [x] Create `TaskRowView` for individual task display
+- [x] Show task number and title
+- [x] Show status icon: circle (pending), spinner (in progress), checkmark (completed), X (failed)
+- [x] Dim completed tasks
+- [x] Expand description for in-progress task
 
 **File:** `ClaudeManager/Views/TaskListView.swift`
 
