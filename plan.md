@@ -446,3 +446,23 @@ User describes feature → Claude generates plan → Plan rewritten to tasks →
 - Added keyboard shortcuts via `.commands` modifier in ClaudeManagerApp (Cmd+P pause/resume, Cmd+. stop)
 - Added `.confirmationDialog()` for stop confirmation with destructive action
 - Generated SF Symbol-based app icon (terminal + gear motif) at all required macOS sizes
+
+---
+
+## Task 28: Support Existing plan.md Files
+
+**Description:** Detect existing plan.md when a folder is selected and allow resuming from it instead of requiring a new feature description.
+
+**Acceptance Criteria:**
+- [ ] Add `existingPlan: Plan?` property to ExecutionContext
+- [ ] Add `checkForExistingPlan()` method to SetupView that loads plan.md if it exists
+- [ ] Call `checkForExistingPlan()` after folder selection and on appear
+- [ ] Add `existingPlanSection` UI showing task count with "Resume Plan" / "Start Fresh" buttons
+- [ ] Update `canStart` to allow starting when existingPlan is set (no feature description required)
+- [ ] Add `startWithExistingPlan()` to ExecutionStateMachine that skips plan generation
+- [ ] Add `findFirstPendingTask(in:)` helper to resume from first incomplete task
+
+**Files:**
+- `ClaudeManager/State/ExecutionContext.swift`
+- `ClaudeManager/Views/SetupView.swift`
+- `ClaudeManager/State/ExecutionStateMachine.swift`
