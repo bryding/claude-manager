@@ -11,9 +11,16 @@ enum PlanServiceError: Error {
 
 final class PlanService: Sendable {
 
+    // Format 1: ## Task 1: Task Title
     private static let taskPattern = /## Task (\d+): (.+)/
     private static let descriptionPattern = /\*\*Description:\*\*\s*(.+)/
     private static let subtaskPattern = /- \[[ xX]?\] (.+)/
+
+    // Format 2: - [x] **Task 1.1**: Task description (checkbox-style)
+    private static let checkboxTaskPattern = /- \[([xX ])\] \*\*Task ([\d.]+)\*\*:\s*(.+)/
+
+    // Format 3: - [x] ~~**Task 2.1**: Task description~~ - SKIPPED
+    private static let skippedTaskPattern = /- \[[xX]\] ~~\*\*Task ([\d.]+)\*\*:\s*(.+)~~ - SKIPPED/
 
     func parsePlanFromFile(at url: URL) throws -> Plan {
         let text: String
@@ -32,6 +39,7 @@ final class PlanService: Sendable {
         var currentTitle: String?
         var currentDescription: String?
         var currentSubtasks: [String] = []
+        var currentStatus: TaskStatus = .pending
 
         func saveCurrentTask() {
             if let number = currentTaskNumber, let title = currentTitle {
@@ -39,7 +47,7 @@ final class PlanService: Sendable {
                     number: number,
                     title: title,
                     description: currentDescription ?? "",
-                    status: .pending,
+                    status: currentStatus,
                     subtasks: currentSubtasks
                 )
                 tasks.append(task)
@@ -47,6 +55,7 @@ final class PlanService: Sendable {
         }
 
         for line in lines {
+            // Format 1: ## Task 1: Task Title
             if let match = line.wholeMatch(of: Self.taskPattern) {
                 saveCurrentTask()
 
@@ -54,6 +63,38 @@ final class PlanService: Sendable {
                 currentTitle = String(match.2)
                 currentDescription = nil
                 currentSubtasks = []
+                currentStatus = .pending
+            }
+            // Format 3: - [x] ~~**Task 2.1**: ...~~ - SKIPPED (check before format 2)
+            else if let match = line.wholeMatch(of: Self.skippedTaskPattern) {
+                saveCurrentTask()
+
+                let taskId = String(match.1)
+                let description = String(match.2)
+                let taskNumber = Int(taskId.split(separator: ".").first ?? "") ?? tasks.count + 1
+
+                currentTaskNumber = taskNumber
+                currentTitle = description
+                currentDescription = nil
+                currentSubtasks = []
+                currentStatus = .skipped
+            }
+            // Format 2: - [x] **Task 1.1**: Task description
+            else if let match = line.wholeMatch(of: Self.checkboxTaskPattern) {
+                saveCurrentTask()
+
+                let checkbox = String(match.1)
+                let taskId = String(match.2)
+                let description = String(match.3)
+
+                // Extract task number (use first part before decimal, or parse as-is)
+                let taskNumber = Int(taskId.split(separator: ".").first ?? "") ?? tasks.count + 1
+
+                currentTaskNumber = taskNumber
+                currentTitle = description
+                currentDescription = nil
+                currentSubtasks = []
+                currentStatus = (checkbox == "x" || checkbox == "X") ? .completed : .pending
             } else if let match = line.wholeMatch(of: Self.descriptionPattern) {
                 currentDescription = String(match.1)
             } else if let match = line.wholeMatch(of: Self.subtaskPattern) {

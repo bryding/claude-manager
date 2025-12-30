@@ -150,6 +150,80 @@ final class PlanServiceTests: XCTestCase {
         XCTAssertEqual(plan.rawText, text)
     }
 
+    // MARK: - Checkbox Task Format (Alternative Format)
+
+    func testParseCheckboxTaskFormat() {
+        let text = """
+        - [ ] **Task 1.1**: Implement the feature
+        - [x] **Task 1.2**: Complete the setup
+        - [ ] **Task 2.1**: Another pending task
+        """
+
+        let plan = service.parsePlanFromText(text)
+
+        XCTAssertEqual(plan.tasks.count, 3)
+
+        XCTAssertEqual(plan.tasks[0].number, 1)
+        XCTAssertEqual(plan.tasks[0].title, "Implement the feature")
+        XCTAssertEqual(plan.tasks[0].status, .pending)
+
+        XCTAssertEqual(plan.tasks[1].number, 1)
+        XCTAssertEqual(plan.tasks[1].title, "Complete the setup")
+        XCTAssertEqual(plan.tasks[1].status, .completed)
+
+        XCTAssertEqual(plan.tasks[2].number, 2)
+        XCTAssertEqual(plan.tasks[2].title, "Another pending task")
+        XCTAssertEqual(plan.tasks[2].status, .pending)
+    }
+
+    func testParseSkippedTaskFormat() {
+        let text = """
+        - [x] ~~**Task 2.1**: Migration utility~~ - SKIPPED
+        - [ ] **Task 3.1**: Next task
+        """
+
+        let plan = service.parsePlanFromText(text)
+
+        XCTAssertEqual(plan.tasks.count, 2)
+
+        XCTAssertEqual(plan.tasks[0].number, 2)
+        XCTAssertEqual(plan.tasks[0].title, "Migration utility")
+        XCTAssertEqual(plan.tasks[0].status, .skipped)
+
+        XCTAssertEqual(plan.tasks[1].number, 3)
+        XCTAssertEqual(plan.tasks[1].status, .pending)
+    }
+
+    func testParseMixedFormats() {
+        let text = """
+        ## Task 1: Standard format task
+
+        **Description:** Using the standard format.
+
+        - [ ] Subtask one
+
+        - [x] **Task 2.1**: Checkbox format completed
+        - [ ] **Task 2.2**: Checkbox format pending
+        """
+
+        let plan = service.parsePlanFromText(text)
+
+        XCTAssertEqual(plan.tasks.count, 3)
+
+        XCTAssertEqual(plan.tasks[0].number, 1)
+        XCTAssertEqual(plan.tasks[0].title, "Standard format task")
+        XCTAssertEqual(plan.tasks[0].status, .pending)
+        XCTAssertEqual(plan.tasks[0].subtasks.count, 1)
+
+        XCTAssertEqual(plan.tasks[1].number, 2)
+        XCTAssertEqual(plan.tasks[1].title, "Checkbox format completed")
+        XCTAssertEqual(plan.tasks[1].status, .completed)
+
+        XCTAssertEqual(plan.tasks[2].number, 2)
+        XCTAssertEqual(plan.tasks[2].title, "Checkbox format pending")
+        XCTAssertEqual(plan.tasks[2].status, .pending)
+    }
+
     // MARK: - File Operations
 
     func testParsePlanFromNonexistentFile() {
