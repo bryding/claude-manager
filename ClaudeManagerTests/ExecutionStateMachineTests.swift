@@ -772,4 +772,145 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertEqual(context.phase, .failed)
         XCTAssertEqual(context.plan?.tasks[0].status, .failed)
     }
+
+    // MARK: - Autonomous Failure Handling Tests
+
+    func testAutonomousRetryWhenUnderMaxRetries() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        userPreferences.autonomousConfig = AutonomousConfiguration(
+            autoFailureHandling: .retryThenSkip,
+            maxTaskRetries: 3
+        )
+        context.retryConfiguration = RetryConfiguration(
+            maxAttempts: 1,
+            initialDelay: 0.01,
+            backoffMultiplier: 1.0,
+            maxDelay: 0.01
+        )
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .pending, subtasks: [])
+        ])
+        // Fail twice, then succeed - autonomous retry should handle this
+        mockClaudeService.failuresBeforeSuccess = 2
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Auto-retrying task") })
+    }
+
+    func testAutonomousRetryThenSkipWhenMaxRetriesExceeded() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        userPreferences.autonomousConfig = AutonomousConfiguration(
+            autoFailureHandling: .retryThenSkip,
+            maxTaskRetries: 2
+        )
+        context.retryConfiguration = RetryConfiguration(
+            maxAttempts: 1,
+            initialDelay: 0.01,
+            backoffMultiplier: 1.0,
+            maxDelay: 0.01
+        )
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Failing Task", description: "Will fail", status: .pending, subtasks: []),
+            PlanTask(id: UUID(), number: 2, title: "Next Task", description: "Should run after skip", status: .pending, subtasks: [])
+        ])
+        // Fail more than maxTaskRetries
+        mockClaudeService.failuresBeforeSuccess = 10
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertEqual(context.plan?.tasks[0].status, .skipped)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Max retries exceeded, skipping task") })
+    }
+
+    func testAutonomousRetryThenStopWhenMaxRetriesExceeded() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        userPreferences.autonomousConfig = AutonomousConfiguration(
+            autoFailureHandling: .retryThenStop,
+            maxTaskRetries: 2
+        )
+        context.retryConfiguration = RetryConfiguration(
+            maxAttempts: 1,
+            initialDelay: 0.01,
+            backoffMultiplier: 1.0,
+            maxDelay: 0.01
+        )
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Failing Task", description: "Will fail", status: .pending, subtasks: [])
+        ])
+        mockClaudeService.failuresBeforeSuccess = 10
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertEqual(context.phase, .failed)
+        XCTAssertEqual(context.plan?.tasks[0].status, .failed)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Max retries exceeded, stopping execution") })
+    }
+
+    func testAutonomousPauseForUserStillPausesOnFailure() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        userPreferences.autonomousConfig = AutonomousConfiguration(
+            autoFailureHandling: .pauseForUser,
+            maxTaskRetries: 3
+        )
+        context.retryConfiguration = RetryConfiguration(
+            maxAttempts: 1,
+            initialDelay: 0.01,
+            backoffMultiplier: 1.0,
+            maxDelay: 0.01
+        )
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Failing Task", description: "Will fail", status: .pending, subtasks: [])
+        ])
+        mockClaudeService.failuresBeforeSuccess = 10
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertNotNil(context.pendingTaskFailure)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Waiting for user input on task failure") })
+    }
+
+    func testTaskFailureCountResetsOnSuccess() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        userPreferences.autonomousConfig = AutonomousConfiguration(
+            autoFailureHandling: .retryThenSkip,
+            maxTaskRetries: 5
+        )
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .pending, subtasks: [])
+        ])
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertEqual(context.taskFailureCount, 0)
+    }
+
+    func testTaskFailureCountIncrementsOnEachFailure() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        userPreferences.autonomousConfig = AutonomousConfiguration(
+            autoFailureHandling: .retryThenSkip,
+            maxTaskRetries: 3
+        )
+        context.retryConfiguration = RetryConfiguration(
+            maxAttempts: 1,
+            initialDelay: 0.01,
+            backoffMultiplier: 1.0,
+            maxDelay: 0.01
+        )
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Failing Task", description: "Will fail", status: .pending, subtasks: []),
+            PlanTask(id: UUID(), number: 2, title: "Next Task", description: "Runs after skip", status: .pending, subtasks: [])
+        ])
+        mockClaudeService.failuresBeforeSuccess = 10
+
+        try await stateMachine.startWithExistingPlan()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Task failure 1/3") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Task failure 2/3") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Task failure 3/3") })
+    }
 }

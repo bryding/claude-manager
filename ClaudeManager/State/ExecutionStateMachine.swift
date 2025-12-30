@@ -197,7 +197,9 @@ final class ExecutionStateMachine {
         context.autonomousConfig = userPreferences.autonomousConfig
     }
 
-    private func handlePhaseError(_ error: Error) {
+    /// Handles phase errors with autonomous failure handling support.
+    /// Returns true if the loop should continue (retry or skip), false if it should exit.
+    private func handlePhaseError(_ error: Error) -> Bool {
         context.addError(
             message: "Execution failed during \(context.phase.rawValue)",
             underlyingError: error.localizedDescription,
@@ -218,7 +220,7 @@ final class ExecutionStateMachine {
                     context.addLog(type: .info, message: "Auto-retrying task...")
                     context.resetRetryAttempt()
                     context.phase = .executingTask
-                    return
+                    return true
                 }
 
                 // Max retries exceeded - handle based on mode
@@ -228,12 +230,12 @@ final class ExecutionStateMachine {
                     context.updateTaskStatus(.skipped)
                     context.taskFailureCount = 0
                     context.phase = .clearingContext
-                    return
+                    return true
                 case .retryThenStop:
                     context.addLog(type: .error, message: "Max retries exceeded, stopping execution")
                     markCurrentTaskFailed()
                     context.phase = .failed
-                    return
+                    return false
                 case .pauseForUser:
                     break
                 }
@@ -247,9 +249,11 @@ final class ExecutionStateMachine {
             )
             context.phase = .waitingForUser
             context.addLog(type: .info, message: "Waiting for user input on task failure")
+            return false
         } else {
             markCurrentTaskFailed()
             context.phase = .failed
+            return false
         }
     }
 
@@ -272,8 +276,11 @@ final class ExecutionStateMachine {
                     context.phase = .handlingContextExhaustion
                     continue
                 }
-                handlePhaseError(error)
-                return
+                let shouldContinue = handlePhaseError(error)
+                if !shouldContinue {
+                    return
+                }
+                continue
             }
 
             if !shouldStop && !isPaused && context.phase != .waitingForUser && !context.phase.isTerminal {
