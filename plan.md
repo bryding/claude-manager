@@ -78,12 +78,12 @@ Make the orchestrator run with full control like a human developer sitting there
   - runTests(in: URL, config: ProjectConfiguration) -> TestResult
   - BuildResult/TestResult structs with success, output, errorOutput, duration
 
-- [ ] **Task 4.3**: Add build/test state to ExecutionContext
+- [x] **Task 4.3**: Add build/test state to ExecutionContext
   - File: `ClaudeManager/State/ExecutionContext.swift`
   - Add: projectConfiguration, buildAttempts, testAttempts, lastBuildResult, lastTestResult
   - Add maxBuildFixAttempts, maxTestFixAttempts constants
 
-- [ ] **Task 4.4**: Wire BuildTestService in AppState
+- [x] **Task 4.4**: Wire BuildTestService in AppState
   - File: `ClaudeManager/State/AppState.swift`
   - Add buildTestService property
   - Pass to ExecutionStateMachine

@@ -11,6 +11,9 @@
 		A9000002210000010000000F /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9000002110000010000000F /* UserPreferences.swift */; };
 		AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001110000010000000F /* AutonomousConfiguration.swift */; };
 		AA000002210000010000000F /* ProjectConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002110000010000000F /* ProjectConfiguration.swift */; };
+		AB000001210000010000000F /* CommandResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000001110000010000000F /* CommandResult.swift */; };
+		AC000001210000010000000F /* BuildTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000001110000010000000F /* BuildTestService.swift */; };
+		AC000002210000010000000F /* BuildTestServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000002110000010000000F /* BuildTestServiceProtocol.swift */; };
 		A1000001210000010000000F /* ClaudeManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001110000010000000F /* ClaudeManagerApp.swift */; };
 		A1000002210000010000000F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002110000010000000F /* ContentView.swift */; };
 		A1000003210000010000000F /* ClaudeStreamMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000003210000010000000A /* ClaudeStreamMessage.swift */; };
@@ -60,6 +63,9 @@
 		A9000002110000010000000F /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
 		AA000001110000010000000F /* AutonomousConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomousConfiguration.swift; sourceTree = "<group>"; };
 		AA000002110000010000000F /* ProjectConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfiguration.swift; sourceTree = "<group>"; };
+		AB000001110000010000000F /* CommandResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandResult.swift; sourceTree = "<group>"; };
+		AC000001110000010000000F /* BuildTestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildTestService.swift; sourceTree = "<group>"; };
+		AC000002110000010000000F /* BuildTestServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildTestServiceProtocol.swift; sourceTree = "<group>"; };
 		A1000000010000010000000F /* ClaudeManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000001110000010000000F /* ClaudeManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeManagerApp.swift; sourceTree = "<group>"; };
 		A1000002110000010000000F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -158,6 +164,7 @@
 				A8000001110000010000000F /* TimeoutConfiguration.swift */,
 				AA000001110000010000000F /* AutonomousConfiguration.swift */,
 				AA000002110000010000000F /* ProjectConfiguration.swift */,
+				AB000001110000010000000F /* CommandResult.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -171,6 +178,7 @@
 				A1000009110000010000000F /* ClaudeCLIService.swift */,
 				A100000A110000010000000F /* PlanService.swift */,
 				A100000E110000010000000F /* GitService.swift */,
+				AC000001110000010000000F /* BuildTestService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -180,6 +188,7 @@
 			children = (
 				A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */,
 				A4000002110000010000000F /* GitServiceProtocol.swift */,
+				AC000002110000010000000F /* BuildTestServiceProtocol.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -356,9 +365,12 @@
 				A8000002210000010000000F /* TaskFailureView.swift in Sources */,
 				A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */,
 				A4000002210000010000000F /* GitServiceProtocol.swift in Sources */,
+				AC000001210000010000000F /* BuildTestService.swift in Sources */,
+				AC000002210000010000000F /* BuildTestServiceProtocol.swift in Sources */,
 				A9000002210000010000000F /* UserPreferences.swift in Sources */,
 				AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */,
 				AA000002210000010000000F /* ProjectConfiguration.swift in Sources */,
+				AB000001210000010000000F /* CommandResult.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

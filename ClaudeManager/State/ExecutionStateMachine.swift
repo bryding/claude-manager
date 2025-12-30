@@ -38,6 +38,7 @@ final class ExecutionStateMachine {
     let claudeService: any ClaudeCLIServiceProtocol
     let planService: PlanService
     let gitService: any GitServiceProtocol
+    let buildTestService: any BuildTestServiceProtocol
     let userPreferences: UserPreferences
 
     // MARK: - Private State
@@ -54,12 +55,14 @@ final class ExecutionStateMachine {
         claudeService: any ClaudeCLIServiceProtocol,
         planService: PlanService,
         gitService: any GitServiceProtocol,
+        buildTestService: any BuildTestServiceProtocol,
         userPreferences: UserPreferences
     ) {
         self.context = context
         self.claudeService = claudeService
         self.planService = planService
         self.gitService = gitService
+        self.buildTestService = buildTestService
         self.userPreferences = userPreferences
     }
 

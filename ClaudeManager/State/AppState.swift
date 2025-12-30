@@ -16,6 +16,7 @@ final class AppState {
         claudeService: (any ClaudeCLIServiceProtocol)? = nil,
         planService: PlanService? = nil,
         gitService: (any GitServiceProtocol)? = nil,
+        buildTestService: (any BuildTestServiceProtocol)? = nil,
         userPreferences: UserPreferences? = nil
     ) {
         let resolvedContext = context ?? ExecutionContext()
@@ -26,6 +27,7 @@ final class AppState {
             claudeService: claudeService ?? ClaudeCLIService(),
             planService: planService ?? PlanService(),
             gitService: gitService ?? GitService(),
+            buildTestService: buildTestService ?? BuildTestService(),
             userPreferences: self.userPreferences
         )
     }

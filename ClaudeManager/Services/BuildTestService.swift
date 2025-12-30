@@ -1,18 +1,5 @@
 import Foundation
 
-// MARK: - Result Types
-
-struct CommandResult: Sendable, Equatable {
-    let success: Bool
-    let output: String
-    let errorOutput: String?
-    let exitCode: Int32
-    let duration: TimeInterval
-}
-
-typealias BuildResult = CommandResult
-typealias TestResult = CommandResult
-
 // MARK: - Error Type
 
 enum BuildTestServiceError: Error, LocalizedError {

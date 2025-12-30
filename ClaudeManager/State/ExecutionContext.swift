@@ -142,9 +142,22 @@ final class ExecutionContext {
 
     var timeoutConfiguration: TimeoutConfiguration = .default
 
+    // MARK: - Build/Test Constants
+
+    static let maxBuildFixAttempts: Int = 3
+    static let maxTestFixAttempts: Int = 3
+
     // MARK: - Task Failure State
 
     var pendingTaskFailure: PendingTaskFailure?
+
+    // MARK: - Build/Test State
+
+    var projectConfiguration: ProjectConfiguration = .default
+    var buildAttempts: Int = 0
+    var testAttempts: Int = 0
+    var lastBuildResult: CommandResult?
+    var lastTestResult: CommandResult?
 
     // MARK: - UI State
 
@@ -249,6 +262,11 @@ final class ExecutionContext {
         taskFailureCount = 0
         pendingTaskFailure = nil
         showStopConfirmation = false
+        projectConfiguration = .default
+        buildAttempts = 0
+        testAttempts = 0
+        lastBuildResult = nil
+        lastTestResult = nil
     }
 
     func resetRetryAttempt() {
@@ -257,6 +275,14 @@ final class ExecutionContext {
 
     func resetTaskFailureCount() {
         taskFailureCount = 0
+    }
+
+    func resetBuildAttempts() {
+        buildAttempts = 0
+    }
+
+    func resetTestAttempts() {
+        testAttempts = 0
     }
 
     func addLog(_ entry: LogEntry) {
