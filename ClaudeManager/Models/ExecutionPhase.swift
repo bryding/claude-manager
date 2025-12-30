@@ -12,6 +12,10 @@ enum ExecutionPhase: String, Sendable, Equatable {
     case committingReview
     case writingTests
     case committingTests
+    case runningBuild
+    case runningTests
+    case fixingBuildErrors
+    case fixingTestErrors
     case clearingContext
     case handlingContextExhaustion
     case waitingForUser
@@ -27,9 +31,9 @@ extension ExecutionPhase {
         switch self {
         case .generatingInitialPlan, .rewritingPlan, .reviewingCode, .writingTests:
             return "plan"
-        case .executingTask, .committingImplementation, .committingReview, .committingTests, .clearingContext, .handlingContextExhaustion:
+        case .executingTask, .committingImplementation, .committingReview, .committingTests, .clearingContext, .handlingContextExhaustion, .fixingBuildErrors, .fixingTestErrors:
             return "acceptEdits"
-        case .idle, .waitingForUser, .paused, .completed, .failed:
+        case .idle, .waitingForUser, .paused, .completed, .failed, .runningBuild, .runningTests:
             return nil
         }
     }
@@ -55,6 +59,10 @@ extension ExecutionPhase {
             return 0.3
         case .committingImplementation:
             return 0.5
+        case .runningBuild:
+            return 0.52
+        case .fixingBuildErrors:
+            return 0.54
         case .reviewingCode:
             return 0.6
         case .committingReview:
@@ -63,6 +71,10 @@ extension ExecutionPhase {
             return 0.8
         case .committingTests:
             return 0.85
+        case .runningTests:
+            return 0.88
+        case .fixingTestErrors:
+            return 0.90
         case .clearingContext:
             return 0.95
         case .handlingContextExhaustion:
@@ -92,6 +104,14 @@ extension ExecutionPhase {
             return "Writing Tests"
         case .committingTests:
             return "Committing Tests"
+        case .runningBuild:
+            return "Running Build"
+        case .runningTests:
+            return "Running Tests"
+        case .fixingBuildErrors:
+            return "Fixing Build Errors"
+        case .fixingTestErrors:
+            return "Fixing Test Errors"
         case .clearingContext:
             return "Clearing Context"
         case .handlingContextExhaustion:
@@ -127,6 +147,14 @@ extension ExecutionPhase {
             return "Creating tests for core logic"
         case .committingTests:
             return "Saving tests to git"
+        case .runningBuild:
+            return "Building the project to verify compilation"
+        case .runningTests:
+            return "Running tests to verify functionality"
+        case .fixingBuildErrors:
+            return "Claude is fixing compilation errors"
+        case .fixingTestErrors:
+            return "Claude is fixing failing tests"
         case .clearingContext:
             return "Preparing for the next task"
         case .handlingContextExhaustion:

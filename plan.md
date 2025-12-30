@@ -66,7 +66,7 @@ Make the orchestrator run with full control like a human developer sitting there
 
 ### Phase 4: Build/Test Integration
 
-- [ ] **Task 4.1**: Add new execution phases
+- [x] **Task 4.1**: Add new execution phases
   - File: `ClaudeManager/Models/ExecutionPhase.swift`
   - Add: runningBuild, runningTests, fixingBuildErrors, fixingTestErrors
   - Add display names and progress weights

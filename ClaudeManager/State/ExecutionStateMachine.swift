@@ -339,6 +339,9 @@ final class ExecutionStateMachine {
         case .handlingContextExhaustion:
             try await handleContextExhaustion()
 
+        case .runningBuild, .runningTests, .fixingBuildErrors, .fixingTestErrors:
+            break
+
         case .waitingForUser, .paused, .completed, .failed:
             break
         }
@@ -397,6 +400,9 @@ final class ExecutionStateMachine {
 
         case .handlingContextExhaustion:
             context.phase = .executingTask
+
+        case .runningBuild, .runningTests, .fixingBuildErrors, .fixingTestErrors:
+            break
 
         case .waitingForUser, .paused, .completed, .failed:
             break
