@@ -38,6 +38,7 @@ final class ExecutionStateMachine {
     let claudeService: any ClaudeCLIServiceProtocol
     let planService: PlanService
     let gitService: any GitServiceProtocol
+    let userPreferences: UserPreferences
 
     // MARK: - Private State
 
@@ -51,12 +52,14 @@ final class ExecutionStateMachine {
         context: ExecutionContext,
         claudeService: any ClaudeCLIServiceProtocol,
         planService: PlanService,
-        gitService: any GitServiceProtocol
+        gitService: any GitServiceProtocol,
+        userPreferences: UserPreferences
     ) {
         self.context = context
         self.claudeService = claudeService
         self.planService = planService
         self.gitService = gitService
+        self.userPreferences = userPreferences
     }
 
     // MARK: - Control Methods
@@ -969,5 +972,112 @@ final class ExecutionStateMachine {
             filesModified: response.filesModified,
             pendingWork: response.pendingWork
         )
+    }
+
+    // MARK: - Smart Auto-Answer
+
+    private func generateSmartAnswer(for pendingQuestion: PendingQuestion) async throws -> String {
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        let question = pendingQuestion.question
+        let config = userPreferences.autonomousConfig
+
+        let optionsList = question.options.enumerated().map { index, opt in
+            "\(index + 1). \(opt.label) - \(opt.description)"
+        }.joined(separator: "\n")
+
+        let taskContext = context.currentTask.map { task in
+            "Current Task: \(task.number) - \(task.title)\nDescription: \(task.description)"
+        } ?? "No current task"
+
+        let planOverview = context.plan.map { plan in
+            let taskList = plan.tasks.prefix(10).map { "\($0.number). \($0.title) [\($0.status.rawValue)]" }
+            return "Plan Tasks:\n" + taskList.joined(separator: "\n")
+        } ?? "No plan available"
+
+        let prompt = """
+            You are helping to automate a development workflow. Claude has asked a question during task execution and you need to choose the best answer.
+
+            ## Project Context
+            \(config.projectContext.isEmpty ? "No specific context provided" : config.projectContext)
+
+            ## Current State
+            \(taskContext)
+
+            \(planOverview)
+
+            ## Question from Claude
+            **\(question.header)**: \(question.question)
+
+            Options:
+            \(optionsList)
+
+            ## Instructions
+            Choose the option that best aligns with:
+            1. The project context and goals
+            2. Standard development best practices
+            3. The current task being executed
+
+            Respond with ONLY a JSON object in this format:
+            {"choice": "exact option label here", "reasoning": "brief explanation"}
+            """
+
+        context.addLog(type: .info, message: "Generating smart answer for: \(question.header)")
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: context.timeoutConfiguration.planModeTimeout,
+            onMessage: { _ in }
+        )
+
+        if result.isError {
+            context.addLog(type: .error, message: "Smart answer generation failed, using first option")
+            return question.options.first?.label ?? "Continue"
+        }
+
+        if let choice = parseSmartAnswerResponse(result.result, options: question.options) {
+            context.addLog(type: .info, message: "Smart answer selected: \(choice)")
+            return choice
+        }
+
+        let fallback = question.options.first?.label ?? "Continue"
+        context.addLog(type: .info, message: "Could not parse response, using fallback: \(fallback)")
+        return fallback
+    }
+
+    private func parseSmartAnswerResponse(_ response: String, options: [AskUserQuestionInput.Option]) -> String? {
+        var cleanedJSON = response
+
+        if let startRange = response.range(of: "{"),
+           let endRange = response.range(of: "}", options: .backwards) {
+            cleanedJSON = String(response[startRange.lowerBound...endRange.upperBound])
+        }
+
+        guard let data = cleanedJSON.data(using: .utf8) else { return nil }
+
+        struct SmartAnswerResponse: Decodable {
+            let choice: String
+            let reasoning: String?
+        }
+
+        guard let parsed = try? JSONDecoder().decode(SmartAnswerResponse.self, from: data) else {
+            return nil
+        }
+
+        let validLabels = options.map { $0.label }
+        if validLabels.contains(parsed.choice) {
+            return parsed.choice
+        }
+
+        if let match = validLabels.first(where: { $0.lowercased() == parsed.choice.lowercased() }) {
+            return match
+        }
+
+        return nil
     }
 }

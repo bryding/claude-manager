@@ -8,6 +8,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     private var mockClaudeService: MockClaudeCLIService!
     private var planService: PlanService!
     private var mockGitService: MockGitService!
+    private var userPreferences: UserPreferences!
     private var stateMachine: ExecutionStateMachine!
 
     override func setUp() async throws {
@@ -16,11 +17,13 @@ final class ExecutionStateMachineTests: XCTestCase {
         mockClaudeService = MockClaudeCLIService()
         planService = PlanService()
         mockGitService = MockGitService()
+        userPreferences = UserPreferences()
         stateMachine = ExecutionStateMachine(
             context: context,
             claudeService: mockClaudeService,
             planService: planService,
-            gitService: mockGitService
+            gitService: mockGitService,
+            userPreferences: userPreferences
         )
     }
 

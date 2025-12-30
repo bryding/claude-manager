@@ -25,7 +25,8 @@ final class AppState {
             context: resolvedContext,
             claudeService: claudeService ?? ClaudeCLIService(),
             planService: planService ?? PlanService(),
-            gitService: gitService ?? GitService()
+            gitService: gitService ?? GitService(),
+            userPreferences: self.userPreferences
         )
     }
 }
