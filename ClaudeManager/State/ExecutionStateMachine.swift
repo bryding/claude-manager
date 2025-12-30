@@ -45,6 +45,7 @@ final class ExecutionStateMachine {
     private var isPaused = false
     private var shouldStop = false
     private var phaseBeforePause: ExecutionPhase?
+    private var pendingAutoAnswerQuestion: PendingQuestion?
 
     // MARK: - Initialization
 
@@ -472,11 +473,17 @@ final class ExecutionStateMachine {
                     if toolUse.isAskUserQuestion {
                         if let input = toolUse.askUserQuestionInput,
                            let firstQuestion = input.questions.first {
-                            context.pendingQuestion = PendingQuestion(
+                            let pendingQuestion = PendingQuestion(
                                 toolUseId: toolUse.id,
                                 question: firstQuestion
                             )
-                            context.phase = .waitingForUser
+
+                            if userPreferences.autonomousConfig.autoAnswerEnabled {
+                                pendingAutoAnswerQuestion = pendingQuestion
+                            } else {
+                                context.pendingQuestion = pendingQuestion
+                                context.phase = .waitingForUser
+                            }
                         }
                     } else {
                         context.addLog(type: .toolUse, message: "Tool: \(toolUse.name)")
@@ -648,6 +655,10 @@ final class ExecutionStateMachine {
             }
         )
 
+        if try await processAutoAnswerIfNeeded() {
+            return
+        }
+
         if context.isHandoffInProgress {
             context.phase = .handlingContextExhaustion
             return
@@ -698,6 +709,10 @@ final class ExecutionStateMachine {
             }
         )
 
+        if try await processAutoAnswerIfNeeded() {
+            return
+        }
+
         if result.isError {
             context.addLog(type: .error, message: "Code review encountered an error")
         } else {
@@ -742,6 +757,10 @@ final class ExecutionStateMachine {
                 }
             }
         )
+
+        if try await processAutoAnswerIfNeeded() {
+            return
+        }
 
         if result.isError {
             context.addLog(type: .error, message: "Test writing encountered an error")
@@ -1079,5 +1098,56 @@ final class ExecutionStateMachine {
         }
 
         return nil
+    }
+
+    private func processAutoAnswerIfNeeded() async throws -> Bool {
+        guard let pendingQuestion = pendingAutoAnswerQuestion else {
+            return false
+        }
+
+        guard let projectPath = context.projectPath,
+              let sessionId = context.sessionId else {
+            context.pendingQuestion = pendingQuestion
+            context.phase = .waitingForUser
+            pendingAutoAnswerQuestion = nil
+            return true
+        }
+
+        pendingAutoAnswerQuestion = nil
+
+        do {
+            let answer = try await generateSmartAnswer(for: pendingQuestion)
+            context.addLog(type: .info, message: "Auto-answered '\(pendingQuestion.question.header)': \(answer)")
+
+            let result = try await claudeService.execute(
+                prompt: answer,
+                workingDirectory: projectPath,
+                permissionMode: .acceptEdits,
+                sessionId: sessionId,
+                timeout: context.timeoutConfiguration.executionTimeout,
+                onMessage: { [weak self] message in
+                    guard let self = self else { return }
+                    await MainActor.run {
+                        self.handleStreamMessage(message)
+                    }
+                }
+            )
+
+            if pendingAutoAnswerQuestion != nil {
+                return try await processAutoAnswerIfNeeded()
+            }
+
+            if result.isError {
+                throw ExecutionStateMachineError.executionFailed("auto-answer resume")
+            }
+
+            return false
+
+        } catch {
+            context.addLog(type: .error, message: "Auto-answer failed: \(error.localizedDescription)")
+            context.pendingQuestion = pendingQuestion
+            context.phase = .waitingForUser
+            return true
+        }
     }
 }

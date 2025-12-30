@@ -38,7 +38,7 @@ Make the orchestrator run with full control like a human developer sitting there
   - Include project context, current plan, current task in prompt
   - Return the chosen option label
 
-- [ ] **Task 2.2**: Update handleStreamMessage() for auto-answer
+- [x] **Task 2.2**: Update handleStreamMessage() for auto-answer
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - When AskUserQuestion detected and autoAnswerEnabled:
     - Call generateSmartAnswer() instead of pausing
