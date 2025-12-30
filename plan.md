@@ -24,7 +24,7 @@ Make the orchestrator run with full control like a human developer sitting there
   - Properties: projectType, buildCommand, testCommand
   - Enum: ProjectType (swift, xcode, typescript, javascript, python, rust, go, unknown)
 
-- [ ] **Task 1.3**: Add configuration persistence to UserPreferences
+- [x] **Task 1.3**: Add configuration persistence to UserPreferences
   - File: `ClaudeManager/State/UserPreferences.swift`
   - Add autonomousConfig property with UserDefaults storage
 

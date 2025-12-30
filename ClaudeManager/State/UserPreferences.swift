@@ -8,6 +8,7 @@ final class UserPreferences {
     private enum Keys {
         static let lastProjectPath = "lastProjectPath"
         static let recentProjects = "recentProjects"
+        static let autonomousConfig = "autonomousConfig"
     }
 
     static let maxRecentProjects = 10
@@ -39,6 +40,21 @@ final class UserPreferences {
         set {
             let paths = newValue.prefix(Self.maxRecentProjects).map { $0.path() }
             defaults.set(Array(paths), forKey: Keys.recentProjects)
+        }
+    }
+
+    var autonomousConfig: AutonomousConfiguration {
+        get {
+            guard let data = defaults.data(forKey: Keys.autonomousConfig),
+                  let config = try? JSONDecoder().decode(AutonomousConfiguration.self, from: data) else {
+                return .default
+            }
+            return config
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue) {
+                defaults.set(data, forKey: Keys.autonomousConfig)
+            }
         }
     }
 

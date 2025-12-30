@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		A9000001210000010000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A9000001110000010000000F /* Assets.xcassets */; };
 		A9000002210000010000000F /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9000002110000010000000F /* UserPreferences.swift */; };
+		AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001110000010000000F /* AutonomousConfiguration.swift */; };
+		AA000002210000010000000F /* ProjectConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002110000010000000F /* ProjectConfiguration.swift */; };
 		A1000001210000010000000F /* ClaudeManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001110000010000000F /* ClaudeManagerApp.swift */; };
 		A1000002210000010000000F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002110000010000000F /* ContentView.swift */; };
 		A1000003210000010000000F /* ClaudeStreamMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000003210000010000000A /* ClaudeStreamMessage.swift */; };
@@ -56,6 +58,8 @@
 /* Begin PBXFileReference section */
 		A9000001110000010000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A9000002110000010000000F /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
+		AA000001110000010000000F /* AutonomousConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomousConfiguration.swift; sourceTree = "<group>"; };
+		AA000002110000010000000F /* ProjectConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfiguration.swift; sourceTree = "<group>"; };
 		A1000000010000010000000F /* ClaudeManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000001110000010000000F /* ClaudeManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeManagerApp.swift; sourceTree = "<group>"; };
 		A1000002110000010000000F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -152,6 +156,8 @@
 				A7000001110000010000000F /* ContinuationSummary.swift */,
 				A7000002110000010000000F /* RetryConfiguration.swift */,
 				A8000001110000010000000F /* TimeoutConfiguration.swift */,
+				AA000001110000010000000F /* AutonomousConfiguration.swift */,
+				AA000002110000010000000F /* ProjectConfiguration.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -351,6 +357,8 @@
 				A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */,
 				A4000002210000010000000F /* GitServiceProtocol.swift in Sources */,
 				A9000002210000010000000F /* UserPreferences.swift in Sources */,
+				AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */,
+				AA000002210000010000000F /* ProjectConfiguration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
