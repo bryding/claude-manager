@@ -54,7 +54,7 @@ Make the orchestrator run with full control like a human developer sitting there
   - Add: taskFailureCount, autonomousConfig properties
   - Add reset in appropriate places
 
-- [ ] **Task 3.2**: Update handlePhaseError() for autonomous failure handling
+- [x] **Task 3.2**: Update handlePhaseError() for autonomous failure handling
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - If autoFailureHandling != pauseForUser:
     - Increment taskFailureCount

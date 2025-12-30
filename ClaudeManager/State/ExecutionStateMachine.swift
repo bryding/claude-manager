@@ -206,6 +206,40 @@ final class ExecutionStateMachine {
         context.addLog(type: .error, message: "Phase failed: \(error.localizedDescription)")
 
         if let task = context.currentTask, context.phase == .executingTask {
+            let config = context.autonomousConfig
+
+            // Check if autonomous failure handling is enabled
+            if config.autoFailureHandling != .pauseForUser {
+                context.taskFailureCount += 1
+                context.addLog(type: .info, message: "Task failure \(context.taskFailureCount)/\(config.maxTaskRetries)")
+
+                if context.taskFailureCount < config.maxTaskRetries {
+                    // Retry the task
+                    context.addLog(type: .info, message: "Auto-retrying task...")
+                    context.resetRetryAttempt()
+                    context.phase = .executingTask
+                    return
+                }
+
+                // Max retries exceeded - handle based on mode
+                switch config.autoFailureHandling {
+                case .retryThenSkip:
+                    context.addLog(type: .info, message: "Max retries exceeded, skipping task")
+                    context.updateTaskStatus(.skipped)
+                    context.taskFailureCount = 0
+                    context.phase = .clearingContext
+                    return
+                case .retryThenStop:
+                    context.addLog(type: .error, message: "Max retries exceeded, stopping execution")
+                    markCurrentTaskFailed()
+                    context.phase = .failed
+                    return
+                case .pauseForUser:
+                    break
+                }
+            }
+
+            // Default behavior: pause for user input
             context.pendingTaskFailure = PendingTaskFailure(
                 taskNumber: task.number,
                 taskTitle: task.title,
@@ -326,6 +360,7 @@ final class ExecutionStateMachine {
 
         case .executingTask:
             markCurrentTaskCompleted()
+            context.taskFailureCount = 0
             context.phase = .committingImplementation
 
         case .committingImplementation:
