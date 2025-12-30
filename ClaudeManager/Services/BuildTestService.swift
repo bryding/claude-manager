@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Result Types
 
-struct BuildResult: Sendable, Equatable {
+struct CommandResult: Sendable, Equatable {
     let success: Bool
     let output: String
     let errorOutput: String?
@@ -10,13 +10,8 @@ struct BuildResult: Sendable, Equatable {
     let duration: TimeInterval
 }
 
-struct TestResult: Sendable, Equatable {
-    let success: Bool
-    let output: String
-    let errorOutput: String?
-    let exitCode: Int32
-    let duration: TimeInterval
-}
+typealias BuildResult = CommandResult
+typealias TestResult = CommandResult
 
 // MARK: - Error Type
 
@@ -39,47 +34,40 @@ enum BuildTestServiceError: Error, LocalizedError {
 
 // MARK: - BuildTestService
 
-final class BuildTestService: @unchecked Sendable {
+final class BuildTestService: BuildTestServiceProtocol, @unchecked Sendable {
 
     // MARK: - Project Type Detection
 
     func detectProjectType(in directory: URL) -> ProjectType {
         let fileManager = FileManager.default
 
-        // Swift Package
         if fileManager.fileExists(atPath: directory.appendingPathComponent("Package.swift").path) {
             return .swift
         }
 
-        // Xcode Project
         if let contents = try? fileManager.contentsOfDirectory(atPath: directory.path),
            contents.contains(where: { $0.hasSuffix(".xcodeproj") }) {
             return .xcode
         }
 
-        // TypeScript (package.json + tsconfig.json)
         let hasPackageJson = fileManager.fileExists(atPath: directory.appendingPathComponent("package.json").path)
         let hasTsConfig = fileManager.fileExists(atPath: directory.appendingPathComponent("tsconfig.json").path)
         if hasPackageJson && hasTsConfig {
             return .typescript
         }
 
-        // JavaScript (package.json without tsconfig)
         if hasPackageJson {
             return .javascript
         }
 
-        // Rust
         if fileManager.fileExists(atPath: directory.appendingPathComponent("Cargo.toml").path) {
             return .rust
         }
 
-        // Go
         if fileManager.fileExists(atPath: directory.appendingPathComponent("go.mod").path) {
             return .go
         }
 
-        // Python
         if fileManager.fileExists(atPath: directory.appendingPathComponent("pyproject.toml").path) ||
            fileManager.fileExists(atPath: directory.appendingPathComponent("setup.py").path) ||
            fileManager.fileExists(atPath: directory.appendingPathComponent("requirements.txt").path) {
