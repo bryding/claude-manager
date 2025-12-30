@@ -26,6 +26,8 @@ struct ExecutionView: View {
 
     private var leftPane: some View {
         VStack(alignment: .leading, spacing: 16) {
+            projectHeader
+
             PhaseIndicatorView(phase: context.phase)
 
             progressSection
@@ -64,6 +66,27 @@ struct ExecutionView: View {
         let percentage = Int(context.progress * 100)
         return "\(percentage)%"
     }
+
+    private var projectHeader: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Project")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(context.projectPath?.lastPathComponent ?? "No Project")
+                    .font(.headline)
+            }
+
+            Spacer()
+
+            Button("Change Project") {
+                appState.context.reset()
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .disabled(context.isRunning)
+        }
+    }
 }
 
 // MARK: - Preview
@@ -71,6 +94,7 @@ struct ExecutionView: View {
 #if DEBUG
 #Preview("Execution - Running") {
     let appState = AppState()
+    appState.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
     appState.context.phase = .executingTask
     appState.context.plan = Plan(rawText: "", tasks: [
         PlanTask(number: 1, title: "Create project structure", description: "Set up folders", status: .completed),
@@ -94,6 +118,7 @@ struct ExecutionView: View {
 
 #Preview("Execution - Completed") {
     let appState = AppState()
+    appState.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
     appState.context.phase = .completed
     appState.context.plan = Plan(rawText: "", tasks: [
         PlanTask(number: 1, title: "Create project structure", description: "Set up folders", status: .completed),
@@ -112,6 +137,7 @@ struct ExecutionView: View {
 
 #Preview("Execution - Waiting for User") {
     let appState = AppState()
+    appState.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
     appState.context.phase = .waitingForUser
     appState.context.plan = Plan(rawText: "", tasks: [
         PlanTask(number: 1, title: "Implement feature", description: "Building feature", status: .inProgress),
