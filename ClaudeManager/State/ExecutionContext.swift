@@ -133,6 +133,11 @@ final class ExecutionContext {
     var retryConfiguration: RetryConfiguration = .default
     var currentRetryAttempt: Int = 0
 
+    // MARK: - Autonomous Failure Tracking
+
+    var taskFailureCount: Int = 0
+    var autonomousConfig: AutonomousConfiguration = .default
+
     // MARK: - Timeout Configuration
 
     var timeoutConfiguration: TimeoutConfiguration = .default
@@ -241,12 +246,17 @@ final class ExecutionContext {
         continuationSummary = nil
         isHandoffInProgress = false
         currentRetryAttempt = 0
+        taskFailureCount = 0
         pendingTaskFailure = nil
         showStopConfirmation = false
     }
 
     func resetRetryAttempt() {
         currentRetryAttempt = 0
+    }
+
+    func resetTaskFailureCount() {
+        taskFailureCount = 0
     }
 
     func addLog(_ entry: LogEntry) {

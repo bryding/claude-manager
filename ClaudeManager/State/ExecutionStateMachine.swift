@@ -194,6 +194,7 @@ final class ExecutionStateMachine {
         isPaused = false
         shouldStop = false
         phaseBeforePause = nil
+        context.autonomousConfig = userPreferences.autonomousConfig
     }
 
     private func handlePhaseError(_ error: Error) {
@@ -478,7 +479,7 @@ final class ExecutionStateMachine {
                                 question: firstQuestion
                             )
 
-                            if userPreferences.autonomousConfig.autoAnswerEnabled {
+                            if context.autonomousConfig.autoAnswerEnabled {
                                 pendingAutoAnswerQuestion = pendingQuestion
                             } else {
                                 context.pendingQuestion = pendingQuestion
@@ -1001,7 +1002,7 @@ final class ExecutionStateMachine {
         }
 
         let question = pendingQuestion.question
-        let config = userPreferences.autonomousConfig
+        let config = context.autonomousConfig
 
         let optionsList = question.options.enumerated().map { index, opt in
             "\(index + 1). \(opt.label) - \(opt.description)"
