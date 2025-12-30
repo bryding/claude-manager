@@ -1,9 +1,20 @@
 import Foundation
 
-enum AutoFailureHandling: String, Sendable, Equatable, Codable {
+enum AutoFailureHandling: String, Sendable, Equatable, Codable, CaseIterable {
     case pauseForUser
     case retryThenSkip
     case retryThenStop
+
+    var displayName: String {
+        switch self {
+        case .pauseForUser:
+            return "Pause for User"
+        case .retryThenSkip:
+            return "Retry, then Skip"
+        case .retryThenStop:
+            return "Retry, then Stop"
+        }
+    }
 }
 
 struct AutonomousConfiguration: Sendable, Equatable, Codable {
