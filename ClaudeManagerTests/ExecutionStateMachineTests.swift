@@ -8,6 +8,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     private var mockClaudeService: MockClaudeCLIService!
     private var planService: PlanService!
     private var mockGitService: MockGitService!
+    private var mockBuildTestService: MockBuildTestService!
     private var userPreferences: UserPreferences!
     private var stateMachine: ExecutionStateMachine!
 
@@ -17,12 +18,14 @@ final class ExecutionStateMachineTests: XCTestCase {
         mockClaudeService = MockClaudeCLIService()
         planService = PlanService()
         mockGitService = MockGitService()
+        mockBuildTestService = MockBuildTestService()
         userPreferences = UserPreferences()
         stateMachine = ExecutionStateMachine(
             context: context,
             claudeService: mockClaudeService,
             planService: planService,
             gitService: mockGitService,
+            buildTestService: mockBuildTestService,
             userPreferences: userPreferences
         )
     }
