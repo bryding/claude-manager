@@ -342,8 +342,25 @@ final class ExecutionStateMachine {
         case .handlingContextExhaustion:
             try await handleContextExhaustion()
 
-        case .runningBuild, .runningTests, .fixingBuildErrors, .fixingTestErrors:
-            break
+        case .runningBuild:
+            try await executeWithRetry(operationName: "Build") {
+                try await runBuild()
+            }
+
+        case .runningTests:
+            try await executeWithRetry(operationName: "Tests") {
+                try await runTests()
+            }
+
+        case .fixingBuildErrors:
+            try await executeWithRetry(operationName: "Fix build errors") {
+                try await fixBuildErrors()
+            }
+
+        case .fixingTestErrors:
+            try await executeWithRetry(operationName: "Fix test errors") {
+                try await fixTestErrors()
+            }
 
         case .waitingForUser, .paused, .completed, .failed:
             break
@@ -840,6 +857,167 @@ final class ExecutionStateMachine {
         case .noChanges:
             context.addLog(type: .info, message: "No changes to commit")
         }
+    }
+
+    // MARK: - Build/Test Phase Handlers
+
+    private func runBuild() async throws {
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        context.addLog(type: .info, message: "Running build...")
+        context.buildAttempts += 1
+
+        let result = try await buildTestService.runBuild(
+            in: projectPath,
+            config: context.projectConfiguration
+        )
+
+        context.lastBuildResult = result
+
+        if result.success {
+            context.addLog(type: .info, message: "Build succeeded")
+        } else {
+            let errorMsg = result.errorOutput ?? result.output
+            context.addLog(type: .error, message: "Build failed:\n\(errorMsg)")
+            throw ExecutionStateMachineError.executionFailed("runBuild")
+        }
+    }
+
+    private func runTests() async throws {
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        context.addLog(type: .info, message: "Running tests...")
+        context.testAttempts += 1
+
+        let result = try await buildTestService.runTests(
+            in: projectPath,
+            config: context.projectConfiguration
+        )
+
+        context.lastTestResult = result
+
+        if result.success {
+            context.addLog(type: .info, message: "Tests passed")
+        } else {
+            let errorMsg = result.errorOutput ?? result.output
+            context.addLog(type: .error, message: "Tests failed:\n\(errorMsg)")
+            throw ExecutionStateMachineError.executionFailed("runTests")
+        }
+    }
+
+    private func fixBuildErrors() async throws {
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        guard let buildResult = context.lastBuildResult else {
+            throw ExecutionStateMachineError.executionFailed("fixBuildErrors: no build result")
+        }
+
+        let errorOutput = buildResult.errorOutput ?? buildResult.output
+
+        let prompt = """
+            The build failed with the following errors:
+
+            ```
+            \(errorOutput)
+            ```
+
+            Please fix these build errors. Make the minimal changes necessary to resolve them.
+            After fixing, run /commit to commit your changes.
+            """
+
+        context.addLog(type: .info, message: "Asking Claude to fix build errors (attempt \(context.buildAttempts))")
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .acceptEdits,
+            sessionId: context.sessionId,
+            timeout: context.timeoutConfiguration.executionTimeout,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleStreamMessage(message)
+                }
+            }
+        )
+
+        if try await processAutoAnswerIfNeeded() {
+            return
+        }
+
+        if context.isHandoffInProgress {
+            context.phase = .handlingContextExhaustion
+            return
+        }
+
+        if result.isError {
+            context.addLog(type: .error, message: "Fix build errors encountered an error")
+            throw ExecutionStateMachineError.executionFailed("fixBuildErrors")
+        }
+
+        context.addLog(type: .info, message: "Build error fix attempt completed")
+    }
+
+    private func fixTestErrors() async throws {
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        guard let testResult = context.lastTestResult else {
+            throw ExecutionStateMachineError.executionFailed("fixTestErrors: no test result")
+        }
+
+        let errorOutput = testResult.errorOutput ?? testResult.output
+
+        let prompt = """
+            The tests failed with the following output:
+
+            ```
+            \(errorOutput)
+            ```
+
+            Please fix these test failures. Either fix the code if there's a bug,
+            or fix the test if it's incorrect.
+            After fixing, run /commit to commit your changes.
+            """
+
+        context.addLog(type: .info, message: "Asking Claude to fix test failures (attempt \(context.testAttempts))")
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .acceptEdits,
+            sessionId: context.sessionId,
+            timeout: context.timeoutConfiguration.executionTimeout,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleStreamMessage(message)
+                }
+            }
+        )
+
+        if try await processAutoAnswerIfNeeded() {
+            return
+        }
+
+        if context.isHandoffInProgress {
+            context.phase = .handlingContextExhaustion
+            return
+        }
+
+        if result.isError {
+            context.addLog(type: .error, message: "Fix test errors encountered an error")
+            throw ExecutionStateMachineError.executionFailed("fixTestErrors")
+        }
+
+        context.addLog(type: .info, message: "Test error fix attempt completed")
     }
 
     private func clearContext() async throws {
