@@ -834,15 +834,41 @@ final class ExecutionStateMachine {
             return
         }
 
-        let prompt = """
-            Review the code changes just made for task "\(task.title)".
+        let projectContextSection: String = {
+            guard !context.autonomousConfig.projectContext.isEmpty else { return "" }
+            return """
+                ## Project Context
+                \(context.autonomousConfig.projectContext)
 
-            Run /codereview to check for:
-            - Code quality and maintainability
-            - Potential bugs or edge cases
-            - Adherence to Swift best practices
-            - DRY principles and code duplication
-            - Proper error handling
+                """
+        }()
+
+        let taskSection = """
+            ## Task Being Reviewed
+            **Task \(task.number): \(task.title)**
+            \(task.description)
+
+            """
+
+        let prompt = """
+            \(projectContextSection)\(taskSection)Review the code changes just made for this task.
+
+            Run /codereview and evaluate against these criteria:
+
+            ## Code Quality
+            - DRY: Is there duplicated code that should be extracted?
+            - Naming: Are variables, functions, and types clearly named?
+            - Readability: Is the code easy to understand?
+
+            ## Correctness
+            - Edge cases: Are boundary conditions handled?
+            - Error handling: Are errors properly caught and handled?
+            - Null safety: Are optionals properly unwrapped?
+
+            ## Best Practices
+            - Swift conventions: Does it follow Swift idioms?
+            - Project patterns: Does it match existing codebase patterns?
+            - Performance: Any obvious inefficiencies?
 
             If you find issues, fix them. If the code looks good, confirm it meets quality standards.
             """

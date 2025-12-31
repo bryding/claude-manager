@@ -112,7 +112,7 @@ Make the orchestrator run with full control like a human developer sitting there
   - Reference plan.md structure
   - Include project context from autonomous config
 
-- [ ] **Task 5.2**: Improve runCodeReview() prompt
+- [x] **Task 5.2**: Improve runCodeReview() prompt
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - More specific review criteria (DRY, edge cases, error handling)
   - Reference the specific task being reviewed
