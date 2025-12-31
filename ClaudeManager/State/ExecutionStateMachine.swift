@@ -253,15 +253,24 @@ final class ExecutionStateMachine {
             context.phase = .waitingForUser
             context.addLog(type: .info, message: "Waiting for user input on task failure")
             return false
-        } else if context.phase == .runningBuild {
+        } else {
+            return handleBuildTestPhaseError()
+        }
+    }
+
+    private func handleBuildTestPhaseError() -> Bool {
+        switch context.phase {
+        case .runningBuild:
             context.addLog(type: .info, message: "Build failed, attempting to fix errors")
             context.phase = .fixingBuildErrors
             return true
-        } else if context.phase == .runningTests {
+
+        case .runningTests:
             context.addLog(type: .info, message: "Tests failed, attempting to fix errors")
             context.phase = .fixingTestErrors
             return true
-        } else if context.phase == .fixingBuildErrors {
+
+        case .fixingBuildErrors:
             if context.buildAttempts < ExecutionContext.maxBuildFixAttempts {
                 context.addLog(type: .info, message: "Build fix failed, retrying build")
                 context.phase = .runningBuild
@@ -272,7 +281,8 @@ final class ExecutionStateMachine {
                 context.phase = .failed
                 return false
             }
-        } else if context.phase == .fixingTestErrors {
+
+        case .fixingTestErrors:
             if context.testAttempts < ExecutionContext.maxTestFixAttempts {
                 context.addLog(type: .info, message: "Test fix failed, retrying tests")
                 context.phase = .runningTests
@@ -283,7 +293,8 @@ final class ExecutionStateMachine {
                 context.phase = .failed
                 return false
             }
-        } else {
+
+        default:
             markCurrentTaskFailed()
             context.phase = .failed
             return false
