@@ -126,7 +126,7 @@ Make the orchestrator run with full control like a human developer sitting there
 
 ### Phase 6: UI Configuration
 
-- [ ] **Task 6.1**: Add autonomous config section to SetupView
+- [x] **Task 6.1**: Add autonomous config section to SetupView
   - File: `ClaudeManager/Views/SetupView.swift`
   - Toggle: Enable Autonomous Mode
   - TextField: Project Context (e.g., "Mimicking BEYOND laser show UI")
