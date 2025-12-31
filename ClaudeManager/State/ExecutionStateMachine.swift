@@ -253,6 +253,36 @@ final class ExecutionStateMachine {
             context.phase = .waitingForUser
             context.addLog(type: .info, message: "Waiting for user input on task failure")
             return false
+        } else if context.phase == .runningBuild {
+            context.addLog(type: .info, message: "Build failed, attempting to fix errors")
+            context.phase = .fixingBuildErrors
+            return true
+        } else if context.phase == .runningTests {
+            context.addLog(type: .info, message: "Tests failed, attempting to fix errors")
+            context.phase = .fixingTestErrors
+            return true
+        } else if context.phase == .fixingBuildErrors {
+            if context.buildAttempts < ExecutionContext.maxBuildFixAttempts {
+                context.addLog(type: .info, message: "Build fix failed, retrying build")
+                context.phase = .runningBuild
+                return true
+            } else {
+                context.addLog(type: .error, message: "Max build fix attempts reached")
+                markCurrentTaskFailed()
+                context.phase = .failed
+                return false
+            }
+        } else if context.phase == .fixingTestErrors {
+            if context.testAttempts < ExecutionContext.maxTestFixAttempts {
+                context.addLog(type: .info, message: "Test fix failed, retrying tests")
+                context.phase = .runningTests
+                return true
+            } else {
+                context.addLog(type: .error, message: "Max test fix attempts reached")
+                markCurrentTaskFailed()
+                context.phase = .failed
+                return false
+            }
         } else {
             markCurrentTaskFailed()
             context.phase = .failed
@@ -394,7 +424,12 @@ final class ExecutionStateMachine {
             context.phase = .committingImplementation
 
         case .committingImplementation:
-            context.phase = .reviewingCode
+            if context.autonomousConfig.runBuildAfterCommit {
+                context.resetBuildAttempts()
+                context.phase = .runningBuild
+            } else {
+                context.phase = .reviewingCode
+            }
 
         case .reviewingCode:
             context.phase = .committingReview
@@ -413,7 +448,12 @@ final class ExecutionStateMachine {
             context.phase = .committingTests
 
         case .committingTests:
-            context.phase = .clearingContext
+            if context.autonomousConfig.runTestsAfterCommit {
+                context.resetTestAttempts()
+                context.phase = .runningTests
+            } else {
+                context.phase = .clearingContext
+            }
 
         case .clearingContext:
             advanceToNextTaskOrComplete()
@@ -421,8 +461,17 @@ final class ExecutionStateMachine {
         case .handlingContextExhaustion:
             context.phase = .executingTask
 
-        case .runningBuild, .runningTests, .fixingBuildErrors, .fixingTestErrors:
-            break
+        case .runningBuild:
+            context.phase = .reviewingCode
+
+        case .fixingBuildErrors:
+            context.phase = .runningBuild
+
+        case .runningTests:
+            context.phase = .clearingContext
+
+        case .fixingTestErrors:
+            context.phase = .runningTests
 
         case .waitingForUser, .paused, .completed, .failed:
             break

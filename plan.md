@@ -95,7 +95,7 @@ Make the orchestrator run with full control like a human developer sitting there
   - fixBuildErrors() - send errors to Claude, commit fix
   - fixTestErrors() - send test failures to Claude, commit fix
 
-- [ ] **Task 4.6**: Update phase transitions for build/test
+- [x] **Task 4.6**: Update phase transitions for build/test
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - committingImplementation → runningBuild (if enabled) → reviewingCode
   - runningBuild → fixingBuildErrors (if failed) → runningBuild (loop)
