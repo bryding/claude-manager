@@ -304,6 +304,7 @@ struct SetupView: View {
 
     private func startDevelopmentLoop() {
         isStarting = true
+        checkForExistingPlan()
 
         Task {
             do {
