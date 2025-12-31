@@ -190,11 +190,13 @@ struct SetupView: View {
     }
 
     private var autonomousConfigSection: some View {
-        GroupBox("Autonomous Mode") {
+        let config = appState.userPreferences.autonomousConfig
+
+        return GroupBox("Autonomous Mode") {
             VStack(alignment: .leading, spacing: 12) {
                 Toggle("Enable Autonomous Mode", isOn: binding(for: \.autoAnswerEnabled))
 
-                if appState.userPreferences.autonomousConfig.autoAnswerEnabled {
+                if config.autoAnswerEnabled {
                     Divider()
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -211,7 +213,7 @@ struct SetupView: View {
                         }
                     }
 
-                    Stepper("Max Retries: \(appState.userPreferences.autonomousConfig.maxTaskRetries)",
+                    Stepper("Max Retries: \(config.maxTaskRetries)",
                             value: binding(for: \.maxTaskRetries),
                             in: 1...10)
 
@@ -222,8 +224,8 @@ struct SetupView: View {
                 }
             }
             .padding(.vertical, 8)
+            .animation(.easeInOut(duration: 0.2), value: config.autoAnswerEnabled)
         }
-        .animation(.easeInOut(duration: 0.2), value: appState.userPreferences.autonomousConfig.autoAnswerEnabled)
     }
 
     private var startButton: some View {
