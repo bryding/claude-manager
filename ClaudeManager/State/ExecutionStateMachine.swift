@@ -572,6 +572,17 @@ final class ExecutionStateMachine {
         return "test: add tests for \(task.title)"
     }
 
+    // MARK: - Prompt Helpers
+
+    private func buildProjectContextSection() -> String {
+        guard !context.autonomousConfig.projectContext.isEmpty else { return "" }
+        return """
+            ## Project Context
+            \(context.autonomousConfig.projectContext)
+
+            """
+    }
+
     // MARK: - Context Handoff Helpers
 
     private var canTriggerContextHandoff: Bool {
@@ -757,14 +768,7 @@ final class ExecutionStateMachine {
             context.continuationSummary = nil
         }
 
-        let projectContextSection: String = {
-            guard !context.autonomousConfig.projectContext.isEmpty else { return "" }
-            return """
-                ## Project Context
-                \(context.autonomousConfig.projectContext)
-
-                """
-        }()
+        let projectContextSection = buildProjectContextSection()
 
         let completedTasksSection: String = {
             let completed = context.plan?.tasks.filter { $0.status == .completed } ?? []
@@ -834,14 +838,7 @@ final class ExecutionStateMachine {
             return
         }
 
-        let projectContextSection: String = {
-            guard !context.autonomousConfig.projectContext.isEmpty else { return "" }
-            return """
-                ## Project Context
-                \(context.autonomousConfig.projectContext)
-
-                """
-        }()
+        let projectContextSection = buildProjectContextSection()
 
         let taskSection = """
             ## Task Being Reviewed
@@ -910,16 +907,41 @@ final class ExecutionStateMachine {
 
         context.addLog(type: .info, message: "Writing tests for \(task.title)")
 
+        let projectContextSection = buildProjectContextSection()
+
+        let taskSection = """
+            ## Task Being Tested
+            **Task \(task.number): \(task.title)**
+            \(task.description)
+
+            """
+
         let prompt = """
-            Write unit tests for the code implemented in task "\(task.title)".
+            \(projectContextSection)\(taskSection)Write unit tests for the code implemented in this task.
 
-            Run /writetests to:
-            - Test the main functionality
-            - Cover edge cases and error conditions
-            - Follow existing test patterns in the project
+            Run /writetests to create tests covering:
+
+            ## Core Functionality
+            - Happy path: Test the main expected behavior works correctly
+            - Input variations: Test with different valid inputs
+            - Return values: Verify correct outputs and state changes
+
+            ## Edge Cases
+            - Boundary conditions: Min/max values, empty collections, single elements
+            - Nil/optional handling: Test nil inputs where applicable
+            - State transitions: Verify before/after state is correct
+
+            ## Error Handling
+            - Invalid inputs: Test rejection of bad data
+            - Failure scenarios: Test error paths are handled gracefully
+            - Error messages: Verify meaningful error information
+
+            ## Guidelines
+            - Follow Arrange-Act-Assert pattern for test structure
+            - Match existing test patterns in the project
             - Use XCTest framework
-
-            Focus on testing the core logic, not UI components or simple getters/setters.
+            - Focus on core logic, skip UI components and trivial getters/setters
+            - Write tests that catch regressions, not just for coverage
             """
 
         let result = try await claudeService.execute(
