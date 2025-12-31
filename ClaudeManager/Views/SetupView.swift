@@ -304,10 +304,19 @@ struct SetupView: View {
 
     private func startDevelopmentLoop() {
         isStarting = true
-        checkForExistingPlan()
 
         Task {
             do {
+                // Check for plan.md right before starting
+                if let projectPath = appState.context.projectPath {
+                    let planURL = projectPath.appendingPathComponent("plan.md")
+                    if FileManager.default.fileExists(atPath: planURL.path) {
+                        if let plan = try? planService.parsePlanFromFile(at: planURL) {
+                            appState.context.existingPlan = plan
+                        }
+                    }
+                }
+
                 if appState.context.existingPlan != nil {
                     try await appState.stateMachine.startWithExistingPlan()
                 } else {
