@@ -757,30 +757,25 @@ final class ExecutionStateMachine {
             context.continuationSummary = nil
         }
 
-        let projectContextSection = context.autonomousConfig.projectContext.isEmpty
-            ? ""
-            : """
-              ## Project Context
-              \(context.autonomousConfig.projectContext)
+        let projectContextSection: String = {
+            guard !context.autonomousConfig.projectContext.isEmpty else { return "" }
+            return """
+                ## Project Context
+                \(context.autonomousConfig.projectContext)
 
-              """
+                """
+        }()
 
-        let completedTasksSection: String
-        if let plan = context.plan {
-            let completed = plan.tasks.filter { $0.status == .completed }
-            if completed.isEmpty {
-                completedTasksSection = ""
-            } else {
-                let completedList = completed.map { "- Task \($0.number): \($0.title)" }.joined(separator: "\n")
-                completedTasksSection = """
-                    ## Previously Completed Tasks
-                    \(completedList)
+        let completedTasksSection: String = {
+            let completed = context.plan?.tasks.filter { $0.status == .completed } ?? []
+            guard !completed.isEmpty else { return "" }
+            let completedList = completed.map { "- Task \($0.number): \($0.title)" }.joined(separator: "\n")
+            return """
+                ## Previously Completed Tasks
+                \(completedList)
 
-                    """
-            }
-        } else {
-            completedTasksSection = ""
-        }
+                """
+        }()
 
         let prompt = """
             \(continuationContext)\(projectContextSection)\(completedTasksSection)Execute the following task:
