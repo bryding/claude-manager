@@ -307,7 +307,11 @@ struct SetupView: View {
 
         Task {
             do {
-                try await appState.stateMachine.start()
+                if appState.context.existingPlan != nil {
+                    try await appState.stateMachine.startWithExistingPlan()
+                } else {
+                    try await appState.stateMachine.start()
+                }
             } catch {
                 errorMessage = error.localizedDescription
             }
