@@ -757,17 +757,45 @@ final class ExecutionStateMachine {
             context.continuationSummary = nil
         }
 
+        let projectContextSection = context.autonomousConfig.projectContext.isEmpty
+            ? ""
+            : """
+              ## Project Context
+              \(context.autonomousConfig.projectContext)
+
+              """
+
+        let completedTasksSection: String
+        if let plan = context.plan {
+            let completed = plan.tasks.filter { $0.status == .completed }
+            if completed.isEmpty {
+                completedTasksSection = ""
+            } else {
+                let completedList = completed.map { "- Task \($0.number): \($0.title)" }.joined(separator: "\n")
+                completedTasksSection = """
+                    ## Previously Completed Tasks
+                    \(completedList)
+
+                    """
+            }
+        } else {
+            completedTasksSection = ""
+        }
+
         let prompt = """
-            \(continuationContext)Execute the following task:
+            \(continuationContext)\(projectContextSection)\(completedTasksSection)Execute the following task:
 
             ## Task \(task.number): \(task.title)
             \(task.description)
 
-            Acceptance Criteria:
+            ## Acceptance Criteria
             \(subtasksText)
 
-            Implement this task completely. Write the necessary code, create or modify files as needed.
-            Make sure to follow existing code patterns and conventions in the project.
+            ## Instructions
+            - Implement this task completely, creating or modifying files as needed
+            - Follow existing code patterns and conventions in the project
+            - Reference plan.md in the project root to understand the overall implementation plan
+            - Build on work from previously completed tasks where relevant
             """
 
         let result = try await claudeService.execute(

@@ -106,7 +106,7 @@ Make the orchestrator run with full control like a human developer sitting there
 
 ### Phase 5: Better Prompts
 
-- [ ] **Task 5.1**: Improve executeCurrentTask() prompt
+- [x] **Task 5.1**: Improve executeCurrentTask() prompt
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - Add context about previously completed tasks
   - Reference plan.md structure
