@@ -434,7 +434,9 @@ final class ExecutionStateMachine {
             break
 
         case .conductingInterview:
-            context.phase = .generatingInitialPlan
+            if context.interviewSession?.isComplete == true {
+                context.phase = .generatingInitialPlan
+            }
 
         case .generatingInitialPlan:
             context.phase = .rewritingPlan
