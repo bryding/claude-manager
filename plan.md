@@ -21,7 +21,7 @@ User clicks Start → .conductingInterview → (questions via UserQuestionView) 
   - Add `mutating func addExchange(question:answer:)`
   - Add `mutating func markComplete()`
 
-- [ ] **Task 1.2**: Add promptContext computed property to InterviewSession
+- [x] **Task 1.2**: Add promptContext computed property to InterviewSession
   - File: `ClaudeManager/Models/InterviewSession.swift`
   - Format all Q&A exchanges into a string for inclusion in plan generation prompt
   - Format: "Q1: ... A1: ... Q2: ... A2: ..."

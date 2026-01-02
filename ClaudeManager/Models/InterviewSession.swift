@@ -53,4 +53,13 @@ struct InterviewSession: Equatable, Sendable {
     mutating func markComplete() {
         completedAt = Date()
     }
+
+    var promptContext: String {
+        guard !exchanges.isEmpty else { return "" }
+
+        return exchanges.enumerated().map { index, exchange in
+            let num = index + 1
+            return "Q\(num): \(exchange.question)\nA\(num): \(exchange.answer)"
+        }.joined(separator: "\n\n")
+    }
 }
