@@ -41,8 +41,13 @@ final class GitService: GitServiceProtocol, @unchecked Sendable {
             return .committed(output: output)
         } catch GitServiceError.commandFailed(let code, let stderr) {
             print("[Git] Commit failed with code \(code): \(stderr ?? "no stderr")")
-            if code == 1, let stderr = stderr, stderr.contains("nothing to commit") {
-                return .noChanges
+            // Exit code 1 with empty or "nothing to commit" stderr means no changes
+            if code == 1 {
+                let stderrLower = stderr?.lowercased() ?? ""
+                if stderrLower.isEmpty || stderrLower.contains("nothing to commit") {
+                    print("[Git] No changes to commit")
+                    return .noChanges
+                }
             }
             throw GitServiceError.commandFailed(code, stderr: stderr)
         }
