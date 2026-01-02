@@ -1245,6 +1245,78 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertEqual(context.interviewSession?.exchanges[1].answer, "Second answer")
     }
 
+    // MARK: - Interview Context in Plan Generation Tests
+
+    func testPlanGenerationIncludesInterviewContext() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build authentication"
+
+        var session = InterviewSession(featureDescription: "Build authentication")
+        session.addExchange(question: "OAuth or JWT?", answer: "Use JWT")
+        session.addExchange(question: "Session duration?", answer: "24 hours")
+        session.markComplete()
+        context.interviewSession = session
+
+        context.phase = .generatingInitialPlan
+
+        configureMockWithPlan(tasks: [(1, "Implement JWT", "Add JWT auth")])
+
+        try await stateMachine.start()
+
+        let planGenerationPrompt = mockClaudeService.allPrompts.first {
+            $0.contains("Analyze the following feature request")
+        }
+        XCTAssertNotNil(planGenerationPrompt)
+        XCTAssertTrue(planGenerationPrompt?.contains("## Clarifications from User") ?? false)
+        XCTAssertTrue(planGenerationPrompt?.contains("Q1: OAuth or JWT?") ?? false)
+        XCTAssertTrue(planGenerationPrompt?.contains("A1: Use JWT") ?? false)
+        XCTAssertTrue(planGenerationPrompt?.contains("Q2: Session duration?") ?? false)
+        XCTAssertTrue(planGenerationPrompt?.contains("A2: 24 hours") ?? false)
+    }
+
+    func testPlanGenerationOmitsClarificationsSectionWhenNoExchanges() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+
+        var session = InterviewSession(featureDescription: "Build feature")
+        session.markComplete()
+        context.interviewSession = session
+
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        try await stateMachine.start()
+
+        let planGenerationPrompt = mockClaudeService.allPrompts.first {
+            $0.contains("Analyze the following feature request")
+        }
+        XCTAssertNotNil(planGenerationPrompt)
+        XCTAssertFalse(planGenerationPrompt?.contains("## Clarifications from User") ?? true)
+    }
+
+    func testPlanGenerationWorksWithoutInterviewSession() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.interviewSession = nil
+
+        // Skip interview by using existing plan
+        context.existingPlan = nil
+
+        // Manually set up to go through plan generation without interview
+        var session = InterviewSession(featureDescription: "Build feature")
+        session.markComplete()
+        context.interviewSession = session
+
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        try await stateMachine.start()
+
+        let planGenerationPrompt = mockClaudeService.allPrompts.first {
+            $0.contains("Analyze the following feature request")
+        }
+        XCTAssertNotNil(planGenerationPrompt)
+        XCTAssertFalse(planGenerationPrompt?.contains("## Clarifications from User") ?? true)
+    }
+
     // MARK: - Test Helpers
 
     private func makeAssistantMessage(text: String) -> ClaudeStreamMessage {

@@ -11,6 +11,7 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
     var lastTimeout: TimeInterval?
     var executeCallCount = 0
     var failuresBeforeSuccess = 0
+    var allPrompts: [String] = []
 
     private var _isRunning = false
     var isRunning: Bool { _isRunning }
@@ -26,6 +27,7 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
         executeCalled = true
         executeCallCount += 1
         lastPrompt = prompt
+        allPrompts.append(prompt)
         lastPermissionMode = permissionMode
         lastTimeout = timeout
         _isRunning = true
