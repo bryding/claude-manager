@@ -187,6 +187,7 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
         var args: [String] = [
             "-p",
             "--output-format", "stream-json",
+            "--verbose",
             "--permission-mode", permissionMode.cliValue
         ]
 
