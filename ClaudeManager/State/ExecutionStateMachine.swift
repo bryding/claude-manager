@@ -162,9 +162,10 @@ final class ExecutionStateMachine {
 
         // Record interview answer if this was an interview question
         if let currentQuestion = context.currentInterviewQuestion,
-           context.interviewSession != nil,
-           context.interviewSession?.isComplete == false {
-            context.interviewSession?.addExchange(question: currentQuestion, answer: answer)
+           var session = context.interviewSession,
+           !session.isComplete {
+            session.addExchange(question: currentQuestion, answer: answer)
+            context.interviewSession = session
             context.currentInterviewQuestion = nil
             context.phase = .conductingInterview
         }

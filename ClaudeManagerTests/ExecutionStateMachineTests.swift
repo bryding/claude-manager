@@ -1067,6 +1067,158 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertTrue(context.logs.contains { $0.message.contains("Interview completed, proceeding to plan generation") })
     }
 
+    // MARK: - Interview Answer Recording Tests
+
+    func testAnswerQuestionRecordsInterviewAnswer() async throws {
+        context.sessionId = "test-session"
+        context.interviewSession = InterviewSession(featureDescription: "Build feature")
+        context.currentInterviewQuestion = "What is the scope?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "What is the scope?",
+                header: "Scope",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("Small scope, MVP only")
+
+        XCTAssertEqual(context.interviewSession?.exchanges.count, 1)
+        XCTAssertEqual(context.interviewSession?.exchanges.first?.question, "What is the scope?")
+        XCTAssertEqual(context.interviewSession?.exchanges.first?.answer, "Small scope, MVP only")
+    }
+
+    func testAnswerQuestionClearsCurrentInterviewQuestion() async throws {
+        context.sessionId = "test-session"
+        context.interviewSession = InterviewSession(featureDescription: "Build feature")
+        context.currentInterviewQuestion = "What is the scope?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "What is the scope?",
+                header: "Scope",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("My answer")
+
+        XCTAssertNil(context.currentInterviewQuestion)
+    }
+
+    func testAnswerQuestionSetsPhaseToInterview() async throws {
+        context.sessionId = "test-session"
+        context.interviewSession = InterviewSession(featureDescription: "Build feature")
+        context.currentInterviewQuestion = "What is the scope?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "What is the scope?",
+                header: "Scope",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("My answer")
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Executing phase: conductingInterview") })
+    }
+
+    func testAnswerQuestionDoesNotRecordWhenNoInterviewSession() async throws {
+        context.sessionId = "test-session"
+        context.interviewSession = nil
+        context.currentInterviewQuestion = "What is the scope?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "Test",
+                header: "Test",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("My answer")
+
+        XCTAssertNil(context.interviewSession)
+        XCTAssertEqual(context.currentInterviewQuestion, "What is the scope?")
+    }
+
+    func testAnswerQuestionDoesNotRecordWhenNoCurrentQuestion() async throws {
+        context.sessionId = "test-session"
+        context.interviewSession = InterviewSession(featureDescription: "Build feature")
+        context.currentInterviewQuestion = nil
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "Test",
+                header: "Test",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("My answer")
+
+        XCTAssertEqual(context.interviewSession?.exchanges.count, 0)
+    }
+
+    func testAnswerQuestionDoesNotRecordWhenInterviewComplete() async throws {
+        var session = InterviewSession(featureDescription: "Build feature")
+        session.markComplete()
+        context.sessionId = "test-session"
+        context.interviewSession = session
+        context.currentInterviewQuestion = "What is the scope?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "Test",
+                header: "Test",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("My answer")
+
+        XCTAssertEqual(context.interviewSession?.exchanges.count, 0)
+        XCTAssertEqual(context.currentInterviewQuestion, "What is the scope?")
+    }
+
+    func testAnswerQuestionRecordsMultipleExchanges() async throws {
+        context.sessionId = "test-session"
+        var session = InterviewSession(featureDescription: "Build feature")
+        session.addExchange(question: "First question?", answer: "First answer")
+        context.interviewSession = session
+        context.currentInterviewQuestion = "Second question?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "Second question?",
+                header: "Q2",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("Second answer")
+
+        XCTAssertEqual(context.interviewSession?.exchanges.count, 2)
+        XCTAssertEqual(context.interviewSession?.exchanges[1].question, "Second question?")
+        XCTAssertEqual(context.interviewSession?.exchanges[1].answer, "Second answer")
+    }
+
     // MARK: - Test Helpers
 
     private func makeAssistantMessage(text: String) -> ClaudeStreamMessage {
