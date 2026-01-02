@@ -48,8 +48,46 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
     let executablePath: String
     private var currentProcess: ClaudeProcess?
 
-    init(executablePath: String = "/usr/local/bin/claude") {
+    init(executablePath: String = Self.findClaudePath()) {
         self.executablePath = executablePath
+    }
+
+    private static func findClaudePath() -> String {
+        // Try common installation paths
+        let commonPaths = [
+            "/usr/local/bin/claude",
+            "/opt/homebrew/bin/claude",
+            NSHomeDirectory() + "/.nvm/versions/node/v22.15.0/bin/claude",
+            NSHomeDirectory() + "/.npm-global/bin/claude"
+        ]
+
+        for path in commonPaths {
+            if FileManager.default.isExecutableFile(atPath: path) {
+                return path
+            }
+        }
+
+        // Fallback: try to find using shell
+        let process = Process()
+        let pipe = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-l", "-c", "which claude"]
+        process.standardOutput = pipe
+        process.standardError = FileHandle.nullDevice
+
+        do {
+            try process.run()
+            process.waitUntilExit()
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !path.isEmpty {
+                return path
+            }
+        } catch {
+            // Ignore errors, fall through to default
+        }
+
+        return "/usr/local/bin/claude"
     }
 
     func execute(
