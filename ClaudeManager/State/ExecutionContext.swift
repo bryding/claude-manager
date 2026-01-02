@@ -269,6 +269,39 @@ final class ExecutionContext {
         lastTestResult = nil
     }
 
+    func resetForNewFeature() {
+        let separatorEntry = LogEntry(
+            phase: .idle,
+            type: .separator,
+            message: "─── New Feature Session ───"
+        )
+        logs.append(separatorEntry)
+
+        featureDescription = ""
+        plan = nil
+        existingPlan = nil
+        currentTaskIndex = 0
+        phase = .idle
+        sessionId = nil
+        startTime = nil
+        pendingQuestion = nil
+        totalCost = 0.0
+        errors = []
+        totalInputTokens = 0
+        totalOutputTokens = 0
+        lastInputTokenCount = 0
+        continuationSummary = nil
+        isHandoffInProgress = false
+        currentRetryAttempt = 0
+        taskFailureCount = 0
+        pendingTaskFailure = nil
+        showStopConfirmation = false
+        buildAttempts = 0
+        testAttempts = 0
+        lastBuildResult = nil
+        lastTestResult = nil
+    }
+
     func resetRetryAttempt() {
         currentRetryAttempt = 0
     }

@@ -5,7 +5,7 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if appState.context.phase == .idle && appState.context.projectPath == nil {
+            if appState.context.phase == .idle {
                 SetupView()
             } else {
                 ExecutionView()

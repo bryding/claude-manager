@@ -79,6 +79,14 @@ struct ExecutionView: View {
 
             Spacer()
 
+            if context.phase == .completed {
+                Button("New Feature") {
+                    appState.context.resetForNewFeature()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+            }
+
             Button("Change Project") {
                 appState.context.reset()
             }

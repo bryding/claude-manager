@@ -125,6 +125,31 @@ private struct LogEntryView: View {
     }()
 
     var body: some View {
+        if entry.type == .separator {
+            separatorView
+        } else {
+            regularEntryView
+        }
+    }
+
+    private var separatorView: some View {
+        HStack(spacing: 12) {
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(height: 1)
+
+            Text(entry.message)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(height: 1)
+        }
+        .padding(.vertical, 12)
+    }
+
+    private var regularEntryView: some View {
         HStack(alignment: .top, spacing: 8) {
             Text(Self.timeFormatter.string(from: entry.timestamp))
                 .font(.caption.monospaced())
