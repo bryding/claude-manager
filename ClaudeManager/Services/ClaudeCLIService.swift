@@ -28,13 +28,25 @@ struct ClaudeExecutionResult: Sendable {
 
 // MARK: - Service Error
 
-enum ClaudeCLIServiceError: Error {
+enum ClaudeCLIServiceError: Error, LocalizedError {
     case noResultMessage
     case processError(ClaudeProcessError)
+    case executableNotFound(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .noResultMessage:
+            return "No result message received from Claude CLI"
+        case .processError(let error):
+            return "Process error: \(error.localizedDescription)"
+        case .executableNotFound(let path):
+            return "Claude CLI not found at: \(path)"
+        }
+    }
 
     var isRetryable: Bool {
         switch self {
-        case .noResultMessage:
+        case .noResultMessage, .executableNotFound:
             return false
         case .processError(let error):
             return error.isRetryable
@@ -98,11 +110,22 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
         timeout: TimeInterval? = nil,
         onMessage: @escaping @Sendable (ClaudeStreamMessage) async -> Void
     ) async throws -> ClaudeExecutionResult {
+        // Verify executable exists
+        guard FileManager.default.isExecutableFile(atPath: executablePath) else {
+            print("[ClaudeCLI] Executable not found at: \(executablePath)")
+            throw ClaudeCLIServiceError.executableNotFound(executablePath)
+        }
+
+        print("[ClaudeCLI] Using executable: \(executablePath)")
+        print("[ClaudeCLI] Working directory: \(workingDirectory.path)")
+
         let arguments = buildArguments(
             prompt: prompt,
             permissionMode: permissionMode,
             sessionId: sessionId
         )
+
+        print("[ClaudeCLI] Arguments: \(arguments)")
 
         let process = ClaudeProcess(
             executablePath: executablePath,
@@ -123,6 +146,7 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
                 }
             }
         } catch let error as ClaudeProcessError {
+            print("[ClaudeCLI] Process error: \(error)")
             currentProcess = nil
             throw ClaudeCLIServiceError.processError(error)
         }
@@ -130,6 +154,7 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
         currentProcess = nil
 
         guard let result = resultMessage else {
+            print("[ClaudeCLI] No result message received")
             throw ClaudeCLIServiceError.noResultMessage
         }
 
