@@ -12,6 +12,7 @@
 		AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001110000010000000F /* AutonomousConfiguration.swift */; };
 		AA000002210000010000000F /* ProjectConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002110000010000000F /* ProjectConfiguration.swift */; };
 		AB000001210000010000000F /* CommandResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000001110000010000000F /* CommandResult.swift */; };
+		AE000001210000010000000F /* InterviewSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE000001110000010000000F /* InterviewSession.swift */; };
 		AC000001210000010000000F /* BuildTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000001110000010000000F /* BuildTestService.swift */; };
 		AC000002210000010000000F /* BuildTestServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000002110000010000000F /* BuildTestServiceProtocol.swift */; };
 		A1000001210000010000000F /* ClaudeManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001110000010000000F /* ClaudeManagerApp.swift */; };
@@ -65,6 +66,7 @@
 		AA000001110000010000000F /* AutonomousConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomousConfiguration.swift; sourceTree = "<group>"; };
 		AA000002110000010000000F /* ProjectConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfiguration.swift; sourceTree = "<group>"; };
 		AB000001110000010000000F /* CommandResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandResult.swift; sourceTree = "<group>"; };
+		AE000001110000010000000F /* InterviewSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewSession.swift; sourceTree = "<group>"; };
 		AC000001110000010000000F /* BuildTestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildTestService.swift; sourceTree = "<group>"; };
 		AC000002110000010000000F /* BuildTestServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildTestServiceProtocol.swift; sourceTree = "<group>"; };
 		A1000000010000010000000F /* ClaudeManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -167,6 +169,7 @@
 				AA000001110000010000000F /* AutonomousConfiguration.swift */,
 				AA000002110000010000000F /* ProjectConfiguration.swift */,
 				AB000001110000010000000F /* CommandResult.swift */,
+				AE000001110000010000000F /* InterviewSession.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -374,6 +377,7 @@
 				AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */,
 				AA000002210000010000000F /* ProjectConfiguration.swift in Sources */,
 				AB000001210000010000000F /* CommandResult.swift in Sources */,
+				AE000001210000010000000F /* InterviewSession.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
