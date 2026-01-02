@@ -66,6 +66,16 @@ final class ClaudeProcess: @unchecked Sendable {
             process.standardOutput = stdoutPipe
             process.standardError = stderrPipe
 
+            // Set up environment with PATH including node location
+            var environment = ProcessInfo.processInfo.environment
+            let nodeBinDir = (executablePath as NSString).deletingLastPathComponent
+            if let existingPath = environment["PATH"] {
+                environment["PATH"] = "\(nodeBinDir):\(existingPath)"
+            } else {
+                environment["PATH"] = nodeBinDir
+            }
+            process.environment = environment
+
             self.process = process
 
             var timeoutTask: Task<Void, Never>?
