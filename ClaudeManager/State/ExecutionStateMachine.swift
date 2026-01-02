@@ -605,7 +605,20 @@ final class ExecutionStateMachine {
 
     // MARK: - Message Handling
 
+    private enum MessageHandlerMode {
+        case standard
+        case interview
+    }
+
     private func handleStreamMessage(_ message: ClaudeStreamMessage) {
+        handleMessage(message, mode: .standard)
+    }
+
+    private func handleInterviewMessage(_ message: ClaudeStreamMessage) {
+        handleMessage(message, mode: .interview)
+    }
+
+    private func handleMessage(_ message: ClaudeStreamMessage, mode: MessageHandlerMode) {
         switch message {
         case .system(let systemMsg):
             context.sessionId = systemMsg.sessionId
@@ -618,22 +631,13 @@ final class ExecutionStateMachine {
                 case .text(let textContent):
                     context.addLog(type: .output, message: textContent.text)
 
+                    if mode == .interview && textContent.text.contains("INTERVIEW_COMPLETE") {
+                        context.interviewSession?.markComplete()
+                    }
+
                 case .toolUse(let toolUse):
                     if toolUse.isAskUserQuestion {
-                        if let input = toolUse.askUserQuestionInput,
-                           let firstQuestion = input.questions.first {
-                            let pendingQuestion = PendingQuestion(
-                                toolUseId: toolUse.id,
-                                question: firstQuestion
-                            )
-
-                            if context.autonomousConfig.autoAnswerEnabled {
-                                pendingAutoAnswerQuestion = pendingQuestion
-                            } else {
-                                context.pendingQuestion = pendingQuestion
-                                context.phase = .waitingForUser
-                            }
-                        }
+                        handleAskUserQuestion(toolUse, mode: mode)
                     } else {
                         context.addLog(type: .toolUse, message: "Tool: \(toolUse.name)")
                     }
@@ -645,7 +649,9 @@ final class ExecutionStateMachine {
                     inputTokens: usage.inputTokens,
                     outputTokens: usage.outputTokens
                 )
-                checkForContextExhaustion()
+                if mode == .standard {
+                    checkForContextExhaustion()
+                }
             }
 
         case .result(let resultMsg):
@@ -655,10 +661,39 @@ final class ExecutionStateMachine {
                 inputTokens: resultMsg.usage.inputTokens,
                 outputTokens: resultMsg.usage.outputTokens
             )
-            checkForContextExhaustion()
+            if mode == .standard {
+                checkForContextExhaustion()
+            }
 
         case .user:
             break
+        }
+    }
+
+    private func handleAskUserQuestion(_ toolUse: ToolUseContent, mode: MessageHandlerMode) {
+        guard let input = toolUse.askUserQuestionInput,
+              let firstQuestion = input.questions.first else {
+            return
+        }
+
+        let pendingQuestion = PendingQuestion(
+            toolUseId: toolUse.id,
+            question: firstQuestion
+        )
+
+        switch mode {
+        case .interview:
+            context.currentInterviewQuestion = firstQuestion.question
+            context.pendingQuestion = pendingQuestion
+            context.phase = .waitingForUser
+
+        case .standard:
+            if context.autonomousConfig.autoAnswerEnabled {
+                pendingAutoAnswerQuestion = pendingQuestion
+            } else {
+                context.pendingQuestion = pendingQuestion
+                context.phase = .waitingForUser
+            }
         }
     }
 
@@ -733,62 +768,6 @@ final class ExecutionStateMachine {
 
         if context.interviewSession?.isComplete == true {
             context.addLog(type: .info, message: "Interview completed, proceeding to plan generation")
-        }
-    }
-
-    private func handleInterviewMessage(_ message: ClaudeStreamMessage) {
-        switch message {
-        case .system(let systemMsg):
-            context.sessionId = systemMsg.sessionId
-
-        case .assistant(let assistantMsg):
-            context.sessionId = assistantMsg.sessionId
-
-            for block in assistantMsg.message.content {
-                switch block {
-                case .text(let textContent):
-                    context.addLog(type: .output, message: textContent.text)
-
-                    if textContent.text.contains("INTERVIEW_COMPLETE") {
-                        context.interviewSession?.markComplete()
-                    }
-
-                case .toolUse(let toolUse):
-                    if toolUse.isAskUserQuestion {
-                        if let input = toolUse.askUserQuestionInput,
-                           let firstQuestion = input.questions.first {
-                            context.currentInterviewQuestion = firstQuestion.question
-
-                            let pendingQuestion = PendingQuestion(
-                                toolUseId: toolUse.id,
-                                question: firstQuestion
-                            )
-                            context.pendingQuestion = pendingQuestion
-                            context.phase = .waitingForUser
-                        }
-                    } else {
-                        context.addLog(type: .toolUse, message: "Tool: \(toolUse.name)")
-                    }
-                }
-            }
-
-            if let usage = assistantMsg.message.usage {
-                context.accumulateUsage(
-                    inputTokens: usage.inputTokens,
-                    outputTokens: usage.outputTokens
-                )
-            }
-
-        case .result(let resultMsg):
-            context.sessionId = resultMsg.sessionId
-            context.totalCost += resultMsg.totalCostUsd
-            context.accumulateUsage(
-                inputTokens: resultMsg.usage.inputTokens,
-                outputTokens: resultMsg.usage.outputTokens
-            )
-
-        case .user:
-            break
         }
     }
 
