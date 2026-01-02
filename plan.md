@@ -62,7 +62,7 @@ User clicks Start → .conductingInterview → (questions via UserQuestionView) 
   - Change: `context.phase = .conductingInterview` (instead of `.generatingInitialPlan`)
   - Update log message: "Starting feature interview"
 
-- [ ] **Task 4.2**: Add conductInterview() method
+- [x] **Task 4.2**: Add conductInterview() method
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - Build prompt that asks Claude to analyze feature and ask ONE clarifying question
   - Include previous Q&A exchanges in prompt if any

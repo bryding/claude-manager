@@ -662,6 +662,134 @@ final class ExecutionStateMachine {
 
     // MARK: - Phase Handlers
 
+    private static let maxInterviewQuestions = 5
+
+    private func conductInterview() async throws {
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        guard let interviewSession = context.interviewSession else {
+            context.addLog(type: .error, message: "No interview session found")
+            return
+        }
+
+        let questionCount = interviewSession.exchanges.count
+
+        if questionCount >= Self.maxInterviewQuestions {
+            context.addLog(type: .info, message: "Maximum interview questions reached, proceeding to plan generation")
+            context.interviewSession?.markComplete()
+            return
+        }
+
+        let previousExchanges: String
+        if interviewSession.exchanges.isEmpty {
+            previousExchanges = ""
+        } else {
+            previousExchanges = """
+
+                ## Previous Clarifications
+                \(interviewSession.promptContext)
+
+                """
+        }
+
+        let prompt = """
+            You are gathering requirements for a software feature. Analyze the following feature request and ask ONE clarifying question that would help create a better implementation plan.
+
+            ## Feature Request
+            \(interviewSession.featureDescription)
+            \(previousExchanges)
+            ## Instructions
+            1. If the feature request is clear enough to proceed with planning, respond with exactly: INTERVIEW_COMPLETE
+            2. Otherwise, use the AskUserQuestion tool to ask ONE important clarifying question
+            3. Focus on: ambiguous requirements, technical decisions, scope boundaries
+            4. Do NOT ask about implementation details you can decide yourself
+            5. Maximum \(Self.maxInterviewQuestions) questions total. You have asked \(questionCount) so far.
+            """
+
+        context.addLog(type: .info, message: "Conducting interview (question \(questionCount + 1)/\(Self.maxInterviewQuestions) max)")
+
+        let result = try await claudeService.execute(
+            prompt: prompt,
+            workingDirectory: projectPath,
+            permissionMode: .plan,
+            sessionId: context.sessionId,
+            timeout: context.timeoutConfiguration.planModeTimeout,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleInterviewMessage(message)
+                }
+            }
+        )
+
+        if result.isError {
+            context.addLog(type: .error, message: "Interview phase failed")
+            throw ExecutionStateMachineError.executionFailed("conductInterview")
+        }
+
+        if context.interviewSession?.isComplete == true {
+            context.addLog(type: .info, message: "Interview completed, proceeding to plan generation")
+        }
+    }
+
+    private func handleInterviewMessage(_ message: ClaudeStreamMessage) {
+        switch message {
+        case .system(let systemMsg):
+            context.sessionId = systemMsg.sessionId
+
+        case .assistant(let assistantMsg):
+            context.sessionId = assistantMsg.sessionId
+
+            for block in assistantMsg.message.content {
+                switch block {
+                case .text(let textContent):
+                    context.addLog(type: .output, message: textContent.text)
+
+                    if textContent.text.contains("INTERVIEW_COMPLETE") {
+                        context.interviewSession?.markComplete()
+                    }
+
+                case .toolUse(let toolUse):
+                    if toolUse.isAskUserQuestion {
+                        if let input = toolUse.askUserQuestionInput,
+                           let firstQuestion = input.questions.first {
+                            context.currentInterviewQuestion = firstQuestion.question
+
+                            let pendingQuestion = PendingQuestion(
+                                toolUseId: toolUse.id,
+                                question: firstQuestion
+                            )
+                            context.pendingQuestion = pendingQuestion
+                            context.phase = .waitingForUser
+                        }
+                    } else {
+                        context.addLog(type: .toolUse, message: "Tool: \(toolUse.name)")
+                    }
+                }
+            }
+
+            if let usage = assistantMsg.message.usage {
+                context.accumulateUsage(
+                    inputTokens: usage.inputTokens,
+                    outputTokens: usage.outputTokens
+                )
+            }
+
+        case .result(let resultMsg):
+            context.sessionId = resultMsg.sessionId
+            context.totalCost += resultMsg.totalCostUsd
+            context.accumulateUsage(
+                inputTokens: resultMsg.usage.inputTokens,
+                outputTokens: resultMsg.usage.outputTokens
+            )
+
+        case .user:
+            break
+        }
+    }
+
     private func generateInitialPlan() async throws {
         guard let projectPath = context.projectPath else {
             throw ExecutionStateMachineError.noProjectPath
