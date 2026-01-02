@@ -160,6 +160,15 @@ final class ExecutionStateMachine {
             throw ExecutionStateMachineError.noSessionId
         }
 
+        // Record interview answer if this was an interview question
+        if let currentQuestion = context.currentInterviewQuestion,
+           context.interviewSession != nil,
+           context.interviewSession?.isComplete == false {
+            context.interviewSession?.addExchange(question: currentQuestion, answer: answer)
+            context.currentInterviewQuestion = nil
+            context.phase = .conductingInterview
+        }
+
         context.pendingQuestion = nil
         context.addLog(type: .info, message: "User answered: \(answer)")
 
