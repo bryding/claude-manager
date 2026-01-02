@@ -916,4 +916,45 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertTrue(context.logs.contains { $0.message.contains("Task failure 2/3") })
         XCTAssertTrue(context.logs.contains { $0.message.contains("Task failure 3/3") })
     }
+
+    // MARK: - Reset Interview State Tests
+
+    func testResetClearsInterviewSession() {
+        context.interviewSession = InterviewSession(featureDescription: "Test feature")
+        context.currentInterviewQuestion = "What is the scope?"
+
+        context.reset()
+
+        XCTAssertNil(context.interviewSession)
+        XCTAssertNil(context.currentInterviewQuestion)
+    }
+
+    func testResetForNewFeatureClearsInterviewSession() {
+        context.interviewSession = InterviewSession(featureDescription: "Test feature")
+        context.currentInterviewQuestion = "What is the scope?"
+
+        context.resetForNewFeature()
+
+        XCTAssertNil(context.interviewSession)
+        XCTAssertNil(context.currentInterviewQuestion)
+    }
+
+    func testResetForNewFeaturePreservesLogs() {
+        context.addLog(type: .info, message: "Previous session log")
+        context.interviewSession = InterviewSession(featureDescription: "Test feature")
+
+        context.resetForNewFeature()
+
+        XCTAssertFalse(context.logs.isEmpty)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Previous session log") })
+    }
+
+    func testResetClearsLogs() {
+        context.addLog(type: .info, message: "Previous session log")
+        context.interviewSession = InterviewSession(featureDescription: "Test feature")
+
+        context.reset()
+
+        XCTAssertTrue(context.logs.isEmpty)
+    }
 }
