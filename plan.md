@@ -70,18 +70,18 @@ User clicks Start → .conductingInterview → (questions via UserQuestionView) 
   - Max 5 questions limit
   - Call claudeService.execute() with plan permission mode
 
-- [ ] **Task 4.3**: Add interview case to executeCurrentPhase()
+- [x] **Task 4.3**: Add interview case to executeCurrentPhase()
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - Add case: `.conductingInterview: try await executeWithRetry(operationName: "Interview") { try await conductInterview() }`
 
-- [ ] **Task 4.4**: Handle interview messages for AskUserQuestion detection
+- [x] **Task 4.4**: Handle interview messages for AskUserQuestion detection
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - In conductInterview's message handler: detect AskUserQuestion tool use
   - Store question text in `context.currentInterviewQuestion`
   - Create PendingQuestion and set `context.pendingQuestion`
   - Set `context.phase = .waitingForUser`
 
-- [ ] **Task 4.5**: Handle "INTERVIEW_COMPLETE" signal
+- [x] **Task 4.5**: Handle "INTERVIEW_COMPLETE" signal
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - In conductInterview's message handler: check for "INTERVIEW_COMPLETE" in text
   - If found, call `context.interviewSession?.markComplete()`
