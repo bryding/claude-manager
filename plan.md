@@ -1,145 +1,146 @@
-# Full Autonomy for Claude Manager
+# Feature Interview Phase
 
-Make the orchestrator run with full control like a human developer sitting there.
+Add a conversational interview step before plan generation. Claude asks clarifying questions about the feature, and the answers inform better plan creation.
 
-## Features
-1. **Smart Auto-Answer** - When Claude asks questions, use AI to intelligently decide based on project context
-2. **Auto-Handle Failures** - Retry failed tasks automatically, then skip and continue
-3. **Run Build/Tests** - Add phases to run build & test commands, feed errors back to Claude
-4. **Better Prompts** - Improve prompts for task execution, code review, and test writing
+## Flow
+```
+User clicks Start → .conductingInterview → (questions via UserQuestionView) → .generatingInitialPlan → ...
+```
 
 ---
 
 ## Tasks
 
-### Phase 1: Configuration Foundation
+### Phase 1: Data Model
 
-- [x] **Task 1.1**: Create AutonomousConfiguration model
-  - File: `ClaudeManager/Models/AutonomousConfiguration.swift`
-  - Properties: autoAnswerEnabled, autoFailureHandling, maxTaskRetries, runBuildAfterCommit, runTestsAfterCommit, projectContext
-  - Enum: AutoFailureHandling (pauseForUser, retryThenSkip, retryThenStop)
+- [ ] **Task 1.1**: Create InterviewSession model
+  - File: `ClaudeManager/Models/InterviewSession.swift` (new)
+  - Create `InterviewQA` struct with: question, answer, timestamp
+  - Create `InterviewSession` struct with: featureDescription, exchanges array, startedAt, completedAt
+  - Add computed property `isComplete` (returns true if completedAt is set)
+  - Add `mutating func addExchange(question:answer:)`
+  - Add `mutating func markComplete()`
 
-- [x] **Task 1.2**: Create ProjectConfiguration model
-  - File: `ClaudeManager/Models/ProjectConfiguration.swift`
-  - Properties: projectType, buildCommand, testCommand
-  - Enum: ProjectType (swift, xcode, typescript, javascript, python, rust, go, unknown)
-
-- [x] **Task 1.3**: Add configuration persistence to UserPreferences
-  - File: `ClaudeManager/State/UserPreferences.swift`
-  - Add autonomousConfig property with UserDefaults storage
-
----
-
-### Phase 2: Smart Auto-Answer
-
-- [x] **Task 2.1**: Add generateSmartAnswer() method to ExecutionStateMachine
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - Use separate Claude call in plan mode to analyze question
-  - Include project context, current plan, current task in prompt
-  - Return the chosen option label
-
-- [x] **Task 2.2**: Update handleStreamMessage() for auto-answer
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - When AskUserQuestion detected and autoAnswerEnabled:
-    - Call generateSmartAnswer() instead of pausing
-    - Log the auto-answer decision
-    - Continue execution loop
+- [ ] **Task 1.2**: Add promptContext computed property to InterviewSession
+  - File: `ClaudeManager/Models/InterviewSession.swift`
+  - Format all Q&A exchanges into a string for inclusion in plan generation prompt
+  - Format: "Q1: ... A1: ... Q2: ... A2: ..."
 
 ---
 
-### Phase 3: Auto-Handle Failures
+### Phase 2: Execution Phase
 
-- [x] **Task 3.1**: Add failure tracking to ExecutionContext
-  - File: `ClaudeManager/State/ExecutionContext.swift`
-  - Add: taskFailureCount, autonomousConfig properties
-  - Add reset in appropriate places
-
-- [x] **Task 3.2**: Update handlePhaseError() for autonomous failure handling
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - If autoFailureHandling != pauseForUser:
-    - Increment taskFailureCount
-    - If under maxTaskRetries: retry (phase = .executingTask)
-    - If retryThenSkip: skip task and continue
-    - If retryThenStop: fail execution
-
----
-
-### Phase 4: Build/Test Integration
-
-- [x] **Task 4.1**: Add new execution phases
+- [ ] **Task 2.1**: Add conductingInterview case to ExecutionPhase
   - File: `ClaudeManager/Models/ExecutionPhase.swift`
-  - Add: runningBuild, runningTests, fixingBuildErrors, fixingTestErrors
-  - Add display names and progress weights
+  - Add `case conductingInterview` after `idle`
+  - Add to `permissionMode` switch: return `"plan"`
+  - Add to `progressWeight` switch: return `0.05`
+  - Add to `displayName` switch: return `"Interviewing"`
+  - Add to `description` switch: return `"Claude is asking clarifying questions about your feature"`
 
-- [x] **Task 4.2**: Create BuildTestService
-  - File: `ClaudeManager/Services/BuildTestService.swift`
-  - detectProjectType(in: URL) - check for Package.swift, package.json, Cargo.toml, etc.
-  - runBuild(in: URL, config: ProjectConfiguration) -> BuildResult
-  - runTests(in: URL, config: ProjectConfiguration) -> TestResult
-  - BuildResult/TestResult structs with success, output, errorOutput, duration
+---
 
-- [x] **Task 4.3**: Add build/test state to ExecutionContext
+### Phase 3: State Management
+
+- [ ] **Task 3.1**: Add interview state to ExecutionContext
   - File: `ClaudeManager/State/ExecutionContext.swift`
-  - Add: projectConfiguration, buildAttempts, testAttempts, lastBuildResult, lastTestResult
-  - Add maxBuildFixAttempts, maxTestFixAttempts constants
+  - Add property: `var interviewSession: InterviewSession?`
+  - Add property: `var currentInterviewQuestion: String?` (tracks question being asked)
 
-- [x] **Task 4.4**: Wire BuildTestService in AppState
-  - File: `ClaudeManager/State/AppState.swift`
-  - Add buildTestService property
-  - Pass to ExecutionStateMachine
-
-- [x] **Task 4.5**: Add build/test phase handlers
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - runBuild() - execute build command, capture output
-  - runTests() - execute test command, capture output
-  - fixBuildErrors() - send errors to Claude, commit fix
-  - fixTestErrors() - send test failures to Claude, commit fix
-
-- [x] **Task 4.6**: Update phase transitions for build/test
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - committingImplementation → runningBuild (if enabled) → reviewingCode
-  - runningBuild → fixingBuildErrors (if failed) → runningBuild (loop)
-  - committingTests → runningTests (if enabled) → clearingContext
-  - runningTests → fixingTestErrors (if failed) → runningTests (loop)
+- [ ] **Task 3.2**: Update reset methods to clear interview state
+  - File: `ClaudeManager/State/ExecutionContext.swift`
+  - In `reset()`: set `interviewSession = nil`, `currentInterviewQuestion = nil`
+  - In `resetForNewFeature()`: set `interviewSession = nil`, `currentInterviewQuestion = nil`
 
 ---
 
-### Phase 5: Better Prompts
+### Phase 4: Interview Execution
 
-- [x] **Task 5.1**: Improve executeCurrentTask() prompt
+- [ ] **Task 4.1**: Modify start() to begin with interview phase
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - Add context about previously completed tasks
-  - Reference plan.md structure
-  - Include project context from autonomous config
+  - After `resetState()`, initialize: `context.interviewSession = InterviewSession(featureDescription: context.featureDescription)`
+  - Change: `context.phase = .conductingInterview` (instead of `.generatingInitialPlan`)
+  - Update log message: "Starting feature interview"
 
-- [x] **Task 5.2**: Improve runCodeReview() prompt
+- [ ] **Task 4.2**: Add conductInterview() method
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - More specific review criteria (DRY, edge cases, error handling)
-  - Reference the specific task being reviewed
+  - Build prompt that asks Claude to analyze feature and ask ONE clarifying question
+  - Include previous Q&A exchanges in prompt if any
+  - Instruct Claude to respond "INTERVIEW_COMPLETE" if feature is clear
+  - Max 5 questions limit
+  - Call claudeService.execute() with plan permission mode
 
-- [x] **Task 5.3**: Improve writeTests() prompt
+- [ ] **Task 4.3**: Add interview case to executeCurrentPhase()
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - Specific test requirements (happy path, edge cases, error conditions)
-  - Arrange-Act-Assert pattern guidance
+  - Add case: `.conductingInterview: try await executeWithRetry(operationName: "Interview") { try await conductInterview() }`
+
+- [ ] **Task 4.4**: Handle interview messages for AskUserQuestion detection
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - In conductInterview's message handler: detect AskUserQuestion tool use
+  - Store question text in `context.currentInterviewQuestion`
+  - Create PendingQuestion and set `context.pendingQuestion`
+  - Set `context.phase = .waitingForUser`
+
+- [ ] **Task 4.5**: Handle "INTERVIEW_COMPLETE" signal
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - In conductInterview's message handler: check for "INTERVIEW_COMPLETE" in text
+  - If found, call `context.interviewSession?.markComplete()`
 
 ---
 
-### Phase 6: UI Configuration
+### Phase 5: Answer Handling
 
-- [x] **Task 6.1**: Add autonomous config section to SetupView
-  - File: `ClaudeManager/Views/SetupView.swift`
-  - Toggle: Enable Autonomous Mode
-  - TextField: Project Context (e.g., "Mimicking BEYOND laser show UI")
-  - Picker: On Failure (Retry then Skip / Retry then Stop)
-  - Stepper: Max Retries (1-10)
-  - Toggle: Run Build After Implementation
-  - Toggle: Run Tests After Writing
+- [ ] **Task 5.1**: Update answerQuestion() to record interview answers
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - Before existing logic, check if we're coming from interview phase
+  - If `currentInterviewQuestion` is set and `interviewSession` exists and not complete:
+    - Call `interviewSession.addExchange(question:answer:)`
+    - Clear `currentInterviewQuestion`
+    - Set `context.phase = .conductingInterview` (to continue interview)
+
+---
+
+### Phase 6: Phase Transitions
+
+- [ ] **Task 6.1**: Add interview phase transition
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - In `transitionToNextPhase()`, add case for `.conductingInterview`:
+    - If `context.interviewSession?.isComplete == true`: set phase to `.generatingInitialPlan`
+    - Else: stay in `.conductingInterview` (will ask another question)
+
+---
+
+### Phase 7: Plan Generation Integration
+
+- [ ] **Task 7.1**: Include interview context in plan generation prompt
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - In `generateInitialPlan()`, get: `let interviewContext = context.interviewSession?.promptContext ?? ""`
+  - Insert `interviewContext` into the prompt after the feature description
+
+---
+
+## Interview Prompt Template
+
+```
+You are gathering requirements for a software feature. Analyze the following feature request and ask ONE clarifying question that would help create a better implementation plan.
+
+## Feature Request
+{featureDescription}
+
+{previousExchanges if any}
+
+## Instructions
+1. If the feature request is clear enough to proceed with planning, respond with exactly: INTERVIEW_COMPLETE
+2. Otherwise, use the AskUserQuestion tool to ask ONE important clarifying question
+3. Focus on: ambiguous requirements, technical decisions, scope boundaries
+4. Do NOT ask about implementation details you can decide yourself
+5. Maximum 5 questions total. You have asked {count} so far.
+```
 
 ---
 
 ## Critical Files
-- `ClaudeManager/State/ExecutionStateMachine.swift` - Core loop logic
-- `ClaudeManager/State/ExecutionContext.swift` - State properties
-- `ClaudeManager/Models/ExecutionPhase.swift` - Phase definitions
-- `ClaudeManager/Views/SetupView.swift` - Configuration UI
-- `ClaudeManager/State/UserPreferences.swift` - Persistence
+- `ClaudeManager/Models/InterviewSession.swift` - New model (to create)
+- `ClaudeManager/Models/ExecutionPhase.swift` - Add new phase
+- `ClaudeManager/State/ExecutionContext.swift` - Add interview state
+- `ClaudeManager/State/ExecutionStateMachine.swift` - Core interview logic
