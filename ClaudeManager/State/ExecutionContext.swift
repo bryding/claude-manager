@@ -272,6 +272,8 @@ final class ExecutionContext {
         testAttempts = 0
         lastBuildResult = nil
         lastTestResult = nil
+        interviewSession = nil
+        currentInterviewQuestion = nil
     }
 
     func resetForNewFeature() {
@@ -305,6 +307,8 @@ final class ExecutionContext {
         testAttempts = 0
         lastBuildResult = nil
         lastTestResult = nil
+        interviewSession = nil
+        currentInterviewQuestion = nil
     }
 
     func resetRetryAttempt() {

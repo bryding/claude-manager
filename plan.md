@@ -47,7 +47,7 @@ User clicks Start → .conductingInterview → (questions via UserQuestionView) 
   - Add property: `var interviewSession: InterviewSession?`
   - Add property: `var currentInterviewQuestion: String?` (tracks question being asked)
 
-- [ ] **Task 3.2**: Update reset methods to clear interview state
+- [x] **Task 3.2**: Update reset methods to clear interview state
   - File: `ClaudeManager/State/ExecutionContext.swift`
   - In `reset()`: set `interviewSession = nil`, `currentInterviewQuestion = nil`
   - In `resetForNewFeature()`: set `interviewSession = nil`, `currentInterviewQuestion = nil`
