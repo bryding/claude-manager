@@ -30,7 +30,7 @@ User clicks Start → .conductingInterview → (questions via UserQuestionView) 
 
 ### Phase 2: Execution Phase
 
-- [ ] **Task 2.1**: Add conductingInterview case to ExecutionPhase
+- [x] **Task 2.1**: Add conductingInterview case to ExecutionPhase
   - File: `ClaudeManager/Models/ExecutionPhase.swift`
   - Add `case conductingInterview` after `idle`
   - Add to `permissionMode` switch: return `"plan"`

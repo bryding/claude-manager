@@ -4,6 +4,7 @@ import Foundation
 
 enum ExecutionPhase: String, Sendable, Equatable {
     case idle
+    case conductingInterview
     case generatingInitialPlan
     case rewritingPlan
     case executingTask
@@ -29,7 +30,7 @@ enum ExecutionPhase: String, Sendable, Equatable {
 extension ExecutionPhase {
     var permissionMode: String? {
         switch self {
-        case .generatingInitialPlan, .rewritingPlan, .reviewingCode, .writingTests:
+        case .conductingInterview, .generatingInitialPlan, .rewritingPlan, .reviewingCode, .writingTests:
             return "plan"
         case .executingTask, .committingImplementation, .committingReview, .committingTests, .clearingContext, .handlingContextExhaustion, .fixingBuildErrors, .fixingTestErrors:
             return "acceptEdits"
@@ -51,6 +52,8 @@ extension ExecutionPhase {
         switch self {
         case .idle, .paused, .failed:
             return 0.0
+        case .conductingInterview:
+            return 0.05
         case .generatingInitialPlan:
             return 0.1
         case .rewritingPlan:
@@ -88,6 +91,8 @@ extension ExecutionPhase {
         switch self {
         case .idle:
             return "Idle"
+        case .conductingInterview:
+            return "Interviewing"
         case .generatingInitialPlan:
             return "Generating Plan"
         case .rewritingPlan:
@@ -131,6 +136,8 @@ extension ExecutionPhase {
         switch self {
         case .idle:
             return "Ready to start"
+        case .conductingInterview:
+            return "Claude is asking clarifying questions about your feature"
         case .generatingInitialPlan:
             return "Claude is analyzing your feature request"
         case .rewritingPlan:

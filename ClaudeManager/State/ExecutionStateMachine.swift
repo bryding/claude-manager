@@ -342,6 +342,9 @@ final class ExecutionStateMachine {
         case .idle:
             break
 
+        case .conductingInterview:
+            break
+
         case .generatingInitialPlan:
             try await executeWithRetry(operationName: "Generate plan") {
                 try await generateInitialPlan()
@@ -416,6 +419,9 @@ final class ExecutionStateMachine {
         switch context.phase {
         case .idle:
             break
+
+        case .conductingInterview:
+            context.phase = .generatingInitialPlan
 
         case .generatingInitialPlan:
             context.phase = .rewritingPlan
