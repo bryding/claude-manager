@@ -307,21 +307,21 @@ struct SetupView: View {
 
         Task {
             do {
-                // Check for plan.md right before starting
-                if let projectPath = appState.context.projectPath {
+                // If no feature description, try to use plan.md
+                let hasFeature = !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+                if !hasFeature, let projectPath = appState.context.projectPath {
                     let planURL = projectPath.appendingPathComponent("plan.md")
                     if FileManager.default.fileExists(atPath: planURL.path) {
-                        if let plan = try? planService.parsePlanFromFile(at: planURL) {
-                            appState.context.existingPlan = plan
-                        }
+                        let plan = try planService.parsePlanFromFile(at: planURL)
+                        appState.context.existingPlan = plan
+                        try await appState.stateMachine.startWithExistingPlan()
+                        isStarting = false
+                        return
                     }
                 }
 
-                if appState.context.existingPlan != nil {
-                    try await appState.stateMachine.startWithExistingPlan()
-                } else {
-                    try await appState.stateMachine.start()
-                }
+                try await appState.stateMachine.start()
             } catch {
                 errorMessage = error.localizedDescription
             }
