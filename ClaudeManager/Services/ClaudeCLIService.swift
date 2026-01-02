@@ -48,8 +48,8 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
     let executablePath: String
     private var currentProcess: ClaudeProcess?
 
-    init(executablePath: String = Self.findClaudePath()) {
-        self.executablePath = executablePath
+    init(executablePath: String? = nil) {
+        self.executablePath = executablePath ?? Self.findClaudePath()
     }
 
     private static func findClaudePath() -> String {
