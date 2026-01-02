@@ -344,7 +344,9 @@ final class ExecutionStateMachine {
             break
 
         case .conductingInterview:
-            break
+            try await executeWithRetry(operationName: "Interview") {
+                try await conductInterview()
+            }
 
         case .generatingInitialPlan:
             try await executeWithRetry(operationName: "Generate plan") {
