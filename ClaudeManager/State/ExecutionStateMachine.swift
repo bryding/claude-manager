@@ -78,9 +78,10 @@ final class ExecutionStateMachine {
         }
 
         resetState()
+        context.interviewSession = InterviewSession(featureDescription: context.featureDescription)
         context.startTime = Date()
-        context.phase = .generatingInitialPlan
-        context.addLog(type: .info, message: "Starting execution loop")
+        context.phase = .conductingInterview
+        context.addLog(type: .info, message: "Starting feature interview")
 
         await runLoop()
     }

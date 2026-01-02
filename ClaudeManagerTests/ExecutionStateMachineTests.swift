@@ -111,7 +111,7 @@ final class ExecutionStateMachineTests: XCTestCase {
         try await stateMachine.start()
 
         XCTAssertFalse(context.logs.isEmpty)
-        XCTAssertTrue(context.logs.contains { $0.message.contains("Starting execution loop") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Starting feature interview") })
     }
 
     // MARK: - Pause
@@ -915,6 +915,29 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertTrue(context.logs.contains { $0.message.contains("Task failure 1/3") })
         XCTAssertTrue(context.logs.contains { $0.message.contains("Task failure 2/3") })
         XCTAssertTrue(context.logs.contains { $0.message.contains("Task failure 3/3") })
+    }
+
+    // MARK: - Interview Initialization Tests
+
+    func testStartInitializesInterviewSession() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a new authentication system"
+
+        XCTAssertNil(context.interviewSession)
+
+        try await stateMachine.start()
+
+        XCTAssertNotNil(context.interviewSession)
+        XCTAssertEqual(context.interviewSession?.featureDescription, "Build a new authentication system")
+    }
+
+    func testStartSetsInterviewPhase() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Executing phase: conductingInterview") })
     }
 
     // MARK: - Reset Interview State Tests
