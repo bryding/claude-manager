@@ -980,4 +980,163 @@ final class ExecutionStateMachineTests: XCTestCase {
 
         XCTAssertTrue(context.logs.isEmpty)
     }
+
+    // MARK: - INTERVIEW_COMPLETE Signal Tests
+
+    func testInterviewCompleteSignalMarksSessionComplete() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        // Set up mock to send an assistant message containing INTERVIEW_COMPLETE
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "The requirements are clear. INTERVIEW_COMPLETE")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "INTERVIEW_COMPLETE",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.interviewSession?.isComplete ?? false)
+    }
+
+    func testInterviewCompleteSignalWithSurroundingTextMarksComplete() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "I understand the requirements fully.\n\nINTERVIEW_COMPLETE\n\nProceeding to planning.")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "done",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        XCTAssertTrue(context.interviewSession?.isComplete ?? false)
+    }
+
+    func testInterviewWithoutCompleteSignalDoesNotMarkComplete() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        // Send an AskUserQuestion instead of INTERVIEW_COMPLETE
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What is the scope?", header: "Scope")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question asked",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        XCTAssertFalse(context.interviewSession?.isComplete ?? true)
+        XCTAssertEqual(context.phase, .waitingForUser)
+    }
+
+    func testInterviewCompleteTransitionsToPlanGeneration() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "INTERVIEW_COMPLETE",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        // After interview completes, should transition to plan generation
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Interview completed, proceeding to plan generation") })
+    }
+
+    // MARK: - Test Helpers
+
+    private func makeAssistantMessage(text: String) -> ClaudeStreamMessage {
+        let json = """
+        {
+            "type": "assistant",
+            "message": {
+                "id": "msg_test",
+                "model": "claude-opus-4-5-20251101",
+                "role": "assistant",
+                "content": [
+                    {"type": "text", "text": "\(escapeJSON(text))"}
+                ],
+                "stop_reason": null,
+                "usage": {
+                    "input_tokens": 100,
+                    "output_tokens": 50
+                }
+            },
+            "session_id": "mock-session-id",
+            "parent_tool_use_id": null
+        }
+        """
+        return try! JSONDecoder().decode(ClaudeStreamMessage.self, from: json.data(using: .utf8)!)
+    }
+
+    private func makeAskUserQuestionMessage(question: String, header: String) -> ClaudeStreamMessage {
+        let json = """
+        {
+            "type": "assistant",
+            "message": {
+                "id": "msg_test",
+                "model": "claude-opus-4-5-20251101",
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "tool_use",
+                        "id": "toolu_ask",
+                        "name": "AskUserQuestion",
+                        "input": {
+                            "questions": [
+                                {
+                                    "question": "\(escapeJSON(question))",
+                                    "header": "\(escapeJSON(header))",
+                                    "options": [
+                                        {"label": "Option 1", "description": "First option"},
+                                        {"label": "Option 2", "description": "Second option"}
+                                    ],
+                                    "multiSelect": false
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "stop_reason": null,
+                "usage": null
+            },
+            "session_id": "mock-session-id",
+            "parent_tool_use_id": null
+        }
+        """
+        return try! JSONDecoder().decode(ClaudeStreamMessage.self, from: json.data(using: .utf8)!)
+    }
+
+    private func escapeJSON(_ string: String) -> String {
+        string
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "\r", with: "\\r")
+            .replacingOccurrences(of: "\t", with: "\\t")
+    }
 }
