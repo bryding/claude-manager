@@ -159,6 +159,11 @@ final class ExecutionContext {
     var lastBuildResult: CommandResult?
     var lastTestResult: CommandResult?
 
+    // MARK: - Interview State
+
+    var interviewSession: InterviewSession?
+    var currentInterviewQuestion: String?
+
     // MARK: - UI State
 
     var showStopConfirmation: Bool = false
