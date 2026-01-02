@@ -788,11 +788,24 @@ final class ExecutionStateMachine {
             throw ExecutionStateMachineError.noProjectPath
         }
 
+        let interviewContext = context.interviewSession?.promptContext ?? ""
+        let clarificationsSection: String
+        if interviewContext.isEmpty {
+            clarificationsSection = ""
+        } else {
+            clarificationsSection = """
+
+
+                ## Clarifications from User
+                \(interviewContext)
+
+                """
+        }
+
         let prompt = """
             Analyze the following feature request and create a high-level implementation plan:
 
-            \(context.featureDescription)
-
+            \(context.featureDescription)\(clarificationsSection)
             Create a structured plan with discrete, implementable tasks. Use this format:
 
             ## Task 1: Task Title

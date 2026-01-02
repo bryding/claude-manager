@@ -112,7 +112,7 @@ User clicks Start → .conductingInterview → (questions via UserQuestionView) 
 
 ### Phase 7: Plan Generation Integration
 
-- [ ] **Task 7.1**: Include interview context in plan generation prompt
+- [x] **Task 7.1**: Include interview context in plan generation prompt
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - In `generateInitialPlan()`, get: `let interviewContext = context.interviewSession?.promptContext ?? ""`
   - Insert `interviewContext` into the prompt after the feature description
