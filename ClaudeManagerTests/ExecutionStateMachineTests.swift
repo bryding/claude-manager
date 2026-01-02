@@ -1065,6 +1065,32 @@ final class ExecutionStateMachineTests: XCTestCase {
 
         // After interview completes, should transition to plan generation
         XCTAssertTrue(context.logs.contains { $0.message.contains("Interview completed, proceeding to plan generation") })
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Transitioned to phase: generatingInitialPlan") })
+    }
+
+    func testInterviewIncompleteStaysInInterviewPhase() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        // First call: Claude asks a question
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What is the scope?", header: "Scope")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question asked",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        // Should be waiting for user, interview not complete
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertFalse(context.interviewSession?.isComplete ?? true)
+        // Should NOT have transitioned to plan generation yet
+        XCTAssertFalse(context.logs.contains { $0.message.contains("Transitioned to phase: generatingInitialPlan") })
     }
 
     // MARK: - Interview Answer Recording Tests
