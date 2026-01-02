@@ -210,6 +210,20 @@ struct ControlsView: View {
     private func startExecution() {
         Task {
             do {
+                // If no feature description, try to use plan.md
+                let hasFeature = !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+                if !hasFeature, let projectPath = appState.context.projectPath {
+                    let planURL = projectPath.appendingPathComponent("plan.md")
+                    if FileManager.default.fileExists(atPath: planURL.path) {
+                        let planService = PlanService()
+                        let plan = try planService.parsePlanFromFile(at: planURL)
+                        appState.context.existingPlan = plan
+                        try await appState.stateMachine.startWithExistingPlan()
+                        return
+                    }
+                }
+
                 try await appState.stateMachine.start()
             } catch {
                 errorMessage = error.localizedDescription
