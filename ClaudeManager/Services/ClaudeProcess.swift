@@ -114,7 +114,9 @@ final class ClaudeProcess: @unchecked Sendable {
 
             continuation.onTermination = { @Sendable _ in
                 timeoutTask?.cancel()
-                process.terminate()
+                if process.isRunning {
+                    process.terminate()
+                }
             }
         }
     }
