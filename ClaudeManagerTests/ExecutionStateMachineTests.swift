@@ -671,7 +671,7 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertTrue(context.logs.contains { $0.message.contains("retrying") })
     }
 
-    func testNonRetryableErrorFailsPlanGeneration() async throws {
+    func testNonRetryableErrorFailsInterview() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
         mockClaudeService.executeError = ClaudeCLIServiceError.noResultMessage
@@ -679,7 +679,7 @@ final class ExecutionStateMachineTests: XCTestCase {
         try await stateMachine.start()
 
         XCTAssertEqual(context.phase, .failed)
-        XCTAssertTrue(context.errors.contains { $0.message.contains("generatingInitialPlan") })
+        XCTAssertTrue(context.errors.contains { $0.message.contains("conductingInterview") })
     }
 
     func testRetryExhaustsMaxAttemptsInPlanGeneration() async throws {
