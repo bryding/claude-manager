@@ -58,6 +58,9 @@ struct PhaseIndicatorView: View {
     }
 
     private var statusColor: Color {
+        if phase == .conductingInterview && hasQuestion {
+            return .yellow
+        }
         switch phase {
         case .idle, .paused:
             return .gray
@@ -73,6 +76,9 @@ struct PhaseIndicatorView: View {
     }
 
     private var isActive: Bool {
+        if phase == .conductingInterview && hasQuestion {
+            return false
+        }
         switch phase {
         case .idle, .paused, .waitingForUser, .completed, .failed:
             return false
@@ -93,6 +99,15 @@ struct PhaseIndicatorView: View {
         PhaseIndicatorView(phase: .waitingForUser)
         PhaseIndicatorView(phase: .completed)
         PhaseIndicatorView(phase: .failed)
+    }
+    .padding()
+}
+
+#Preview("Interview States") {
+    VStack(alignment: .leading, spacing: 16) {
+        PhaseIndicatorView(phase: .conductingInterview)
+        PhaseIndicatorView(phase: .conductingInterview, hasQuestion: true)
+        PhaseIndicatorView(phase: .conductingInterview, isInterviewComplete: true)
     }
     .padding()
 }
