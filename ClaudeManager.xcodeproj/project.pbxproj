@@ -50,6 +50,7 @@
 		A6000005210000010000000F /* UserQuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000005110000010000000F /* UserQuestionView.swift */; };
 		A6000006210000010000000F /* ControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000006110000010000000F /* ControlsView.swift */; };
 		A6000007210000010000000F /* ExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000007110000010000000F /* ExecutionView.swift */; };
+		A6000008210000010000000F /* ManualInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000008110000010000000F /* ManualInputView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +109,7 @@
 		A6000005110000010000000F /* UserQuestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserQuestionView.swift; sourceTree = "<group>"; };
 		A6000006110000010000000F /* ControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsView.swift; sourceTree = "<group>"; };
 		A6000007110000010000000F /* ExecutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionView.swift; sourceTree = "<group>"; };
+		A6000008110000010000000F /* ManualInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualInputView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -223,6 +225,7 @@
 				A6000005110000010000000F /* UserQuestionView.swift */,
 				A6000006110000010000000F /* ControlsView.swift */,
 				A6000007110000010000000F /* ExecutionView.swift */,
+				A6000008110000010000000F /* ManualInputView.swift */,
 				A8000002110000010000000F /* TaskFailureView.swift */,
 			);
 			path = Views;
@@ -384,6 +387,7 @@
 				AA000002210000010000000F /* ProjectConfiguration.swift in Sources */,
 				AB000001210000010000000F /* CommandResult.swift in Sources */,
 				AE000001210000010000000F /* InterviewSession.swift in Sources */,
+				A6000008210000010000000F /* ManualInputView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

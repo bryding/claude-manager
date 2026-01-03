@@ -41,6 +41,10 @@ struct LogView: View {
                     }
                 }
             }
+
+            Divider()
+
+            ManualInputView()
         }
     }
 
@@ -183,7 +187,12 @@ private struct LogEntryView: View {
 
 #if DEBUG
 #Preview("Log View") {
-    LogView(logs: [
+    let context = ExecutionContext()
+    context.sessionId = "test-session"
+    context.phase = .executingTask
+    let appState = AppState(context: context)
+
+    return LogView(logs: [
         LogEntry(phase: .executingTask, type: .info, message: "Starting task execution..."),
         LogEntry(phase: .executingTask, type: .output, message: "Reading file: /src/main.swift"),
         LogEntry(phase: .executingTask, type: .toolUse, message: "Read: ClaudeManager/Models/Plan.swift"),
@@ -193,11 +202,29 @@ private struct LogEntryView: View {
         LogEntry(phase: .executingTask, type: .output, message: "Fixing compilation error..."),
         LogEntry(phase: .executingTask, type: .result, message: "Task completed successfully"),
     ])
+    .environment(appState)
     .frame(width: 800, height: 400)
 }
 
 #Preview("Log View Empty") {
-    LogView(logs: [])
+    let appState = AppState()
+
+    return LogView(logs: [])
+        .environment(appState)
         .frame(width: 800, height: 400)
+}
+
+#Preview("Log View With Input Available") {
+    let context = ExecutionContext()
+    context.sessionId = "test-session"
+    context.phase = .executingTask
+    let appState = AppState(context: context)
+
+    return LogView(logs: [
+        LogEntry(phase: .executingTask, type: .info, message: "Executing task..."),
+        LogEntry(phase: .executingTask, type: .output, message: "Working on implementation"),
+    ])
+    .environment(appState)
+    .frame(width: 800, height: 400)
 }
 #endif
