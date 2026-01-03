@@ -1,146 +1,161 @@
-# Feature Interview Phase
+# Fix Interview Bugs and Add Manual User Input
 
-Add a conversational interview step before plan generation. Claude asks clarifying questions about the feature, and the answers inform better plan creation.
+Fix bugs in the interview/plan generation workflow and add manual user control.
 
-## Flow
-```
-User clicks Start → .conductingInterview → (questions via UserQuestionView) → .generatingInitialPlan → ...
-```
+## Problem Summary
+
+1. **Duplicate question bug**: Interview question asked twice, dialog closes before user can answer
+2. **Freeze bug**: Plan generation appears to freeze after interview
+3. **Missing user control**: No way to send manual prompts to Claude when stuck
 
 ---
 
 ## Tasks
 
-### Phase 1: Data Model
+### Phase 1: Fix Duplicate Question Bug
 
-- [ ] **Task 1.1**: Create InterviewSession model
-  - File: `ClaudeManager/Models/InterviewSession.swift` (new)
-  - Create `InterviewQA` struct with: question, answer, timestamp
-  - Create `InterviewSession` struct with: featureDescription, exchanges array, startedAt, completedAt
-  - Add computed property `isComplete` (returns true if completedAt is set)
-  - Add `mutating func addExchange(question:answer:)`
-  - Add `mutating func markComplete()`
+- [ ] **Task 1.1**: Add question tracking flag to ExecutionStateMachine
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - Add private property: `private var questionAskedDuringPhase = false`
+  - Location: Around line 49 with other private properties
 
-- [x] **Task 1.2**: Add promptContext computed property to InterviewSession
-  - File: `ClaudeManager/Models/InterviewSession.swift`
-  - Format all Q&A exchanges into a string for inclusion in plan generation prompt
-  - Format: "Q1: ... A1: ... Q2: ... A2: ..."
+- [ ] **Task 1.2**: Set flag when interview question is detected
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - In `handleAskUserQuestion()` (~line 697-700), for `.interview` case:
+  - Add: `questionAskedDuringPhase = true` after setting `context.phase = .waitingForUser`
 
----
+- [ ] **Task 1.3**: Reset flag at start of conductInterview()
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - At the beginning of `conductInterview()` (~line 716):
+  - Add: `questionAskedDuringPhase = false`
 
-### Phase 2: Execution Phase
-
-- [x] **Task 2.1**: Add conductingInterview case to ExecutionPhase
-  - File: `ClaudeManager/Models/ExecutionPhase.swift`
-  - Add `case conductingInterview` after `idle`
-  - Add to `permissionMode` switch: return `"plan"`
-  - Add to `progressWeight` switch: return `0.05`
-  - Add to `displayName` switch: return `"Interviewing"`
-  - Add to `description` switch: return `"Claude is asking clarifying questions about your feature"`
+- [ ] **Task 1.4**: Check flag in runLoop() and break if question asked
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - In `runLoop()` after `try await executeCurrentPhase()` (~line 339):
+  - Add check: if `questionAskedDuringPhase` is true, set it false and `break`
 
 ---
 
-### Phase 3: State Management
+### Phase 2: Fix Interview Freeze Bug
 
-- [ ] **Task 3.1**: Add interview state to ExecutionContext
+- [ ] **Task 2.1**: Add auto-complete fallback in conductInterview()
+  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+  - After `claudeService.execute()` returns in `conductInterview()` (~line 776):
+  - Check: if `isComplete == false` AND `pendingQuestion == nil` AND `questionAskedDuringPhase == false`
+  - If all true: call `context.interviewSession?.markComplete()` with log message
+  - Reason: Claude responded substantively without asking more questions
+
+---
+
+### Phase 3: Add Manual Input State
+
+- [ ] **Task 3.1**: Add isManualInputAvailable computed property
   - File: `ClaudeManager/State/ExecutionContext.swift`
-  - Add property: `var interviewSession: InterviewSession?`
-  - Add property: `var currentInterviewQuestion: String?` (tracks question being asked)
+  - Add computed property that returns true if:
+  - `sessionId != nil && !phase.isTerminal && phase != .idle`
 
-- [x] **Task 3.2**: Update reset methods to clear interview state
+- [ ] **Task 3.2**: Add suggestedManualInput property
   - File: `ClaudeManager/State/ExecutionContext.swift`
-  - In `reset()`: set `interviewSession = nil`, `currentInterviewQuestion = nil`
-  - In `resetForNewFeature()`: set `interviewSession = nil`, `currentInterviewQuestion = nil`
+  - Add: `var suggestedManualInput: String = ""`
+  - Used by Continue button to pre-fill the input field
+
+- [ ] **Task 3.3**: Add appearsStuck computed property
+  - File: `ClaudeManager/State/ExecutionContext.swift`
+  - Returns true if: `phase == .conductingInterview && pendingQuestion == nil && interviewSession?.isComplete != true`
 
 ---
 
-### Phase 4: Interview Execution
+### Phase 4: Add Manual Input Method
 
-- [x] **Task 4.1**: Modify start() to begin with interview phase
+- [ ] **Task 4.1**: Add sendManualInput() method to ExecutionStateMachine
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - After `resetState()`, initialize: `context.interviewSession = InterviewSession(featureDescription: context.featureDescription)`
-  - Change: `context.phase = .conductingInterview` (instead of `.generatingInitialPlan`)
-  - Update log message: "Starting feature interview"
-
-- [x] **Task 4.2**: Add conductInterview() method
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - Build prompt that asks Claude to analyze feature and ask ONE clarifying question
-  - Include previous Q&A exchanges in prompt if any
-  - Instruct Claude to respond "INTERVIEW_COMPLETE" if feature is clear
-  - Max 5 questions limit
-  - Call claudeService.execute() with plan permission mode
-
-- [x] **Task 4.3**: Add interview case to executeCurrentPhase()
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - Add case: `.conductingInterview: try await executeWithRetry(operationName: "Interview") { try await conductInterview() }`
-
-- [x] **Task 4.4**: Handle interview messages for AskUserQuestion detection
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - In conductInterview's message handler: detect AskUserQuestion tool use
-  - Store question text in `context.currentInterviewQuestion`
-  - Create PendingQuestion and set `context.pendingQuestion`
-  - Set `context.phase = .waitingForUser`
-
-- [x] **Task 4.5**: Handle "INTERVIEW_COMPLETE" signal
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - In conductInterview's message handler: check for "INTERVIEW_COMPLETE" in text
-  - If found, call `context.interviewSession?.markComplete()`
+  - New public method: `func sendManualInput(_ input: String) async throws`
+  - Guard: projectPath and sessionId must exist
+  - Log the user input
+  - Determine permission mode from current phase
+  - Call `claudeService.execute()` with user's prompt and current sessionId
+  - Handle streaming messages with `handleStreamMessage()`
+  - Resume `runLoop()` after completion if not waiting for user
 
 ---
 
-### Phase 5: Answer Handling
+### Phase 5: Create ManualInputView
 
-- [ ] **Task 5.1**: Update answerQuestion() to record interview answers
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - Before existing logic, check if we're coming from interview phase
-  - If `currentInterviewQuestion` is set and `interviewSession` exists and not complete:
-    - Call `interviewSession.addExchange(question:answer:)`
-    - Clear `currentInterviewQuestion`
-    - Set `context.phase = .conductingInterview` (to continue interview)
+- [ ] **Task 5.1**: Create ManualInputView.swift file
+  - File: `ClaudeManager/Views/ManualInputView.swift` (new)
+  - SwiftUI view with Environment access to AppState
+  - Local state: `inputText`, `isSubmitting`, `errorMessage`
 
----
+- [ ] **Task 5.2**: Add text field and send button
+  - File: `ClaudeManager/Views/ManualInputView.swift`
+  - TextField with placeholder "Send message to Claude..."
+  - Send button with paperplane icon
+  - Disable when: input empty, submitting, or `!isManualInputAvailable`
 
-### Phase 6: Phase Transitions
+- [ ] **Task 5.3**: Add submit logic
+  - File: `ClaudeManager/Views/ManualInputView.swift`
+  - On submit: trim input, clear field, set isSubmitting
+  - Call `appState.stateMachine.sendManualInput(text)`
+  - Handle errors with alert
+  - Reset isSubmitting when done
 
-- [ ] **Task 6.1**: Add interview phase transition
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - In `transitionToNextPhase()`, add case for `.conductingInterview`:
-    - If `context.interviewSession?.isComplete == true`: set phase to `.generatingInitialPlan`
-    - Else: stay in `.conductingInterview` (will ask another question)
-
----
-
-### Phase 7: Plan Generation Integration
-
-- [x] **Task 7.1**: Include interview context in plan generation prompt
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
-  - In `generateInitialPlan()`, get: `let interviewContext = context.interviewSession?.promptContext ?? ""`
-  - Insert `interviewContext` into the prompt after the feature description
+- [ ] **Task 5.4**: Add suggested text binding
+  - File: `ClaudeManager/Views/ManualInputView.swift`
+  - Watch `appState.context.suggestedManualInput`
+  - When it changes to non-empty, populate inputText and clear the suggestion
 
 ---
 
-## Interview Prompt Template
+### Phase 6: Integrate ManualInputView into LogView
 
-```
-You are gathering requirements for a software feature. Analyze the following feature request and ask ONE clarifying question that would help create a better implementation plan.
+- [ ] **Task 6.1**: Add ManualInputView to LogView body
+  - File: `ClaudeManager/Views/LogView.swift`
+  - Add `Divider()` and `ManualInputView()` at the bottom of the VStack
+  - After the ScrollViewReader, before closing brace
 
-## Feature Request
-{featureDescription}
+---
 
-{previousExchanges if any}
+### Phase 7: Add Continue Button for Stuck States
 
-## Instructions
-1. If the feature request is clear enough to proceed with planning, respond with exactly: INTERVIEW_COMPLETE
-2. Otherwise, use the AskUserQuestion tool to ask ONE important clarifying question
-3. Focus on: ambiguous requirements, technical decisions, scope boundaries
-4. Do NOT ask about implementation details you can decide yourself
-5. Maximum 5 questions total. You have asked {count} so far.
-```
+- [ ] **Task 7.1**: Add Continue button to ControlsView
+  - File: `ClaudeManager/Views/ControlsView.swift`
+  - Add computed property checking `context.appearsStuck`
+  - Show orange "Continue" button when stuck
+
+- [ ] **Task 7.2**: Implement Continue button action
+  - File: `ClaudeManager/Views/ControlsView.swift`
+  - On click: set `context.suggestedManualInput` to nudge text
+  - Nudge text: "Please continue with the interview or proceed to plan generation if you have enough information."
+  - User edits and sends manually
+
+---
+
+### Phase 8: Improve Phase Indicator
+
+- [ ] **Task 8.1**: Add context parameters to PhaseIndicatorView
+  - File: `ClaudeManager/Views/PhaseIndicatorView.swift`
+  - Add optional parameters: `hasQuestion: Bool = false`, `isInterviewComplete: Bool = false`
+
+- [ ] **Task 8.2**: Show contextual status for interview phase
+  - File: `ClaudeManager/Views/PhaseIndicatorView.swift`
+  - If interview phase and `hasQuestion`: "Waiting for your answer..."
+  - If interview phase and not complete: "Claude is gathering requirements..."
+
+- [ ] **Task 8.3**: Update ExecutionView to pass context
+  - File: `ClaudeManager/Views/ExecutionView.swift`
+  - Pass `hasQuestion: context.pendingQuestion != nil`
+  - Pass `isInterviewComplete: context.interviewSession?.isComplete ?? false`
 
 ---
 
 ## Critical Files
-- `ClaudeManager/Models/InterviewSession.swift` - New model (to create)
-- `ClaudeManager/Models/ExecutionPhase.swift` - Add new phase
-- `ClaudeManager/State/ExecutionContext.swift` - Add interview state
-- `ClaudeManager/State/ExecutionStateMachine.swift` - Core interview logic
+
+| File | Changes |
+|------|---------|
+| `State/ExecutionStateMachine.swift` | Bug fixes (flag, auto-complete), sendManualInput() |
+| `State/ExecutionContext.swift` | New properties for manual input state |
+| `Views/ManualInputView.swift` | **NEW** - Manual input UI component |
+| `Views/LogView.swift` | Integrate ManualInputView |
+| `Views/ControlsView.swift` | Continue button |
+| `Views/PhaseIndicatorView.swift` | Better interview status |
+| `Views/ExecutionView.swift` | Pass context to PhaseIndicatorView |
