@@ -54,7 +54,7 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
   - Add computed property that returns true if:
   - `sessionId != nil && !phase.isTerminal && phase != .idle`
 
-- [ ] **Task 3.2**: Add suggestedManualInput property
+- [x] **Task 3.2**: Add suggestedManualInput property
   - File: `ClaudeManager/State/ExecutionContext.swift`
   - Add: `var suggestedManualInput: String = ""`
   - Used by Continue button to pre-fill the input field

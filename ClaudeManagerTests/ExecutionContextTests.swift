@@ -96,4 +96,32 @@ final class ExecutionContextTests: XCTestCase {
 
         XCTAssertFalse(context.isManualInputAvailable)
     }
+
+    // MARK: - suggestedManualInput Tests
+
+    func testSuggestedManualInputInitializesToEmptyString() {
+        XCTAssertEqual(context.suggestedManualInput, "")
+    }
+
+    func testSuggestedManualInputCanBeSet() {
+        context.suggestedManualInput = "Please continue with the interview."
+
+        XCTAssertEqual(context.suggestedManualInput, "Please continue with the interview.")
+    }
+
+    func testSuggestedManualInputResetClearsValue() {
+        context.suggestedManualInput = "Some suggested text"
+
+        context.reset()
+
+        XCTAssertEqual(context.suggestedManualInput, "")
+    }
+
+    func testSuggestedManualInputResetForNewFeatureClearsValue() {
+        context.suggestedManualInput = "Some suggested text"
+
+        context.resetForNewFeature()
+
+        XCTAssertEqual(context.suggestedManualInput, "")
+    }
 }

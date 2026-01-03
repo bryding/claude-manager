@@ -167,6 +167,7 @@ final class ExecutionContext {
     // MARK: - UI State
 
     var showStopConfirmation: Bool = false
+    var suggestedManualInput: String = ""
 
     // MARK: - Initialization
 
@@ -271,6 +272,7 @@ final class ExecutionContext {
         taskFailureCount = 0
         pendingTaskFailure = nil
         showStopConfirmation = false
+        suggestedManualInput = ""
         projectConfiguration = .default
         buildAttempts = 0
         testAttempts = 0
@@ -307,6 +309,7 @@ final class ExecutionContext {
         taskFailureCount = 0
         pendingTaskFailure = nil
         showStopConfirmation = false
+        suggestedManualInput = ""
         buildAttempts = 0
         testAttempts = 0
         lastBuildResult = nil
