@@ -8,6 +8,7 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
     var executeCalled = false
     var lastPrompt: String?
     var lastPermissionMode: PermissionMode?
+    var lastSessionId: String?
     var lastTimeout: TimeInterval?
     var executeCallCount = 0
     var failuresBeforeSuccess = 0
@@ -29,6 +30,7 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
         lastPrompt = prompt
         allPrompts.append(prompt)
         lastPermissionMode = permissionMode
+        lastSessionId = sessionId
         lastTimeout = timeout
         _isRunning = true
 

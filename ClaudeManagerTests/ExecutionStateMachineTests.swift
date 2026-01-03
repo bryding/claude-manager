@@ -1559,4 +1559,141 @@ final class ExecutionStateMachineTests: XCTestCase {
             .replacingOccurrences(of: "\r", with: "\\r")
             .replacingOccurrences(of: "\t", with: "\\t")
     }
+
+    // MARK: - sendManualInput Tests
+
+    func testSendManualInputThrowsWithoutProjectPath() async {
+        context.sessionId = "test-session"
+        context.projectPath = nil
+
+        do {
+            try await stateMachine.sendManualInput("test input")
+            XCTFail("Expected noProjectPath error")
+        } catch ExecutionStateMachineError.noProjectPath {
+            // Expected
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testSendManualInputThrowsWithoutSessionId() async {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = nil
+
+        do {
+            try await stateMachine.sendManualInput("test input")
+            XCTFail("Expected noSessionId error")
+        } catch ExecutionStateMachineError.noSessionId {
+            // Expected
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testSendManualInputLogsUserInput() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .executingTask
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("my custom input")
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("my custom input") })
+    }
+
+    func testSendManualInputUsesPlanModeForInterview() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .conductingInterview
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("continue please")
+
+        XCTAssertEqual(mockClaudeService.lastPermissionMode, .plan)
+    }
+
+    func testSendManualInputUsesAcceptEditsForTaskExecution() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .executingTask
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("fix the bug")
+
+        XCTAssertEqual(mockClaudeService.lastPermissionMode, .acceptEdits)
+    }
+
+    func testSendManualInputPassesSessionId() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "my-session-123"
+        context.phase = .executingTask
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "my-session-123",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("test")
+
+        XCTAssertEqual(mockClaudeService.lastSessionId, "my-session-123")
+    }
+
+    func testSendManualInputThrowsOnError() async {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .executingTask
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "error",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: true
+        )
+
+        do {
+            try await stateMachine.sendManualInput("test")
+            XCTFail("Expected executionFailed error")
+        } catch ExecutionStateMachineError.executionFailed(let phase) {
+            XCTAssertEqual(phase, "sendManualInput")
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testSendManualInputLogsSuccessMessage() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .executingTask
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("test")
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Manual input processed successfully") })
+    }
 }

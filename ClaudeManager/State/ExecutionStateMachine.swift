@@ -188,6 +188,7 @@ final class ExecutionStateMachine {
 
         context.addLog(type: .info, message: "User input: \(input)")
 
+        let isInterviewPhase = context.phase == .conductingInterview
         let permissionMode: PermissionMode = switch context.phase {
         case .conductingInterview, .generatingInitialPlan, .rewritingPlan:
             .plan
@@ -204,7 +205,11 @@ final class ExecutionStateMachine {
             onMessage: { [weak self] message in
                 guard let self = self else { return }
                 await MainActor.run {
-                    self.handleStreamMessage(message)
+                    if isInterviewPhase {
+                        self.handleInterviewMessage(message)
+                    } else {
+                        self.handleStreamMessage(message)
+                    }
                 }
             }
         )
