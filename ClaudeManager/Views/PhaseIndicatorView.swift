@@ -11,9 +11,9 @@ struct PhaseIndicatorView: View {
         HStack(spacing: 12) {
             statusDot
             VStack(alignment: .leading, spacing: 4) {
-                Text(phase.displayName)
+                Text(displayName)
                     .font(.headline)
-                Text(phase.description)
+                Text(statusDescription)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -24,6 +24,24 @@ struct PhaseIndicatorView: View {
         .onChange(of: phase) { _, _ in
             isPulsing = isActive
         }
+    }
+
+    private var displayName: String {
+        if phase == .conductingInterview && hasQuestion {
+            return "Waiting for Answer"
+        }
+        return phase.displayName
+    }
+
+    private var statusDescription: String {
+        if phase == .conductingInterview {
+            if hasQuestion {
+                return "Waiting for your answer..."
+            } else if !isInterviewComplete {
+                return "Claude is gathering requirements..."
+            }
+        }
+        return phase.description
     }
 
     private var statusDot: some View {

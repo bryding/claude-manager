@@ -28,7 +28,11 @@ struct ExecutionView: View {
         VStack(alignment: .leading, spacing: 16) {
             projectHeader
 
-            PhaseIndicatorView(phase: context.phase)
+            PhaseIndicatorView(
+                phase: context.phase,
+                hasQuestion: context.pendingQuestion != nil,
+                isInterviewComplete: context.interviewSession?.isComplete ?? false
+            )
 
             progressSection
 

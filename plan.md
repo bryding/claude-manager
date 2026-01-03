@@ -108,7 +108,7 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
 
 ### Phase 6: Integrate ManualInputView into LogView
 
-- [ ] **Task 6.1**: Add ManualInputView to LogView body
+- [x] **Task 6.1**: Add ManualInputView to LogView body
   - File: `ClaudeManager/Views/LogView.swift`
   - Add `Divider()` and `ManualInputView()` at the bottom of the VStack
   - After the ScrollViewReader, before closing brace
@@ -132,16 +132,16 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
 
 ### Phase 8: Improve Phase Indicator
 
-- [ ] **Task 8.1**: Add context parameters to PhaseIndicatorView
+- [x] **Task 8.1**: Add context parameters to PhaseIndicatorView
   - File: `ClaudeManager/Views/PhaseIndicatorView.swift`
   - Add optional parameters: `hasQuestion: Bool = false`, `isInterviewComplete: Bool = false`
 
-- [ ] **Task 8.2**: Show contextual status for interview phase
+- [x] **Task 8.2**: Show contextual status for interview phase
   - File: `ClaudeManager/Views/PhaseIndicatorView.swift`
   - If interview phase and `hasQuestion`: "Waiting for your answer..."
   - If interview phase and not complete: "Claude is gathering requirements..."
 
-- [ ] **Task 8.3**: Update ExecutionView to pass context
+- [x] **Task 8.3**: Update ExecutionView to pass context
   - File: `ClaudeManager/Views/ExecutionView.swift`
   - Pass `hasQuestion: context.pendingQuestion != nil`
   - Pass `isInterviewComplete: context.interviewSession?.isComplete ?? false`
