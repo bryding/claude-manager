@@ -47,6 +47,7 @@ final class ExecutionStateMachine {
     private var shouldStop = false
     private var phaseBeforePause: ExecutionPhase?
     private var pendingAutoAnswerQuestion: PendingQuestion?
+    private var questionAskedDuringPhase = false
 
     // MARK: - Initialization
 
