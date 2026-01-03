@@ -44,17 +44,15 @@ struct ManualInputView: View {
                 }
 
             Button(action: submit) {
-                Group {
-                    if isSubmitting {
-                        ProgressView()
-                            .scaleEffect(0.7)
-                            .frame(width: 16, height: 16)
-                    } else {
-                        Image(systemName: "paperplane.fill")
-                    }
+                if isSubmitting {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                        .frame(width: 16, height: 16)
+                } else {
+                    Image(systemName: "paperplane.fill")
                 }
-                .frame(width: 20, height: 20)
             }
+            .frame(width: 32, height: 32)
             .buttonStyle(.borderedProminent)
             .disabled(!canSubmit)
         }
