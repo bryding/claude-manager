@@ -1093,6 +1093,29 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertFalse(context.logs.contains { $0.message.contains("Transitioned to phase: generatingInitialPlan") })
     }
 
+    func testInterviewAutoCompleteFallbackWhenNoQuestionAsked() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        // Claude responds with substantive text but no INTERVIEW_COMPLETE and no question
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "I understand the requirements. This feature involves building a simple API endpoint.")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "substantive response without markers",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        // Auto-complete fallback should mark interview as complete
+        XCTAssertTrue(context.interviewSession?.isComplete ?? false)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Claude responded without asking more questions, completing interview") })
+    }
+
     // MARK: - Interview Answer Recording Tests
 
     func testAnswerQuestionRecordsInterviewAnswer() async throws {
