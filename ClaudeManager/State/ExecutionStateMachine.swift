@@ -339,6 +339,11 @@ final class ExecutionStateMachine {
                 continue
             }
 
+            if questionAskedDuringPhase {
+                questionAskedDuringPhase = false
+                break
+            }
+
             if !shouldStop && !isPaused && context.phase != .waitingForUser && !context.phase.isTerminal {
                 transitionToNextPhase()
             }
