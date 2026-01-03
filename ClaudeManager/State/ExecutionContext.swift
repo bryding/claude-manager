@@ -243,6 +243,10 @@ final class ExecutionContext {
         contextPercentRemaining < 0.10
     }
 
+    var isManualInputAvailable: Bool {
+        sessionId != nil && !phase.isTerminal && phase != .idle
+    }
+
     // MARK: - Mutation Methods
 
     func reset() {
