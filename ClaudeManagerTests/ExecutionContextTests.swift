@@ -124,4 +124,67 @@ final class ExecutionContextTests: XCTestCase {
 
         XCTAssertEqual(context.suggestedManualInput, "")
     }
+
+    // MARK: - appearsStuck Tests
+
+    func testAppearsStuckReturnsTrueWhenInterviewingWithNoQuestionAndNotComplete() {
+        context.phase = .conductingInterview
+        context.pendingQuestion = nil
+        context.interviewSession = InterviewSession(featureDescription: "Test feature")
+
+        XCTAssertTrue(context.appearsStuck)
+    }
+
+    func testAppearsStuckReturnsFalseWhenNotInInterviewPhase() {
+        context.phase = .executingTask
+        context.pendingQuestion = nil
+        context.interviewSession = InterviewSession(featureDescription: "Test feature")
+
+        XCTAssertFalse(context.appearsStuck)
+    }
+
+    func testAppearsStuckReturnsFalseWhenPendingQuestionExists() {
+        context.phase = .conductingInterview
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "test-id",
+            question: AskUserQuestionInput.Question(
+                question: "Test question?",
+                header: "Test",
+                options: [
+                    AskUserQuestionInput.Option(label: "Yes", description: "Confirm"),
+                    AskUserQuestionInput.Option(label: "No", description: "Deny")
+                ],
+                multiSelect: false
+            )
+        )
+        context.interviewSession = InterviewSession(featureDescription: "Test feature")
+
+        XCTAssertFalse(context.appearsStuck)
+    }
+
+    func testAppearsStuckReturnsFalseWhenInterviewIsComplete() {
+        context.phase = .conductingInterview
+        context.pendingQuestion = nil
+        var session = InterviewSession(featureDescription: "Test feature")
+        session.markComplete()
+        context.interviewSession = session
+
+        XCTAssertFalse(context.appearsStuck)
+    }
+
+    func testAppearsStuckReturnsTrueWhenInterviewSessionIsNil() {
+        context.phase = .conductingInterview
+        context.pendingQuestion = nil
+        context.interviewSession = nil
+
+        XCTAssertTrue(context.appearsStuck)
+    }
+
+    func testAppearsStuckReturnsFalseWhenIdlePhase() {
+        context.phase = .idle
+        context.pendingQuestion = nil
+        context.interviewSession = nil
+
+        XCTAssertFalse(context.appearsStuck)
+    }
 }
