@@ -14,22 +14,22 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
 
 ### Phase 1: Fix Duplicate Question Bug
 
-- [ ] **Task 1.1**: Add question tracking flag to ExecutionStateMachine
+- [x] **Task 1.1**: Add question tracking flag to ExecutionStateMachine
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - Add private property: `private var questionAskedDuringPhase = false`
   - Location: Around line 49 with other private properties
 
-- [ ] **Task 1.2**: Set flag when interview question is detected
+- [x] **Task 1.2**: Set flag when interview question is detected
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - In `handleAskUserQuestion()` (~line 697-700), for `.interview` case:
   - Add: `questionAskedDuringPhase = true` after setting `context.phase = .waitingForUser`
 
-- [ ] **Task 1.3**: Reset flag at start of conductInterview()
+- [x] **Task 1.3**: Reset flag at start of conductInterview()
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - At the beginning of `conductInterview()` (~line 716):
   - Add: `questionAskedDuringPhase = false`
 
-- [ ] **Task 1.4**: Check flag in runLoop() and break if question asked
+- [x] **Task 1.4**: Check flag in runLoop() and break if question asked
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - In `runLoop()` after `try await executeCurrentPhase()` (~line 339):
   - Add check: if `questionAskedDuringPhase` is true, set it false and `break`
