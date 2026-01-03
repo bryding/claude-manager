@@ -699,6 +699,7 @@ final class ExecutionStateMachine {
             context.currentInterviewQuestion = firstQuestion.question
             context.pendingQuestion = pendingQuestion
             context.phase = .waitingForUser
+            questionAskedDuringPhase = true
 
         case .standard:
             if context.autonomousConfig.autoAnswerEnabled {
