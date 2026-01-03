@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Prompt Content
 
-struct PromptContent: Sendable {
+struct PromptContent: Sendable, Equatable {
     let text: String
     let images: [AttachedImage]
 
@@ -16,37 +16,34 @@ struct PromptContent: Sendable {
     }
 
     var contentBlocks: [ClaudeContentBlock] {
-        var blocks: [ClaudeContentBlock] = images.map { image in
-            .image(
+        let imageBlocks = images.map { image in
+            ClaudeContentBlock.image(
                 mediaType: image.mediaType.rawValue,
                 data: image.base64Encoded
             )
         }
-        if !text.isEmpty {
-            blocks.append(.text(text))
-        }
-        return blocks
+        let textBlocks = text.isEmpty ? [] : [ClaudeContentBlock.text(text)]
+        return imageBlocks + textBlocks
     }
 
     func toJSONData() throws -> Data {
-        let blocks = contentBlocks
-        return try JSONEncoder().encode(blocks)
+        try JSONEncoder().encode(contentBlocks)
     }
 }
 
 // MARK: - Claude Content Block
 
-enum ClaudeContentBlock: Encodable, Sendable {
+enum ClaudeContentBlock: Encodable, Sendable, Equatable {
     case text(String)
     case image(mediaType: String, data: String)
 
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case type
         case text
         case source
     }
 
-    enum SourceKeys: String, CodingKey {
+    private enum SourceKeys: String, CodingKey {
         case type
         case mediaType = "media_type"
         case data
@@ -66,27 +63,6 @@ enum ClaudeContentBlock: Encodable, Sendable {
             try sourceContainer.encode("base64", forKey: .type)
             try sourceContainer.encode(mediaType, forKey: .mediaType)
             try sourceContainer.encode(data, forKey: .data)
-        }
-    }
-}
-
-// MARK: - Equatable
-
-extension PromptContent: Equatable {
-    static func == (lhs: PromptContent, rhs: PromptContent) -> Bool {
-        lhs.text == rhs.text && lhs.images == rhs.images
-    }
-}
-
-extension ClaudeContentBlock: Equatable {
-    static func == (lhs: ClaudeContentBlock, rhs: ClaudeContentBlock) -> Bool {
-        switch (lhs, rhs) {
-        case (.text(let lhsText), .text(let rhsText)):
-            return lhsText == rhsText
-        case (.image(let lhsMediaType, let lhsData), .image(let rhsMediaType, let rhsData)):
-            return lhsMediaType == rhsMediaType && lhsData == rhsData
-        default:
-            return false
         }
     }
 }
