@@ -716,6 +716,8 @@ final class ExecutionStateMachine {
     private static let maxInterviewQuestions = 5
 
     private func conductInterview() async throws {
+        questionAskedDuringPhase = false
+
         guard let projectPath = context.projectPath else {
             throw ExecutionStateMachineError.noProjectPath
         }
