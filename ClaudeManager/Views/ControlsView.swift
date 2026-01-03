@@ -15,6 +15,10 @@ struct ControlsView: View {
         appState.context
     }
 
+    private var showContinueButton: Bool {
+        context.appearsStuck
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -24,6 +28,9 @@ struct ControlsView: View {
             } else {
                 pauseResumeButton
                 stopButton
+                if showContinueButton {
+                    continueButton
+                }
             }
             Spacer()
             elapsedTimeDisplay
@@ -86,6 +93,18 @@ struct ControlsView: View {
         .controlSize(.regular)
         .tint(.red)
         .disabled(!context.canStop)
+    }
+
+    private var continueButton: some View {
+        Button(action: nudgeContinue) {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.forward.circle.fill")
+                Text("Continue")
+            }
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.regular)
+        .tint(.orange)
     }
 
     private var startButton: some View {
@@ -207,6 +226,10 @@ struct ControlsView: View {
         appState.context.showStopConfirmation = true
     }
 
+    private func nudgeContinue() {
+        appState.context.suggestedManualInput = "Please continue with the interview or proceed to plan generation if you have enough information."
+    }
+
     private func startExecution() {
         Task {
             do {
@@ -278,6 +301,17 @@ struct ControlsView: View {
     appState.context.phase = .executingTask
     appState.context.totalCost = 0.25
     appState.context.lastInputTokenCount = 160_000
+    return ControlsView()
+        .environment(appState)
+        .padding()
+}
+
+#Preview("Controls - Stuck Interview") {
+    let appState = AppState()
+    appState.context.phase = .conductingInterview
+    appState.context.interviewSession = InterviewSession(featureDescription: "Test feature")
+    appState.context.sessionId = "test-session"
+    appState.context.totalCost = 0.10
     return ControlsView()
         .environment(appState)
         .padding()

@@ -117,12 +117,12 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
 
 ### Phase 7: Add Continue Button for Stuck States
 
-- [ ] **Task 7.1**: Add Continue button to ControlsView
+- [x] **Task 7.1**: Add Continue button to ControlsView
   - File: `ClaudeManager/Views/ControlsView.swift`
   - Add computed property checking `context.appearsStuck`
   - Show orange "Continue" button when stuck
 
-- [ ] **Task 7.2**: Implement Continue button action
+- [x] **Task 7.2**: Implement Continue button action
   - File: `ClaudeManager/Views/ControlsView.swift`
   - On click: set `context.suggestedManualInput` to nudge text
   - Nudge text: "Please continue with the interview or proceed to plan generation if you have enough information."
