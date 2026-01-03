@@ -787,6 +787,15 @@ final class ExecutionStateMachine {
             throw ExecutionStateMachineError.executionFailed("conductInterview")
         }
 
+        // Auto-complete fallback: if Claude responded without asking a question and
+        // the interview isn't already complete, mark it complete
+        if context.interviewSession?.isComplete != true
+            && context.pendingQuestion == nil
+            && !questionAskedDuringPhase {
+            context.addLog(type: .info, message: "Claude responded without asking more questions, completing interview")
+            context.interviewSession?.markComplete()
+        }
+
         if context.interviewSession?.isComplete == true {
             context.addLog(type: .info, message: "Interview completed, proceeding to plan generation")
         }
