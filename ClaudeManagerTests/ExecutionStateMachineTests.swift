@@ -1696,4 +1696,201 @@ final class ExecutionStateMachineTests: XCTestCase {
 
         XCTAssertTrue(context.logs.contains { $0.message.contains("Manual input processed successfully") })
     }
+
+    func testSendManualInputUsesPlanModeForPlanGeneration() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .generatingInitialPlan
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("add more detail")
+
+        XCTAssertEqual(mockClaudeService.lastPermissionMode, .plan)
+    }
+
+    func testSendManualInputUsesPlanModeForRewriting() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .rewritingPlan
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("restructure tasks")
+
+        XCTAssertEqual(mockClaudeService.lastPermissionMode, .plan)
+    }
+
+    func testSendManualInputUsesAcceptEditsForCodeReview() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .reviewingCode
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("focus on error handling")
+
+        XCTAssertEqual(mockClaudeService.lastPermissionMode, .acceptEdits)
+    }
+
+    func testSendManualInputDoesNotResumeLoopWhenWaitingForUser() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .executingTask
+
+        // Set up mock to trigger waitingForUser via AskUserQuestion
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "Which option?", header: "Choice")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question asked",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("proceed")
+
+        // Phase should be waitingForUser, loop should not have advanced further
+        XCTAssertEqual(context.phase, .waitingForUser)
+    }
+
+    func testSendManualInputDoesNotResumeLoopWhenTerminal() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .completed
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        let logCountBefore = context.logs.count
+
+        try await stateMachine.sendManualInput("test")
+
+        // Should log input and success, but not execute any phase
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertFalse(context.logs.suffix(from: logCountBefore).contains { $0.message.contains("Executing phase:") })
+    }
+
+    func testSendManualInputHandlesInterviewMessages() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .conductingInterview
+        context.interviewSession = InterviewSession(featureDescription: "Test feature")
+
+        // Send a message that would complete the interview
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "Got it. INTERVIEW_COMPLETE")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "INTERVIEW_COMPLETE",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("please continue")
+
+        XCTAssertTrue(context.interviewSession?.isComplete ?? false)
+    }
+
+    func testSendManualInputHandlesInterviewQuestion() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .conductingInterview
+        context.interviewSession = InterviewSession(featureDescription: "Test feature")
+
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What framework?", header: "Framework")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("continue with interview")
+
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertEqual(context.currentInterviewQuestion, "What framework?")
+    }
+
+    func testSendManualInputPassesPromptToService() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .executingTask
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("please fix the authentication bug")
+
+        XCTAssertEqual(mockClaudeService.lastPrompt, "please fix the authentication bug")
+    }
+
+    func testSendManualInputWithEmptyString() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .executingTask
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.sendManualInput("")
+
+        XCTAssertEqual(mockClaudeService.lastPrompt, "")
+        XCTAssertTrue(context.logs.contains { $0.message == "User input: " })
+    }
+
+    func testSendManualInputLogsErrorOnFailure() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.phase = .executingTask
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "error",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: true
+        )
+
+        do {
+            try await stateMachine.sendManualInput("test")
+        } catch {
+            // Expected
+        }
+
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Manual input execution failed") })
+    }
 }
