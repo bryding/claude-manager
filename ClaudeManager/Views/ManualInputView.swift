@@ -63,7 +63,9 @@ struct ManualInputView: View {
                 appState.context.suggestedManualInput = ""
             }
         }
-        .alert("Error", isPresented: showingError, actions: {}) {
+        .alert("Error", isPresented: showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
             Text(errorMessage ?? "")
         }
     }
