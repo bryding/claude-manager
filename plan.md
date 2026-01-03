@@ -49,7 +49,7 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
 
 ### Phase 3: Add Manual Input State
 
-- [ ] **Task 3.1**: Add isManualInputAvailable computed property
+- [x] **Task 3.1**: Add isManualInputAvailable computed property
   - File: `ClaudeManager/State/ExecutionContext.swift`
   - Add computed property that returns true if:
   - `sessionId != nil && !phase.isTerminal && phase != .idle`
@@ -59,7 +59,7 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
   - Add: `var suggestedManualInput: String = ""`
   - Used by Continue button to pre-fill the input field
 
-- [ ] **Task 3.3**: Add appearsStuck computed property
+- [x] **Task 3.3**: Add appearsStuck computed property
   - File: `ClaudeManager/State/ExecutionContext.swift`
   - Returns true if: `phase == .conductingInterview && pendingQuestion == nil && interviewSession?.isComplete != true`
 
