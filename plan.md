@@ -38,7 +38,7 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
 
 ### Phase 2: Fix Interview Freeze Bug
 
-- [ ] **Task 2.1**: Add auto-complete fallback in conductInterview()
+- [x] **Task 2.1**: Add auto-complete fallback in conductInterview()
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - After `claudeService.execute()` returns in `conductInterview()` (~line 776):
   - Check: if `isComplete == false` AND `pendingQuestion == nil` AND `questionAskedDuringPhase == false`
