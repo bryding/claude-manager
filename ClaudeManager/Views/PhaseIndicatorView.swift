@@ -2,6 +2,8 @@ import SwiftUI
 
 struct PhaseIndicatorView: View {
     let phase: ExecutionPhase
+    var hasQuestion: Bool = false
+    var isInterviewComplete: Bool = false
 
     @State private var isPulsing = false
 
