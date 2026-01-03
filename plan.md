@@ -13,7 +13,7 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
   - Computed: `base64Encoded`, `fileSizeDescription`
   - File: `ClaudeManager/Models/AttachedImage.swift`
 
-- [ ] **Task 1.2**: Create `PromptContent.swift` model
+- [x] **Task 1.2**: Create `PromptContent.swift` model
   - `PromptContent` struct with `text: String`, `images: [AttachedImage]`
   - `ClaudeContentBlock` for building JSON stdin content
   - File: `ClaudeManager/Models/PromptContent.swift`
