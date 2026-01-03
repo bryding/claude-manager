@@ -8,7 +8,7 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
 
 ### Phase 1: Models
 
-- [ ] **Task 1.1**: Create `AttachedImage.swift` model
+- [x] **Task 1.1**: Create `AttachedImage.swift` model
   - `id: UUID`, `data: Data`, `mediaType: ImageMediaType`, `thumbnail: NSImage`, `originalSize: CGSize`
   - Computed: `base64Encoded`, `fileSizeDescription`
   - File: `ClaudeManager/Models/AttachedImage.swift`
