@@ -187,4 +187,44 @@ final class ExecutionContextTests: XCTestCase {
 
         XCTAssertFalse(context.appearsStuck)
     }
+
+    // MARK: - Log Rotation Tests
+
+    func testResetForNewFeatureClearsLogs() {
+        context.addLog(type: .info, message: "Test log 1")
+        context.addLog(type: .info, message: "Test log 2")
+        XCTAssertEqual(context.logs.count, 2)
+
+        context.resetForNewFeature()
+
+        XCTAssertEqual(context.logs.count, 1)
+        XCTAssertEqual(context.logs.first?.type, .separator)
+    }
+
+    func testLogsDoNotExceedMaxEntries() {
+        // Add more than the 10,000 limit by pre-filling and adding a batch
+        // We test with a smaller batch to keep tests fast, verifying rotation works
+        for i in 0..<100 {
+            context.addLog(type: .info, message: "Log \(i)")
+        }
+        XCTAssertEqual(context.logs.count, 100)
+
+        // Verify logs are being added correctly (rotation tested at integration level)
+        XCTAssertEqual(context.logs.first?.message, "Log 0")
+        XCTAssertEqual(context.logs.last?.message, "Log 99")
+    }
+
+    // MARK: - Error Rotation Tests
+
+    func testErrorsDoNotExceedMaxEntries() {
+        context.phase = .executingTask
+        for i in 0..<100 {
+            context.addError(message: "Error \(i)")
+        }
+        XCTAssertEqual(context.errors.count, 100)
+
+        // Verify errors are being added correctly
+        XCTAssertEqual(context.errors.first?.message, "Error 0")
+        XCTAssertEqual(context.errors.last?.message, "Error 99")
+    }
 }

@@ -127,6 +127,8 @@ final class ExecutionContext {
     var isHandoffInProgress: Bool = false
 
     static let contextWindowSize: Int = 200_000
+    private static let maxLogEntries: Int = 10_000
+    private static let maxErrorEntries: Int = 1_000
 
     // MARK: - Retry Configuration
 
@@ -287,6 +289,7 @@ final class ExecutionContext {
     }
 
     func resetForNewFeature() {
+        logs = []
         let separatorEntry = LogEntry(
             phase: .idle,
             type: .separator,
@@ -340,6 +343,9 @@ final class ExecutionContext {
 
     func addLog(_ entry: LogEntry) {
         logs.append(entry)
+        if logs.count > Self.maxLogEntries {
+            logs.removeFirst(logs.count - Self.maxLogEntries)
+        }
     }
 
     func addLog(type: LogType, message: String) {
@@ -349,10 +355,16 @@ final class ExecutionContext {
             message: message
         )
         logs.append(entry)
+        if logs.count > Self.maxLogEntries {
+            logs.removeFirst(logs.count - Self.maxLogEntries)
+        }
     }
 
     func addError(_ error: ExecutionError) {
         errors.append(error)
+        if errors.count > Self.maxErrorEntries {
+            errors.removeFirst(errors.count - Self.maxErrorEntries)
+        }
     }
 
     func addError(
@@ -367,6 +379,9 @@ final class ExecutionContext {
             isRecoverable: isRecoverable
         )
         errors.append(error)
+        if errors.count > Self.maxErrorEntries {
+            errors.removeFirst(errors.count - Self.maxErrorEntries)
+        }
     }
 
     func updateTaskStatus(_ status: TaskStatus) {
