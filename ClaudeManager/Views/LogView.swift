@@ -213,18 +213,4 @@ private struct LogEntryView: View {
         .environment(appState)
         .frame(width: 800, height: 400)
 }
-
-#Preview("Log View With Input Available") {
-    let context = ExecutionContext()
-    context.sessionId = "test-session"
-    context.phase = .executingTask
-    let appState = AppState(context: context)
-
-    return LogView(logs: [
-        LogEntry(phase: .executingTask, type: .info, message: "Executing task..."),
-        LogEntry(phase: .executingTask, type: .output, message: "Working on implementation"),
-    ])
-    .environment(appState)
-    .frame(width: 800, height: 400)
-}
 #endif
