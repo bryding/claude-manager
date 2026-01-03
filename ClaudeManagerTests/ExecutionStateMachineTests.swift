@@ -1317,6 +1317,153 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertFalse(planGenerationPrompt?.contains("## Clarifications from User") ?? true)
     }
 
+    // MARK: - Question Asked During Phase Flag Tests
+
+    func testInterviewQuestionBreaksLoopImmediately() async throws {
+        // Arrange: Set up interview with a question
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What framework?", header: "Framework")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question asked",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        // Act
+        try await stateMachine.start()
+
+        // Assert: Loop should break after question, not transition to next phase
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertFalse(context.logs.contains { $0.message.contains("Transitioned to phase: generatingInitialPlan") })
+        XCTAssertEqual(mockClaudeService.executeCallCount, 1)
+    }
+
+    func testInterviewQuestionPreventsPhaseTransition() async throws {
+        // Arrange
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What scope?", header: "Scope")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question asked",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        // Act
+        try await stateMachine.start()
+
+        // Assert: Should stay in interview-related state, not advance
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertNotNil(context.pendingQuestion)
+        XCTAssertEqual(context.currentInterviewQuestion, "What scope?")
+    }
+
+    func testMultipleInterviewQuestionsHandledSequentially() async throws {
+        // Arrange: First question
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "First question?", header: "Q1")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "first question",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        // Act: Start interview
+        try await stateMachine.start()
+
+        // Assert: First question stops the loop
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertEqual(context.currentInterviewQuestion, "First question?")
+        let callCountAfterFirst = mockClaudeService.executeCallCount
+
+        // Arrange: Set up second question for when user answers
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "Second question?", header: "Q2")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "second question",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        // Act: Answer first question
+        try await stateMachine.answerQuestion("First answer")
+
+        // Assert: Second question also stops the loop properly
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertEqual(context.currentInterviewQuestion, "Second question?")
+        XCTAssertEqual(mockClaudeService.executeCallCount, callCountAfterFirst + 1)
+    }
+
+    func testInterviewCompleteDoesNotBreakLoopPrematurely() async throws {
+        // Arrange: Interview completes without question
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "I have all the information. INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        // Act
+        try await stateMachine.start()
+
+        // Assert: Should proceed through to completion (no question asked, so loop continues)
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Transitioned to phase: generatingInitialPlan") })
+    }
+
+    func testAnswerQuestionResumesLoopCorrectly() async throws {
+        // Arrange: Start with a question
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What scope?", header: "Scope")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+        XCTAssertEqual(context.phase, .waitingForUser)
+
+        // Arrange: Set up completion response for after answer
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "Got it. INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        // Act: Answer the question
+        try await stateMachine.answerQuestion("Small scope")
+
+        // Assert: Loop should resume and complete
+        XCTAssertEqual(context.phase, .completed)
+    }
+
     // MARK: - Test Helpers
 
     private func makeAssistantMessage(text: String) -> ClaudeStreamMessage {
