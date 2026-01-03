@@ -67,7 +67,7 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
 
 ### Phase 4: Add Manual Input Method
 
-- [ ] **Task 4.1**: Add sendManualInput() method to ExecutionStateMachine
+- [x] **Task 4.1**: Add sendManualInput() method to ExecutionStateMachine
   - File: `ClaudeManager/State/ExecutionStateMachine.swift`
   - New public method: `func sendManualInput(_ input: String) async throws`
   - Guard: projectPath and sessionId must exist
