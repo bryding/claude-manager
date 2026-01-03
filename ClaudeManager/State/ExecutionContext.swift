@@ -248,6 +248,10 @@ final class ExecutionContext {
         sessionId != nil && !phase.isTerminal && phase != .idle
     }
 
+    var appearsStuck: Bool {
+        phase == .conductingInterview && pendingQuestion == nil && interviewSession?.isComplete != true
+    }
+
     // MARK: - Mutation Methods
 
     func reset() {
