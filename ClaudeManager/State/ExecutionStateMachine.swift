@@ -177,6 +177,50 @@ final class ExecutionStateMachine {
         await runLoop()
     }
 
+    func sendManualInput(_ input: String) async throws {
+        guard let projectPath = context.projectPath else {
+            throw ExecutionStateMachineError.noProjectPath
+        }
+
+        guard let sessionId = context.sessionId else {
+            throw ExecutionStateMachineError.noSessionId
+        }
+
+        context.addLog(type: .info, message: "User input: \(input)")
+
+        let permissionMode: PermissionMode = switch context.phase {
+        case .conductingInterview, .generatingInitialPlan, .rewritingPlan:
+            .plan
+        default:
+            .acceptEdits
+        }
+
+        let result = try await claudeService.execute(
+            prompt: input,
+            workingDirectory: projectPath,
+            permissionMode: permissionMode,
+            sessionId: sessionId,
+            timeout: context.timeoutConfiguration.executionTimeout,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleStreamMessage(message)
+                }
+            }
+        )
+
+        if result.isError {
+            context.addLog(type: .error, message: "Manual input execution failed")
+            throw ExecutionStateMachineError.executionFailed("sendManualInput")
+        }
+
+        context.addLog(type: .info, message: "Manual input processed successfully")
+
+        if context.phase != .waitingForUser && !context.phase.isTerminal {
+            await runLoop()
+        }
+    }
+
     func handleTaskFailureResponse(_ response: TaskFailureResponse) async {
         guard context.pendingTaskFailure != nil else { return }
 
