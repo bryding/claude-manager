@@ -81,25 +81,25 @@ Fix bugs in the interview/plan generation workflow and add manual user control.
 
 ### Phase 5: Create ManualInputView
 
-- [ ] **Task 5.1**: Create ManualInputView.swift file
+- [x] **Task 5.1**: Create ManualInputView.swift file
   - File: `ClaudeManager/Views/ManualInputView.swift` (new)
   - SwiftUI view with Environment access to AppState
   - Local state: `inputText`, `isSubmitting`, `errorMessage`
 
-- [ ] **Task 5.2**: Add text field and send button
+- [x] **Task 5.2**: Add text field and send button
   - File: `ClaudeManager/Views/ManualInputView.swift`
   - TextField with placeholder "Send message to Claude..."
   - Send button with paperplane icon
   - Disable when: input empty, submitting, or `!isManualInputAvailable`
 
-- [ ] **Task 5.3**: Add submit logic
+- [x] **Task 5.3**: Add submit logic
   - File: `ClaudeManager/Views/ManualInputView.swift`
   - On submit: trim input, clear field, set isSubmitting
   - Call `appState.stateMachine.sendManualInput(text)`
   - Handle errors with alert
   - Reset isSubmitting when done
 
-- [ ] **Task 5.4**: Add suggested text binding
+- [x] **Task 5.4**: Add suggested text binding
   - File: `ClaudeManager/Views/ManualInputView.swift`
   - Watch `appState.context.suggestedManualInput`
   - When it changes to non-empty, populate inputText and clear the suggestion
