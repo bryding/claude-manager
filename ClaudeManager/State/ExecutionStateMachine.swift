@@ -821,38 +821,22 @@ final class ExecutionStateMachine {
         context.addLog(type: .info, message: "Conducting interview (question \(questionCount + 1)/\(Self.maxInterviewQuestions) max)")
 
         let isFirstCall = interviewSession.exchanges.isEmpty && context.sessionId == nil
-        let result: ClaudeExecutionResult
+        let images = isFirstCall ? interviewSession.attachedImages : []
+        let content = PromptContent(text: prompt, images: images)
 
-        if isFirstCall && !interviewSession.attachedImages.isEmpty {
-            let content = PromptContent(text: prompt, images: interviewSession.attachedImages)
-            result = try await claudeService.execute(
-                content: content,
-                workingDirectory: projectPath,
-                permissionMode: .plan,
-                sessionId: context.sessionId,
-                timeout: context.timeoutConfiguration.planModeTimeout,
-                onMessage: { [weak self] message in
-                    guard let self = self else { return }
-                    await MainActor.run {
-                        self.handleInterviewMessage(message)
-                    }
+        let result = try await claudeService.execute(
+            content: content,
+            workingDirectory: projectPath,
+            permissionMode: .plan,
+            sessionId: context.sessionId,
+            timeout: context.timeoutConfiguration.planModeTimeout,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleInterviewMessage(message)
                 }
-            )
-        } else {
-            result = try await claudeService.execute(
-                prompt: prompt,
-                workingDirectory: projectPath,
-                permissionMode: .plan,
-                sessionId: context.sessionId,
-                timeout: context.timeoutConfiguration.planModeTimeout,
-                onMessage: { [weak self] message in
-                    guard let self = self else { return }
-                    await MainActor.run {
-                        self.handleInterviewMessage(message)
-                    }
-                }
-            )
-        }
+            }
+        )
 
         if result.isError {
             context.addLog(type: .error, message: "Interview phase failed")
@@ -910,38 +894,21 @@ final class ExecutionStateMachine {
             """
 
         let attachedImages = context.interviewSession?.attachedImages ?? []
-        let result: ClaudeExecutionResult
+        let content = PromptContent(text: prompt, images: attachedImages)
 
-        if !attachedImages.isEmpty {
-            let content = PromptContent(text: prompt, images: attachedImages)
-            result = try await claudeService.execute(
-                content: content,
-                workingDirectory: projectPath,
-                permissionMode: .plan,
-                sessionId: nil,
-                timeout: context.timeoutConfiguration.planModeTimeout,
-                onMessage: { [weak self] message in
-                    guard let self = self else { return }
-                    await MainActor.run {
-                        self.handleStreamMessage(message)
-                    }
+        let result = try await claudeService.execute(
+            content: content,
+            workingDirectory: projectPath,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: context.timeoutConfiguration.planModeTimeout,
+            onMessage: { [weak self] message in
+                guard let self = self else { return }
+                await MainActor.run {
+                    self.handleStreamMessage(message)
                 }
-            )
-        } else {
-            result = try await claudeService.execute(
-                prompt: prompt,
-                workingDirectory: projectPath,
-                permissionMode: .plan,
-                sessionId: nil,
-                timeout: context.timeoutConfiguration.planModeTimeout,
-                onMessage: { [weak self] message in
-                    guard let self = self else { return }
-                    await MainActor.run {
-                        self.handleStreamMessage(message)
-                    }
-                }
-            )
-        }
+            }
+        )
 
         if result.isError {
             throw ExecutionStateMachineError.executionFailed("generateInitialPlan")
