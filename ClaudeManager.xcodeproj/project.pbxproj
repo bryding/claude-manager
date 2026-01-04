@@ -58,6 +58,7 @@
 		A6000006210000010000000F /* ControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000006110000010000000F /* ControlsView.swift */; };
 		A6000007210000010000000F /* ExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000007110000010000000F /* ExecutionView.swift */; };
 		A6000008210000010000000F /* ManualInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000008110000010000000F /* ManualInputView.swift */; };
+		B7000001210000010000000F /* PastableTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7000001110000010000000F /* PastableTextEditor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -124,6 +125,7 @@
 		A6000006110000010000000F /* ControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsView.swift; sourceTree = "<group>"; };
 		A6000007110000010000000F /* ExecutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionView.swift; sourceTree = "<group>"; };
 		A6000008110000010000000F /* ManualInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualInputView.swift; sourceTree = "<group>"; };
+		B7000001110000010000000F /* PastableTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastableTextEditor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,6 +237,7 @@
 		A1000006110000010000000F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B7000002110000010000000F /* Components */,
 				A6000001110000010000000F /* SetupView.swift */,
 				A6000002110000010000000F /* PhaseIndicatorView.swift */,
 				A6000003110000010000000F /* TaskListView.swift */,
@@ -246,6 +249,14 @@
 				A8000002110000010000000F /* TaskFailureView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		B7000002110000010000000F /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				B7000001110000010000000F /* PastableTextEditor.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		B3000002110000010000000F /* Utilities */ = {
@@ -420,6 +431,7 @@
 				B1000001210000010000000F /* AttachedImage.swift in Sources */,
 				B1000002210000010000000F /* PromptContent.swift in Sources */,
 				B3000001210000010000000F /* ImageProcessor.swift in Sources */,
+				B7000001210000010000000F /* PastableTextEditor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

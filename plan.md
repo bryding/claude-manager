@@ -62,7 +62,7 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
 
 ### Phase 5: View Layer
 
-- [ ] **Task 5.1**: Create `PastableTextEditor.swift`
+- [x] **Task 5.1**: Create `PastableTextEditor.swift`
   - NSViewRepresentable wrapping NSTextView
   - Override paste to detect images from NSPasteboard
   - Support drag-and-drop via registerForDraggedTypes
