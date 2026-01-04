@@ -32,7 +32,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
   - `listWorktrees`: runs `git worktree list --porcelain`
   - File: `ClaudeManager/Services/WorktreeService.swift`
 
-- [ ] **Task 2.3**: Create `MockWorktreeService.swift`
+- [x] **Task 2.3**: Create `MockWorktreeService.swift`
   - Mock implementation for testing
   - File: `ClaudeManagerTests/Mocks/MockWorktreeService.swift`
 
