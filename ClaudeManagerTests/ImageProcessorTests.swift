@@ -26,22 +26,20 @@ final class ImageProcessorTests: XCTestCase {
         return image
     }
 
-    private func createPNGData(width: Int = 100, height: Int = 100) -> Data? {
+    private func createImageData(
+        width: Int = 100,
+        height: Int = 100,
+        format: NSBitmapImageRep.FileType = .png
+    ) -> Data? {
         let image = createTestImage(width: width, height: height)
         guard let tiffData = image.tiffRepresentation,
               let bitmapRep = NSBitmapImageRep(data: tiffData) else {
             return nil
         }
-        return bitmapRep.representation(using: .png, properties: [:])
-    }
-
-    private func createJPEGData(width: Int = 100, height: Int = 100) -> Data? {
-        let image = createTestImage(width: width, height: height)
-        guard let tiffData = image.tiffRepresentation,
-              let bitmapRep = NSBitmapImageRep(data: tiffData) else {
-            return nil
-        }
-        return bitmapRep.representation(using: .jpeg, properties: [.compressionFactor: 0.9])
+        let properties: [NSBitmapImageRep.PropertyKey: Any] = format == .jpeg
+            ? [.compressionFactor: 0.9]
+            : [:]
+        return bitmapRep.representation(using: format, properties: properties)
     }
 
     // MARK: - Process NSImage Tests
@@ -148,7 +146,7 @@ final class ImageProcessorTests: XCTestCase {
     // MARK: - Process Data Tests
 
     func testProcessValidPNGData() throws {
-        let pngData = try XCTUnwrap(createPNGData(width: 100, height: 80))
+        let pngData = try XCTUnwrap(createImageData(width: 100, height: 80, format: .png))
 
         let result = processor.process(data: pngData)
 
@@ -162,7 +160,7 @@ final class ImageProcessorTests: XCTestCase {
     }
 
     func testProcessValidJPEGData() throws {
-        let jpegData = try XCTUnwrap(createJPEGData(width: 100, height: 80))
+        let jpegData = try XCTUnwrap(createImageData(width: 100, height: 80, format: .jpeg))
 
         let result = processor.process(data: jpegData)
 
@@ -203,7 +201,7 @@ final class ImageProcessorTests: XCTestCase {
     // MARK: - Size Limit Tests
 
     func testProcessImageWithinSizeLimit() throws {
-        let pngData = try XCTUnwrap(createPNGData(width: 100, height: 100))
+        let pngData = try XCTUnwrap(createImageData(width: 100, height: 100))
         let sizeLimit = pngData.count + 1000
 
         let result = processor.process(data: pngData, maxSize: sizeLimit)
@@ -233,7 +231,7 @@ final class ImageProcessorTests: XCTestCase {
     }
 
     func testProcessImageExactlyAtSizeLimit() throws {
-        let pngData = try XCTUnwrap(createPNGData(width: 100, height: 100))
+        let pngData = try XCTUnwrap(createImageData(width: 100, height: 100))
 
         let result = processor.process(data: pngData, maxSize: pngData.count)
 
@@ -391,24 +389,24 @@ final class ImageProcessorTests: XCTestCase {
 
     func testProcessorIsSendable() {
         let processor = ImageProcessor()
+        let image1 = createTestImage(width: 100, height: 100)
+        let image2 = createTestImage(width: 200, height: 200)
+        let image3 = createTestImage(width: 150, height: 150)
         let expectation = XCTestExpectation(description: "Concurrent access")
         expectation.expectedFulfillmentCount = 3
 
         Task.detached {
-            let image = self.createTestImage(width: 100, height: 100)
-            _ = processor.process(image: image)
+            _ = processor.process(image: image1)
             expectation.fulfill()
         }
 
         Task.detached {
-            let image = self.createTestImage(width: 200, height: 200)
-            _ = processor.process(image: image)
+            _ = processor.process(image: image2)
             expectation.fulfill()
         }
 
         Task.detached {
-            let image = self.createTestImage(width: 150, height: 150)
-            _ = processor.process(image: image)
+            _ = processor.process(image: image3)
             expectation.fulfill()
         }
 
