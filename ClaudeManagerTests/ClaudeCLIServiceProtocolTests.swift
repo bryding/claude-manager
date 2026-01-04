@@ -347,4 +347,206 @@ final class ClaudeCLIServiceProtocolTests: XCTestCase {
         XCTAssertEqual(mockService.lastPrompt, "Prompt call")
         XCTAssertEqual(mockService.lastContent?.text, "Content call")
     }
+
+    // MARK: - Edge Case Tests
+
+    func testMockTracksContentWithEmptyImagesArray() async throws {
+        let content = PromptContent(text: "No images", images: [])
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastContent?.text, "No images")
+        XCTAssertEqual(mockService.lastContent?.images.count, 0)
+        XCTAssertFalse(mockService.lastContent?.hasImages ?? true)
+    }
+
+    func testMockLastContentIsNilBeforeFirstCall() {
+        XCTAssertNil(mockService.lastContent)
+        XCTAssertTrue(mockService.allContents.isEmpty)
+    }
+
+    func testMockContentOverwritesLastContent() async throws {
+        let content1 = PromptContent(text: "First content", images: [makeTestImage()])
+        let content2 = PromptContent(text: "Second content")
+
+        _ = try await mockService.execute(
+            content: content1,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastContent?.text, "First content")
+        XCTAssertEqual(mockService.lastContent?.images.count, 1)
+
+        _ = try await mockService.execute(
+            content: content2,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastContent?.text, "Second content")
+        XCTAssertEqual(mockService.lastContent?.images.count, 0)
+    }
+
+    func testMockContentWithMultipleImages() async throws {
+        let images = [makeTestImage(), makeTestImage(), makeTestImage()]
+        let content = PromptContent(text: "Multiple images", images: images)
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastContent?.images.count, 3)
+        XCTAssertTrue(mockService.lastContent?.hasImages ?? false)
+    }
+
+    // MARK: - Error Handling Tests for Content Execution
+
+    func testMockContentExecutionPropagatesTimeoutError() async {
+        let content = PromptContent(text: "Will timeout")
+        mockService.failuresBeforeSuccess = 1
+
+        do {
+            _ = try await mockService.execute(
+                content: content,
+                workingDirectory: tempDirectory,
+                permissionMode: .plan,
+                sessionId: nil,
+                timeout: nil,
+                onMessage: { _ in }
+            )
+            XCTFail("Expected timeout error")
+        } catch {
+            XCTAssertTrue(error is ClaudeProcessError)
+        }
+
+        XCTAssertEqual(mockService.lastContent?.text, "Will timeout")
+        XCTAssertEqual(mockService.allContents.count, 1)
+    }
+
+    func testMockContentStillTrackedOnError() async {
+        let content = PromptContent(text: "Track despite error", images: [makeTestImage()])
+        mockService.executeError = ClaudeCLIServiceError.noResultMessage
+
+        do {
+            _ = try await mockService.execute(
+                content: content,
+                workingDirectory: tempDirectory,
+                permissionMode: .plan,
+                sessionId: nil,
+                timeout: nil,
+                onMessage: { _ in }
+            )
+            XCTFail("Expected error")
+        } catch {
+            // Expected
+        }
+
+        XCTAssertEqual(mockService.lastContent?.text, "Track despite error")
+        XCTAssertEqual(mockService.lastContent?.images.count, 1)
+        XCTAssertEqual(mockService.allContents.count, 1)
+    }
+
+    // MARK: - State Transition Tests
+
+    func testMockContentExecutionIncrementsCallCount() async throws {
+        let content = PromptContent(text: "Count me")
+
+        XCTAssertEqual(mockService.executeCallCount, 0)
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.executeCallCount, 1)
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.executeCallCount, 2)
+    }
+
+    func testMockContentExecutionSetsExecuteCalled() async throws {
+        let content = PromptContent(text: "Set flag")
+
+        XCTAssertFalse(mockService.executeCalled)
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertTrue(mockService.executeCalled)
+    }
+
+    func testMockContentExecutionAlsoTracksPrompt() async throws {
+        let content = PromptContent(text: "Text goes to prompt too")
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastPrompt, "Text goes to prompt too")
+        XCTAssertEqual(mockService.allPrompts.count, 1)
+        XCTAssertEqual(mockService.allPrompts.first, "Text goes to prompt too")
+    }
+
+    // MARK: - Access Images via lastContent Tests
+
+    func testAccessImagesViaLastContent() async throws {
+        let image = makeTestImage()
+        let content = PromptContent(text: "Image access", images: [image])
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        let images = mockService.lastContent?.images
+        XCTAssertNotNil(images)
+        XCTAssertEqual(images?.count, 1)
+        XCTAssertEqual(images?.first?.mediaType, .png)
+    }
 }
