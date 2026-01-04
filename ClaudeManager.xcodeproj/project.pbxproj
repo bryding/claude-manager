@@ -44,6 +44,7 @@
 		AF000001210000010000000F /* InterviewSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF000001110000010000000F /* InterviewSessionTests.swift */; };
 		B0000001210000010000000F /* ExecutionContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000001110000010000000F /* ExecutionContextTests.swift */; };
 		B2000001210000010000000F /* PromptContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000001110000010000000F /* PromptContentTests.swift */; };
+		B4000001210000010000000F /* ClaudeProcessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4000001110000010000000F /* ClaudeProcessTests.swift */; };
 		A3000001210000010000000F /* ExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000001110000010000000F /* ExecutionContext.swift */; };
 		A3000002210000010000000F /* ExecutionStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000002110000010000000F /* ExecutionStateMachine.swift */; };
 		A3000003210000010000000F /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3000003110000010000000F /* AppState.swift */; };
@@ -106,6 +107,7 @@
 		AF000001110000010000000F /* InterviewSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewSessionTests.swift; sourceTree = "<group>"; };
 		B0000001110000010000000F /* ExecutionContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContextTests.swift; sourceTree = "<group>"; };
 		B2000001110000010000000F /* PromptContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptContentTests.swift; sourceTree = "<group>"; };
+		B4000001110000010000000F /* ClaudeProcessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeProcessTests.swift; sourceTree = "<group>"; };
 		B3000001110000010000000F /* ImageProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessor.swift; sourceTree = "<group>"; };
 		A3000001110000010000000F /* ExecutionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContext.swift; sourceTree = "<group>"; };
 		A3000002110000010000000F /* ExecutionStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionStateMachine.swift; sourceTree = "<group>"; };
@@ -254,6 +256,7 @@
 			isa = PBXGroup;
 			children = (
 				A5000003110000010000000F /* Mocks */,
+				B4000001110000010000000F /* ClaudeProcessTests.swift */,
 				A2000001110000010000000F /* ClaudeStreamMessageTests.swift */,
 				B0000001110000010000000F /* ExecutionContextTests.swift */,
 				A2000004110000010000000F /* ExecutionStateMachineTests.swift */,
@@ -418,6 +421,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B4000001210000010000000F /* ClaudeProcessTests.swift in Sources */,
 				A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */,
 				B0000001210000010000000F /* ExecutionContextTests.swift in Sources */,
 				A2000004210000010000000F /* ExecutionStateMachineTests.swift in Sources */,
