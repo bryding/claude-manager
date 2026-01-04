@@ -87,17 +87,17 @@ final class ImageProcessor: Sendable {
         let scale = min(size / originalSize.width, size / originalSize.height, 1.0)
         let thumbnailWidth = originalSize.width * scale
         let thumbnailHeight = originalSize.height * scale
-        let thumbnailSize = NSSize(width: thumbnailWidth, height: thumbnailHeight)
+        let targetSize = NSSize(width: thumbnailWidth, height: thumbnailHeight)
 
-        let thumbnail = NSImage(size: thumbnailSize)
-        thumbnail.lockFocus()
-        image.draw(
-            in: NSRect(origin: .zero, size: thumbnailSize),
-            from: NSRect(origin: .zero, size: originalSize),
-            operation: .copy,
-            fraction: 1.0
-        )
-        thumbnail.unlockFocus()
+        let thumbnail = NSImage(size: targetSize, flipped: false) { rect in
+            image.draw(
+                in: rect,
+                from: NSRect(origin: .zero, size: originalSize),
+                operation: .copy,
+                fraction: 1.0
+            )
+            return true
+        }
 
         return thumbnail
     }

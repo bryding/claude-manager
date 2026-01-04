@@ -166,6 +166,10 @@ final class ExecutionContext {
     var interviewSession: InterviewSession?
     var currentInterviewQuestion: String?
 
+    // MARK: - Attached Images
+
+    var attachedImages: [AttachedImage] = []
+
     // MARK: - UI State
 
     var showStopConfirmation: Bool = false
@@ -252,6 +256,10 @@ final class ExecutionContext {
 
     var appearsStuck: Bool {
         phase == .conductingInterview && pendingQuestion == nil && interviewSession?.isComplete != true
+    }
+
+    var promptContent: PromptContent {
+        PromptContent(text: featureDescription, images: attachedImages)
     }
 
     // MARK: - Mutation Methods
@@ -408,5 +416,19 @@ final class ExecutionContext {
         totalInputTokens += inputTokens
         totalOutputTokens += outputTokens
         lastInputTokenCount = inputTokens
+    }
+
+    // MARK: - Image Management
+
+    func addImage(_ image: AttachedImage) {
+        attachedImages.append(image)
+    }
+
+    func removeImage(id: UUID) {
+        attachedImages.removeAll { $0.id == id }
+    }
+
+    func removeAllImages() {
+        attachedImages.removeAll()
     }
 }
