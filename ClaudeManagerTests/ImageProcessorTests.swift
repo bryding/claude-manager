@@ -355,6 +355,30 @@ final class ImageProcessorTests: XCTestCase {
         )
     }
 
+    // MARK: - Error Display Message Tests
+
+    func testInvalidImageDataDisplayMessage() {
+        let error = ImageProcessorError.invalidImageData
+        XCTAssertEqual(error.displayMessage, "Could not read image data")
+    }
+
+    func testUnsupportedFormatDisplayMessage() {
+        let error = ImageProcessorError.unsupportedFormat
+        XCTAssertEqual(error.displayMessage, "Only PNG and JPEG images are supported")
+    }
+
+    func testImageTooLargeDisplayMessage() {
+        let error = ImageProcessorError.imageTooLarge(size: 25 * 1024 * 1024, limit: 20 * 1024 * 1024)
+        let message = error.displayMessage
+        XCTAssertTrue(message.contains("25.0 MB"))
+        XCTAssertTrue(message.contains("20 MB"))
+    }
+
+    func testThumbnailCreationFailedDisplayMessage() {
+        let error = ImageProcessorError.thumbnailCreationFailed
+        XCTAssertEqual(error.displayMessage, "Failed to create image thumbnail")
+    }
+
     // MARK: - Edge Cases
 
     func testProcessVerySmallImage() {

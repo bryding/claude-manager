@@ -159,9 +159,6 @@ struct SetupView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
                 )
-                .onDrop(of: [.image, .fileURL], isTargeted: nil) { providers in
-                    handleImageDrop(providers)
-                }
 
                 HStack(spacing: 4) {
                     Image(systemName: "info.circle")
@@ -192,45 +189,7 @@ struct SetupView: View {
         case .success(let attachedImage):
             appState.context.addImage(attachedImage)
         case .failure(let error):
-            imageError = displayMessage(for: error)
-        }
-    }
-
-    private func handleImageDrop(_ providers: [NSItemProvider]) -> Bool {
-        imageError = nil
-
-        for provider in providers {
-            if provider.hasItemConformingToTypeIdentifier("public.image") {
-                provider.loadDataRepresentation(forTypeIdentifier: "public.image") { data, _ in
-                    guard let data = data else { return }
-
-                    DispatchQueue.main.async {
-                        switch imageProcessor.process(data: data) {
-                        case .success(let attachedImage):
-                            appState.context.addImage(attachedImage)
-                        case .failure(let error):
-                            imageError = displayMessage(for: error)
-                        }
-                    }
-                }
-                return true
-            }
-        }
-        return false
-    }
-
-    private func displayMessage(for error: ImageProcessorError) -> String {
-        switch error {
-        case .invalidImageData:
-            return "Could not read image data"
-        case .unsupportedFormat:
-            return "Only PNG and JPEG images are supported"
-        case .imageTooLarge(let size, let limit):
-            let sizeMB = Double(size) / (1024 * 1024)
-            let limitMB = Double(limit) / (1024 * 1024)
-            return String(format: "Image too large (%.1f MB). Maximum size is %.0f MB.", sizeMB, limitMB)
-        case .thumbnailCreationFailed:
-            return "Failed to create image thumbnail"
+            imageError = error.displayMessage
         }
     }
 

@@ -8,6 +8,21 @@ enum ImageProcessorError: Error, Equatable {
     case unsupportedFormat
     case imageTooLarge(size: Int, limit: Int)
     case thumbnailCreationFailed
+
+    var displayMessage: String {
+        switch self {
+        case .invalidImageData:
+            return "Could not read image data"
+        case .unsupportedFormat:
+            return "Only PNG and JPEG images are supported"
+        case .imageTooLarge(let size, let limit):
+            let sizeMB = Double(size) / (1024 * 1024)
+            let limitMB = Double(limit) / (1024 * 1024)
+            return String(format: "Image too large (%.1f MB). Maximum size is %.0f MB.", sizeMB, limitMB)
+        case .thumbnailCreationFailed:
+            return "Failed to create image thumbnail"
+        }
+    }
 }
 
 // MARK: - Image Processor
