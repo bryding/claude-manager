@@ -17,11 +17,11 @@ final class ImageProcessorTests: XCTestCase {
 
     // MARK: - Test Helpers
 
-    private func createTestImage(width: Int, height: Int, color: NSColor = .red) -> NSImage {
+    private func createTestImage(width: Int, height: Int) -> NSImage {
         let size = NSSize(width: width, height: height)
         let image = NSImage(size: size)
         image.lockFocus()
-        color.drawSwatch(in: NSRect(origin: .zero, size: size))
+        NSColor.red.drawSwatch(in: NSRect(origin: .zero, size: size))
         image.unlockFocus()
         return image
     }
