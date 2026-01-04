@@ -86,6 +86,11 @@ final class PastableNSTextView: NSTextView {
         NSPasteboard.PasteboardType("public.image")
     ]
 
+    private static let imageFileReadingOptions: [NSPasteboard.ReadingOptionKey: Any] = [
+        .urlReadingFileURLsOnly: true,
+        .urlReadingContentsConformToTypes: ["public.image"]
+    ]
+
     override func paste(_ sender: Any?) {
         let pasteboard = NSPasteboard.general
 
@@ -98,33 +103,17 @@ final class PastableNSTextView: NSTextView {
     }
 
     override func draggingEntered(_ sender: any NSDraggingInfo) -> NSDragOperation {
-        let pasteboard = sender.draggingPasteboard
-
-        if canExtractImage(from: pasteboard) {
+        if canExtractImage(from: sender.draggingPasteboard) {
             return .copy
         }
-
         return super.draggingEntered(sender)
     }
 
     override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
-        let pasteboard = sender.draggingPasteboard
-
-        if let image = extractImage(from: pasteboard) {
+        if let image = extractImage(from: sender.draggingPasteboard) {
             onImagePaste?(image)
             return true
         }
-
-        if let fileURLs = pasteboard.readObjects(forClasses: [NSURL.self], options: [
-            .urlReadingFileURLsOnly: true,
-            .urlReadingContentsConformToTypes: ["public.image"]
-        ]) as? [URL], let url = fileURLs.first {
-            if let image = NSImage(contentsOf: url) {
-                onImagePaste?(image)
-                return true
-            }
-        }
-
         return super.performDragOperation(sender)
     }
 
@@ -136,12 +125,11 @@ final class PastableNSTextView: NSTextView {
         }
 
         if let types = pasteboard.types, types.contains(.fileURL) {
-            if let urls = pasteboard.readObjects(forClasses: [NSURL.self], options: [
-                .urlReadingFileURLsOnly: true,
-                .urlReadingContentsConformToTypes: ["public.image"]
-            ]) as? [URL], !urls.isEmpty {
-                return true
-            }
+            let urls = pasteboard.readObjects(
+                forClasses: [NSURL.self],
+                options: Self.imageFileReadingOptions
+            ) as? [URL]
+            return urls?.isEmpty == false
         }
 
         return false
@@ -155,10 +143,10 @@ final class PastableNSTextView: NSTextView {
             }
         }
 
-        if let fileURLs = pasteboard.readObjects(forClasses: [NSURL.self], options: [
-            .urlReadingFileURLsOnly: true,
-            .urlReadingContentsConformToTypes: ["public.image"]
-        ]) as? [URL], let url = fileURLs.first {
+        if let urls = pasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: Self.imageFileReadingOptions
+        ) as? [URL], let url = urls.first {
             return NSImage(contentsOf: url)
         }
 
@@ -169,35 +157,27 @@ final class PastableNSTextView: NSTextView {
 // MARK: - Preview
 
 #if DEBUG
-struct PastableTextEditor_Previews: PreviewProvider {
-    static var previews: some View {
-        PastableTextEditorPreviewWrapper()
-            .frame(width: 400, height: 200)
-            .padding()
-    }
-}
+#Preview("Pastable Text Editor") {
+    @Previewable @State var text = ""
+    @Previewable @State var imageCount = 0
 
-private struct PastableTextEditorPreviewWrapper: View {
-    @State private var text = ""
-    @State private var imageCount = 0
+    VStack(alignment: .leading, spacing: 8) {
+        Text("Paste or drop images here (count: \(imageCount))")
+            .font(.callout)
+            .foregroundStyle(.secondary)
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Paste or drop images here (count: \(imageCount))")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-
-            PastableTextEditor(text: $text) { _ in
-                imageCount += 1
-            }
-            .frame(minHeight: 150)
-            .background(Color(nsColor: .textBackgroundColor))
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-            )
+        PastableTextEditor(text: $text) { _ in
+            imageCount += 1
         }
+        .frame(minHeight: 150)
+        .background(Color(nsColor: .textBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
+        )
     }
+    .frame(width: 400, height: 200)
+    .padding()
 }
 #endif
