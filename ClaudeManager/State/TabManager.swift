@@ -45,14 +45,22 @@ final class TabManager {
     }
 
     func closeTab(_ tab: Tab) {
-        tabs.removeAll { $0.id == tab.id }
+        guard let index = tabs.firstIndex(where: { $0.id == tab.id }) else { return }
 
-        if activeTabId == tab.id {
-            activeTabId = tabs.first?.id
+        let wasActive = activeTabId == tab.id
+        tabs.remove(at: index)
+
+        if wasActive {
+            if tabs.indices.contains(index) {
+                activeTabId = tabs[index].id
+            } else {
+                activeTabId = tabs.last?.id
+            }
         }
     }
 
     func selectTab(_ tab: Tab) {
+        guard tabs.contains(where: { $0.id == tab.id }) else { return }
         activeTabId = tab.id
     }
 }
