@@ -1,6 +1,6 @@
-# Plan: Add Image Paste Support to Feature Description
+# Plan: Multi-Tab Support
 
-Add the ability to paste/drag-drop PNG and JPEG images into the feature description input. Images are displayed as thumbnails and passed to Claude CLI via stdin as base64-encoded content blocks.
+Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously. Auto-create git worktrees when opening same repo in a new tab.
 
 ---
 
@@ -8,103 +8,164 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
 
 ### Phase 1: Models
 
-- [x] **Task 1.1**: Create `AttachedImage.swift` model
-  - `id: UUID`, `data: Data`, `mediaType: ImageMediaType`, `thumbnail: NSImage`, `originalSize: CGSize`
-  - Computed: `base64Encoded`, `fileSizeDescription`
-  - File: `ClaudeManager/Models/AttachedImage.swift`
+- [x] **Task 1.1**: Create `WorktreeInfo.swift` model
+  - Struct with: `id: UUID`, `originalRepoPath: URL`, `worktreePath: URL`, `branchName: String`, `createdAt: Date`
+  - Conform to `Identifiable`, `Sendable`, `Equatable`
+  - File: `ClaudeManager/Models/WorktreeInfo.swift`
 
-- [x] **Task 1.2**: Create `PromptContent.swift` model
-  - `PromptContent` struct with `text: String`, `images: [AttachedImage]`
-  - `ClaudeContentBlock` for building JSON stdin content
-  - File: `ClaudeManager/Models/PromptContent.swift`
+- [ ] **Task 1.2**: Create `Tab.swift` model
+  - `@MainActor @Observable` class with: `id: UUID`, `label: String`, `context: ExecutionContext`, `stateMachine: ExecutionStateMachine`, `worktreeInfo: WorktreeInfo?`
+  - Computed `effectiveProjectPath: URL?` returns worktree path if present, else context.projectPath
+  - Factory `init` that creates fresh services (ClaudeCLIService, PlanService, GitService, BuildTestService)
+  - File: `ClaudeManager/Models/Tab.swift`
 
-### Phase 2: Utility
+### Phase 2: Services
 
-- [ ] **Task 2.1**: Create `ImageProcessor.swift` utility
-  - Process NSImage from paste/drop
-  - Validate PNG/JPEG, create thumbnails (120x120), enforce 20MB limit
-  - File: `ClaudeManager/Utilities/ImageProcessor.swift`
+- [ ] **Task 2.1**: Create `WorktreeServiceProtocol.swift`
+  - Protocol with: `createWorktree(from: URL) async throws -> WorktreeInfo`, `removeWorktree(_: WorktreeInfo) async throws`, `listWorktrees(in: URL) async throws -> [WorktreeInfo]`
+  - File: `ClaudeManager/Services/Protocols/WorktreeServiceProtocol.swift`
+
+- [ ] **Task 2.2**: Create `WorktreeService.swift`
+  - Implements WorktreeServiceProtocol
+  - `createWorktree`: runs `git worktree add .worktrees/<uuid> -b claude-worktree-<uuid>`
+  - `removeWorktree`: runs `git worktree remove <path>`
+  - `listWorktrees`: runs `git worktree list --porcelain`
+  - File: `ClaudeManager/Services/WorktreeService.swift`
+
+- [ ] **Task 2.3**: Create `MockWorktreeService.swift`
+  - Mock implementation for testing
+  - File: `ClaudeManagerTests/Mocks/MockWorktreeService.swift`
 
 ### Phase 3: State Layer
 
-- [ ] **Task 3.1**: Update `ExecutionContext.swift`
-  - Add `attachedImages: [AttachedImage]` property
-  - Add `addImage()`, `removeImage(id:)`, `removeAllImages()` methods
-  - Add `promptContent` computed property
-  - Update `reset()` and `resetForNewFeature()` to clear images
-  - File: `ClaudeManager/State/ExecutionContext.swift`
+- [ ] **Task 3.1**: Create `TabManager.swift`
+  - `@MainActor @Observable` class
+  - Properties: `tabs: [Tab]`, `activeTabId: UUID?`
+  - Computed: `activeTab: Tab?`
+  - Methods: `createTab(projectPath: URL?, userPreferences: UserPreferences) -> Tab`, `closeTab(_: Tab)`, `selectTab(_: Tab)`
+  - Inject WorktreeService, detect duplicate projectPath before creating tab
+  - File: `ClaudeManager/State/TabManager.swift`
 
-- [ ] **Task 3.2**: Update `InterviewSession.swift`
-  - Add `attachedImages: [AttachedImage]` property
-  - Update init to accept images
-  - File: `ClaudeManager/Models/InterviewSession.swift`
+- [ ] **Task 3.2**: Refactor `AppState.swift`
+  - Replace `context` and `stateMachine` with `tabManager: TabManager`
+  - Keep `userPreferences` as shared
+  - Add computed `activeTab: Tab?`, `context: ExecutionContext?`, `stateMachine: ExecutionStateMachine?`
+  - Update init to create TabManager with one initial tab
+  - File: `ClaudeManager/State/AppState.swift`
 
-### Phase 4: Service Layer
+### Phase 4: Tab Bar UI
 
-- [ ] **Task 4.1**: Add stdin support to `ClaudeProcess.swift`
-  - Add `stdinData: Data?` parameter to init
-  - Write stdin data after process.run(), close handle
-  - File: `ClaudeManager/Services/ClaudeProcess.swift`
+- [ ] **Task 4.1**: Create `TabItemView.swift`
+  - Parameters: `tab: Tab`, `isActive: Bool`, `onSelect: () -> Void`, `onClose: () -> Void`
+  - Display: label (truncated), status dot (color by phase), close button (X)
+  - Styling: highlight background when active, hover effects
+  - File: `ClaudeManager/Views/Components/TabItemView.swift`
 
-- [ ] **Task 4.2**: Update `ClaudeCLIServiceProtocol.swift`
-  - Add `execute(content: PromptContent, ...)` method signature
-  - File: `ClaudeManager/Services/Protocols/ClaudeCLIServiceProtocol.swift`
+- [ ] **Task 4.2**: Create `TabBarView.swift`
+  - Horizontal ScrollView of TabItemView for each tab
+  - "+" button at end to create new tab
+  - Wire up selection and close actions to TabManager
+  - File: `ClaudeManager/Views/Components/TabBarView.swift`
 
-- [ ] **Task 4.3**: Update `ClaudeCLIService.swift`
-  - Implement content-based execution
-  - Build JSON content blocks for stdin when images present
-  - Delegate to text-based method when no images
-  - File: `ClaudeManager/Services/ClaudeCLIService.swift`
+### Phase 5: View Integration
 
-- [ ] **Task 4.4**: Update `MockClaudeCLIService.swift`
-  - Add `lastContent` property and content-based execute method
-  - File: `ClaudeManagerTests/Mocks/MockClaudeCLIService.swift`
+- [ ] **Task 5.1**: Create `MainView.swift`
+  - VStack: TabBarView, Divider, content area
+  - Content: if activeTab exists show TabContentView, else show EmptyTabView
+  - Pass activeTab into environment for child views
+  - File: `ClaudeManager/Views/MainView.swift`
 
-### Phase 5: View Layer
+- [ ] **Task 5.2**: Create `TabContentView.swift`
+  - Accepts Tab via environment
+  - Contains existing ContentView logic (SetupView vs ExecutionView switch)
+  - Handles sheets for pendingQuestion and pendingTaskFailure
+  - File: `ClaudeManager/Views/TabContentView.swift`
 
-- [ ] **Task 5.1**: Create `PastableTextEditor.swift`
-  - NSViewRepresentable wrapping NSTextView
-  - Override paste to detect images from NSPasteboard
-  - Support drag-and-drop via registerForDraggedTypes
-  - Callback: `onImagePaste: (NSImage) -> Void`
-  - File: `ClaudeManager/Views/Components/PastableTextEditor.swift`
+- [ ] **Task 5.3**: Create `EmptyTabView.swift`
+  - Shown when no tabs exist
+  - "Create New Tab" button
+  - File: `ClaudeManager/Views/EmptyTabView.swift`
 
-- [ ] **Task 5.2**: Create `ImageThumbnailView.swift`
-  - 80x80 thumbnail with hover-to-remove X button
-  - Show file size and dimensions in tooltip
-  - File: `ClaudeManager/Views/Components/ImageThumbnailView.swift`
+- [ ] **Task 5.4**: Update `ClaudeManagerApp.swift`
+  - Use MainView as root instead of ContentView
+  - Update menu commands to use `appState.activeTab?.context` and `appState.activeTab?.stateMachine`
+  - Add New Tab command (⌘T)
+  - Add Close Tab command (⌘W)
+  - File: `ClaudeManager/ClaudeManagerApp.swift`
 
-- [ ] **Task 5.3**: Create `AttachedImagesView.swift`
-  - Horizontal ScrollView of thumbnails
-  - "Remove All" button, image count label
-  - File: `ClaudeManager/Views/Components/AttachedImagesView.swift`
+- [ ] **Task 5.5**: Update `ContentView.swift`
+  - Accept Tab via `@Environment(Tab.self)` instead of AppState
+  - Use `tab.context` and `tab.stateMachine`
+  - File: `ClaudeManager/ContentView.swift`
 
-- [ ] **Task 5.4**: Update `SetupView.swift`
-  - Replace TextEditor with PastableTextEditor
-  - Add AttachedImagesView above text input
-  - Add drop delegate for drag-and-drop
-  - Add hint text and error display
+### Phase 6: Child View Updates
+
+- [ ] **Task 6.1**: Update `SetupView.swift`
+  - Use `@Environment(Tab.self)` to access tab.context and tab.stateMachine
   - File: `ClaudeManager/Views/SetupView.swift`
 
-### Phase 6: Integration
+- [ ] **Task 6.2**: Update `ExecutionView.swift`
+  - Use `@Environment(Tab.self)` to access tab.context
+  - Add worktree indicator badge next to project name if tab.worktreeInfo != nil
+  - File: `ClaudeManager/Views/ExecutionView.swift`
 
-- [ ] **Task 6.1**: Update `ExecutionStateMachine.swift`
-  - In `start()`: pass `attachedImages` to InterviewSession
-  - In `conductInterview()`: use `execute(content:...)` with images
-  - In `generateInitialPlan()`: include images in first prompt
-  - File: `ClaudeManager/State/ExecutionStateMachine.swift`
+- [ ] **Task 6.3**: Update `ControlsView.swift`
+  - Use `@Environment(Tab.self)` to access tab.context and tab.stateMachine
+  - File: `ClaudeManager/Views/ControlsView.swift`
 
-### Phase 7: Testing
+- [ ] **Task 6.4**: Update `UserQuestionView.swift`
+  - Use `@Environment(Tab.self)` to access tab.stateMachine
+  - File: `ClaudeManager/Views/UserQuestionView.swift`
 
-- [ ] **Task 7.1**: Add `ImageProcessorTests.swift`
-  - Test PNG/JPEG processing, thumbnail creation, size limits
-  - File: `ClaudeManagerTests/ImageProcessorTests.swift`
+- [ ] **Task 6.5**: Update `TaskFailureView.swift`
+  - Use `@Environment(Tab.self)` to access tab.stateMachine
+  - File: `ClaudeManager/Views/TaskFailureView.swift`
+
+- [ ] **Task 6.6**: Update `LogView.swift`
+  - Use `@Environment(Tab.self)` to access tab.context
+  - File: `ClaudeManager/Views/LogView.swift`
+
+- [ ] **Task 6.7**: Update `ManualInputView.swift`
+  - Use `@Environment(Tab.self)` to access tab.context and tab.stateMachine
+  - File: `ClaudeManager/Views/ManualInputView.swift`
+
+### Phase 7: Worktree Integration
+
+- [ ] **Task 7.1**: Integrate worktree creation in TabManager.createTab
+  - Check if any existing tab has same projectPath
+  - If duplicate, call worktreeService.createWorktree()
+  - Set new tab's context.projectPath to worktree path
+  - Store WorktreeInfo in tab
+  - File: `ClaudeManager/State/TabManager.swift`
+
+- [ ] **Task 7.2**: Implement worktree cleanup in TabManager.closeTab
+  - If tab.worktreeInfo != nil, stop execution first
+  - Call worktreeService.removeWorktree()
+  - File: `ClaudeManager/State/TabManager.swift`
+
+### Phase 8: Keyboard Shortcuts
+
+- [ ] **Task 8.1**: Add tab navigation shortcuts in ClaudeManagerApp
+  - Next Tab: ⌘⇧]
+  - Previous Tab: ⌘⇧[
+  - Add methods in TabManager: selectNextTab(), selectPreviousTab()
+  - File: `ClaudeManager/ClaudeManagerApp.swift`, `ClaudeManager/State/TabManager.swift`
+
+### Phase 9: Testing
+
+- [ ] **Task 9.1**: Add `WorktreeServiceTests.swift`
+  - Test createWorktree, removeWorktree, listWorktrees
+  - File: `ClaudeManagerTests/WorktreeServiceTests.swift`
+
+- [ ] **Task 9.2**: Add `TabManagerTests.swift`
+  - Test createTab, closeTab, selectTab, duplicate detection
+  - File: `ClaudeManagerTests/TabManagerTests.swift`
 
 ---
 
 ## Key Implementation Notes
 
-- **Stdin format:** Claude CLI accepts JSON content blocks via stdin with base64-encoded images
-- **No temp files:** Images stored in memory, passed directly to CLI
-- **Size limit:** 20MB per image (accounts for base64 expansion)
-- **Supported formats:** PNG, JPEG
+- **Per-tab isolation:** Each Tab owns its own ExecutionContext, ExecutionStateMachine, and ClaudeCLIService
+- **Shared state:** UserPreferences remains app-level and shared across tabs
+- **Worktree location:** `.worktrees/<uuid>/` in the original repo
+- **Environment injection:** Views use `@Environment(Tab.self)` for tab-level state
