@@ -20,7 +20,7 @@ struct ImageThumbnailView: View {
                         .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
                 )
 
-            if isHovering, let onRemove {
+            if let onRemove {
                 Button(action: onRemove) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 18))
@@ -29,8 +29,11 @@ struct ImageThumbnailView: View {
                 }
                 .buttonStyle(.plain)
                 .offset(x: 6, y: -6)
+                .opacity(isHovering ? 1 : 0)
+                .scaleEffect(isHovering ? 1 : 0.5)
             }
         }
+        .animation(.easeInOut(duration: 0.15), value: isHovering)
         .onHover { hovering in
             isHovering = hovering
         }
@@ -42,26 +45,6 @@ struct ImageThumbnailView: View {
 
 #if DEBUG
 #Preview("Image Thumbnail") {
-    let sampleImage = NSImage(size: NSSize(width: 200, height: 150), flipped: false) { rect in
-        NSColor.systemBlue.setFill()
-        rect.fill()
-        NSColor.white.setFill()
-        let text = "Sample" as NSString
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 24),
-            .foregroundColor: NSColor.white
-        ]
-        let textSize = text.size(withAttributes: attrs)
-        let textRect = NSRect(
-            x: (rect.width - textSize.width) / 2,
-            y: (rect.height - textSize.height) / 2,
-            width: textSize.width,
-            height: textSize.height
-        )
-        text.draw(in: textRect, withAttributes: attrs)
-        return true
-    }
-
     let thumbnail = NSImage(size: NSSize(width: 120, height: 120), flipped: false) { rect in
         NSColor.systemBlue.setFill()
         rect.fill()
