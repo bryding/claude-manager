@@ -27,7 +27,7 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
 
 ### Phase 3: State Layer
 
-- [ ] **Task 3.1**: Update `ExecutionContext.swift`
+- [x] **Task 3.1**: Update `ExecutionContext.swift`
   - Add `attachedImages: [AttachedImage]` property
   - Add `addImage()`, `removeImage(id:)`, `removeAllImages()` methods
   - Add `promptContent` computed property

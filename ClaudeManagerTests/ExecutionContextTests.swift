@@ -11,6 +11,19 @@ final class ExecutionContextTests: XCTestCase {
         context = ExecutionContext()
     }
 
+    // MARK: - Test Helpers
+
+    private func makeTestImage(mediaType: ImageMediaType = .png) -> AttachedImage {
+        let data = Data(repeating: 0x42, count: 100)
+        let thumbnail = NSImage(size: NSSize(width: 80, height: 80))
+        return AttachedImage(
+            data: data,
+            mediaType: mediaType,
+            thumbnail: thumbnail,
+            originalSize: CGSize(width: 800, height: 600)
+        )
+    }
+
     // MARK: - isManualInputAvailable Tests
 
     func testIsManualInputAvailableReturnsFalseWhenIdle() {
@@ -226,5 +239,127 @@ final class ExecutionContextTests: XCTestCase {
         // Verify errors are being added correctly
         XCTAssertEqual(context.errors.first?.message, "Error 0")
         XCTAssertEqual(context.errors.last?.message, "Error 99")
+    }
+
+    // MARK: - attachedImages Tests
+
+    func testAttachedImagesInitializesToEmpty() {
+        XCTAssertTrue(context.attachedImages.isEmpty)
+    }
+
+    func testAddImageAppendsToAttachedImages() {
+        let image = makeTestImage()
+
+        context.addImage(image)
+
+        XCTAssertEqual(context.attachedImages.count, 1)
+        XCTAssertEqual(context.attachedImages.first?.id, image.id)
+    }
+
+    func testAddMultipleImages() {
+        let image1 = makeTestImage()
+        let image2 = makeTestImage(mediaType: .jpeg)
+
+        context.addImage(image1)
+        context.addImage(image2)
+
+        XCTAssertEqual(context.attachedImages.count, 2)
+        XCTAssertEqual(context.attachedImages[0].id, image1.id)
+        XCTAssertEqual(context.attachedImages[1].id, image2.id)
+    }
+
+    func testRemoveImageById() {
+        let image1 = makeTestImage()
+        let image2 = makeTestImage()
+        context.addImage(image1)
+        context.addImage(image2)
+
+        context.removeImage(id: image1.id)
+
+        XCTAssertEqual(context.attachedImages.count, 1)
+        XCTAssertEqual(context.attachedImages.first?.id, image2.id)
+    }
+
+    func testRemoveImageWithNonexistentIdDoesNothing() {
+        let image = makeTestImage()
+        context.addImage(image)
+
+        context.removeImage(id: UUID())
+
+        XCTAssertEqual(context.attachedImages.count, 1)
+    }
+
+    func testRemoveAllImagesClearsAttachedImages() {
+        context.addImage(makeTestImage())
+        context.addImage(makeTestImage())
+        context.addImage(makeTestImage())
+
+        context.removeAllImages()
+
+        XCTAssertTrue(context.attachedImages.isEmpty)
+    }
+
+    func testRemoveAllImagesOnEmptyArrayDoesNothing() {
+        context.removeAllImages()
+
+        XCTAssertTrue(context.attachedImages.isEmpty)
+    }
+
+    func testResetClearsAttachedImages() {
+        context.addImage(makeTestImage())
+        context.addImage(makeTestImage())
+
+        context.reset()
+
+        XCTAssertTrue(context.attachedImages.isEmpty)
+    }
+
+    func testResetForNewFeatureClearsAttachedImages() {
+        context.addImage(makeTestImage())
+        context.addImage(makeTestImage())
+
+        context.resetForNewFeature()
+
+        XCTAssertTrue(context.attachedImages.isEmpty)
+    }
+
+    // MARK: - promptContent Tests
+
+    func testPromptContentWithTextOnly() {
+        context.featureDescription = "Test feature"
+
+        let content = context.promptContent
+
+        XCTAssertEqual(content.text, "Test feature")
+        XCTAssertTrue(content.images.isEmpty)
+    }
+
+    func testPromptContentWithTextAndImages() {
+        context.featureDescription = "Feature with images"
+        let image = makeTestImage()
+        context.addImage(image)
+
+        let content = context.promptContent
+
+        XCTAssertEqual(content.text, "Feature with images")
+        XCTAssertEqual(content.images.count, 1)
+        XCTAssertEqual(content.images.first?.id, image.id)
+    }
+
+    func testPromptContentReflectsCurrentState() {
+        context.featureDescription = "Initial"
+        let image1 = makeTestImage()
+        context.addImage(image1)
+
+        var content = context.promptContent
+        XCTAssertEqual(content.text, "Initial")
+        XCTAssertEqual(content.images.count, 1)
+
+        context.featureDescription = "Updated"
+        context.addImage(makeTestImage())
+
+        content = context.promptContent
+        XCTAssertEqual(content.text, "Updated")
+        XCTAssertEqual(content.images.count, 2)
     }
 }

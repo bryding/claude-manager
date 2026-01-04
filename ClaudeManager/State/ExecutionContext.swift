@@ -294,6 +294,7 @@ final class ExecutionContext {
         lastTestResult = nil
         interviewSession = nil
         currentInterviewQuestion = nil
+        attachedImages = []
     }
 
     func resetForNewFeature() {
@@ -331,6 +332,7 @@ final class ExecutionContext {
         lastTestResult = nil
         interviewSession = nil
         currentInterviewQuestion = nil
+        attachedImages = []
     }
 
     func resetRetryAttempt() {
