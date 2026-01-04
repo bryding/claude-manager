@@ -1893,4 +1893,242 @@ final class ExecutionStateMachineTests: XCTestCase {
 
         XCTAssertTrue(context.logs.contains { $0.message.contains("Manual input execution failed") })
     }
+
+    // MARK: - Image Support Tests
+
+    private func makeTestImage(mediaType: ImageMediaType = .png) -> AttachedImage {
+        let data = Data(repeating: 0x42, count: 100)
+        let thumbnail = NSImage(size: NSSize(width: 80, height: 80))
+        return AttachedImage(
+            data: data,
+            mediaType: mediaType,
+            thumbnail: thumbnail,
+            originalSize: CGSize(width: 800, height: 600)
+        )
+    }
+
+    // MARK: - start() Image Tests
+
+    func testStartPassesAttachedImagesToInterviewSession() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature with image reference"
+        let image = makeTestImage()
+        context.attachedImages = [image]
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.interviewSession?.attachedImages.count, 1)
+        XCTAssertEqual(context.interviewSession?.attachedImages.first?.id, image.id)
+    }
+
+    func testStartPassesMultipleImagesToInterviewSession() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        let image1 = makeTestImage()
+        let image2 = makeTestImage(mediaType: .jpeg)
+        context.attachedImages = [image1, image2]
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.interviewSession?.attachedImages.count, 2)
+    }
+
+    func testStartWithNoImagesCreatesSessionWithEmptyImages() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.attachedImages = []
+
+        try await stateMachine.start()
+
+        XCTAssertNotNil(context.interviewSession)
+        XCTAssertTrue(context.interviewSession?.attachedImages.isEmpty ?? false)
+    }
+
+    // MARK: - conductInterview() Image Tests
+
+    func testConductInterviewIncludesImagesOnFirstCall() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        let image = makeTestImage()
+        context.attachedImages = [image]
+
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        try await stateMachine.start()
+
+        let firstContent = mockClaudeService.allContents.first
+        XCTAssertNotNil(firstContent)
+        XCTAssertEqual(firstContent?.images.count, 1)
+        XCTAssertEqual(firstContent?.images.first?.id, image.id)
+    }
+
+    func testConductInterviewDoesNotIncludeImagesOnSubsequentCalls() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        let image = makeTestImage()
+        context.attachedImages = [image]
+
+        // First call: ask a question
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What scope?", header: "Scope")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .waitingForUser)
+        let firstContent = mockClaudeService.allContents.first
+        XCTAssertEqual(firstContent?.images.count, 1)
+
+        // Clear to prepare for second call
+        mockClaudeService.allContents.removeAll()
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        // Answer the question (triggers second interview call)
+        try await stateMachine.answerQuestion("Small scope")
+
+        // Second call should have empty images
+        let secondContent = mockClaudeService.allContents.first
+        XCTAssertNotNil(secondContent)
+        XCTAssertTrue(secondContent?.images.isEmpty ?? false)
+    }
+
+    func testConductInterviewWithNoImagesUsesEmptyContent() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.attachedImages = []
+
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        try await stateMachine.start()
+
+        let firstContent = mockClaudeService.allContents.first
+        XCTAssertNotNil(firstContent)
+        XCTAssertTrue(firstContent?.images.isEmpty ?? false)
+    }
+
+    // MARK: - generateInitialPlan() Image Tests
+
+    func testGenerateInitialPlanIncludesImagesFromSession() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        let image = makeTestImage()
+        context.attachedImages = [image]
+
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        try await stateMachine.start()
+
+        // Find the plan generation call (contains "Analyze the following feature request")
+        let planGenerationContent = mockClaudeService.allContents.first {
+            $0.text.contains("Analyze the following feature request")
+        }
+        XCTAssertNotNil(planGenerationContent)
+        XCTAssertEqual(planGenerationContent?.images.count, 1)
+        XCTAssertEqual(planGenerationContent?.images.first?.id, image.id)
+    }
+
+    func testGenerateInitialPlanWithMultipleImages() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        let image1 = makeTestImage()
+        let image2 = makeTestImage(mediaType: .jpeg)
+        context.attachedImages = [image1, image2]
+
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        try await stateMachine.start()
+
+        let planGenerationContent = mockClaudeService.allContents.first {
+            $0.text.contains("Analyze the following feature request")
+        }
+        XCTAssertNotNil(planGenerationContent)
+        XCTAssertEqual(planGenerationContent?.images.count, 2)
+    }
+
+    func testGenerateInitialPlanWithNoImagesHasEmptyImages() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.attachedImages = []
+
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        try await stateMachine.start()
+
+        let planGenerationContent = mockClaudeService.allContents.first {
+            $0.text.contains("Analyze the following feature request")
+        }
+        XCTAssertNotNil(planGenerationContent)
+        XCTAssertTrue(planGenerationContent?.images.isEmpty ?? false)
+    }
+
+    func testImagesArePreservedInInterviewSession() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        let image = makeTestImage()
+        context.attachedImages = [image]
+
+        // First call: ask question
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What scope?", header: "Scope")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        // Verify the interview session preserved the image
+        XCTAssertEqual(context.interviewSession?.attachedImages.count, 1)
+        XCTAssertEqual(context.interviewSession?.attachedImages.first?.id, image.id)
+
+        // Verify first interview call included the image
+        let firstContent = mockClaudeService.allContents.first
+        XCTAssertNotNil(firstContent)
+        XCTAssertEqual(firstContent?.images.count, 1)
+        XCTAssertEqual(firstContent?.images.first?.id, image.id)
+    }
+
+    func testStartWithExistingPlanDoesNotUseImages() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        let image = makeTestImage()
+        context.attachedImages = [image]
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .pending, subtasks: [])
+        ])
+
+        try await stateMachine.startWithExistingPlan()
+
+        // Should not have any content with images since we skip interview and planning
+        let contentsWithImages = mockClaudeService.allContents.filter { !$0.images.isEmpty }
+        XCTAssertTrue(contentsWithImages.isEmpty)
+    }
 }
