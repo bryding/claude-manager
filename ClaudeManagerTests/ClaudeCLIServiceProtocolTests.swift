@@ -549,4 +549,217 @@ final class ClaudeCLIServiceProtocolTests: XCTestCase {
         XCTAssertEqual(images?.count, 1)
         XCTAssertEqual(images?.first?.mediaType, .png)
     }
+
+    // MARK: - All Permission Modes Tests
+
+    func testExecuteContentWithDefaultPermissionMode() async throws {
+        let content = PromptContent(text: "Default mode")
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .default,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastPermissionMode, .default)
+    }
+
+    func testExecuteContentWithAllPermissionModes() async throws {
+        let modes: [PermissionMode] = [.plan, .acceptEdits, .default]
+
+        for mode in modes {
+            mockService = MockClaudeCLIService()
+            let content = PromptContent(text: "Test \(mode)")
+
+            _ = try await mockService.execute(
+                content: content,
+                workingDirectory: tempDirectory,
+                permissionMode: mode,
+                sessionId: nil,
+                timeout: nil,
+                onMessage: { _ in }
+            )
+
+            XCTAssertEqual(mockService.lastPermissionMode, mode)
+        }
+    }
+
+    // MARK: - Timeout Boundary Tests
+
+    func testExecuteContentWithZeroTimeout() async throws {
+        let content = PromptContent(text: "Zero timeout")
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: 0,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastTimeout, 0)
+    }
+
+    func testExecuteContentWithLargeTimeout() async throws {
+        let content = PromptContent(text: "Large timeout")
+        let largeTimeout: TimeInterval = 3600.0  // 1 hour
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: largeTimeout,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastTimeout, largeTimeout)
+    }
+
+    // MARK: - Session ID Tests
+
+    func testExecuteContentWithEmptySessionId() async throws {
+        let content = PromptContent(text: "Empty session")
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: "",
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastSessionId, "")
+    }
+
+    func testExecuteContentWithLongSessionId() async throws {
+        let content = PromptContent(text: "Long session")
+        let longSessionId = String(repeating: "a", count: 1000)
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: longSessionId,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastSessionId, longSessionId)
+    }
+
+    // MARK: - Content with Special Characters Tests
+
+    func testExecuteContentWithSpecialCharacters() async throws {
+        let content = PromptContent(text: "Test with émojis 🎉 and unicode: 日本語")
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastPrompt, "Test with émojis 🎉 and unicode: 日本語")
+    }
+
+    func testExecuteContentWithNewlines() async throws {
+        let content = PromptContent(text: "Line 1\nLine 2\nLine 3")
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastPrompt, "Line 1\nLine 2\nLine 3")
+    }
+
+    // MARK: - Result isError Flag Tests
+
+    func testExecuteContentReturnsErrorResult() async throws {
+        let content = PromptContent(text: "Will have error result")
+        mockService.executeResult = ClaudeExecutionResult(
+            result: "Error occurred",
+            sessionId: "error-session",
+            totalCostUsd: 0.0,
+            durationMs: 50,
+            isError: true
+        )
+
+        let result = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertTrue(result.isError)
+        XCTAssertEqual(result.result, "Error occurred")
+    }
+
+    // MARK: - Multiple Messages Callback Tests
+
+    func testExecuteContentForwardsMultipleMessages() async throws {
+        let content = PromptContent(text: "Multiple messages")
+        let messages = [
+            ClaudeStreamMessage.system(SystemMessage(
+                subtype: "init",
+                sessionId: "multi-session",
+                cwd: "/tmp",
+                tools: [],
+                model: "claude-3",
+                permissionMode: "plan",
+                mcpServers: [],
+                slashCommands: [],
+                claudeCodeVersion: "1.0.0",
+                agents: []
+            )),
+            ClaudeStreamMessage.result(ResultMessage(
+                subtype: "success",
+                isError: false,
+                durationMs: 100,
+                durationApiMs: 80,
+                numTurns: 1,
+                result: "Done",
+                sessionId: "multi-session",
+                totalCostUsd: 0.01,
+                usage: UsageInfo(
+                    inputTokens: 100,
+                    outputTokens: 50,
+                    cacheCreationInputTokens: nil,
+                    cacheReadInputTokens: nil
+                )
+            ))
+        ]
+        mockService.messagesToSend = messages
+
+        let messageCounter = MessageCounter()
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in
+                await messageCounter.increment()
+            }
+        )
+
+        let count = await messageCounter.count
+        XCTAssertEqual(count, 2)
+    }
 }
