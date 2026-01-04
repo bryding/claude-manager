@@ -27,10 +27,16 @@ final class MockWorktreeService: WorktreeServiceProtocol, @unchecked Sendable {
             throw error
         }
 
-        return createWorktreeResult ?? WorktreeInfo(
+        if let result = createWorktreeResult {
+            return result
+        }
+
+        let id = UUID()
+        return WorktreeInfo(
+            id: id,
             originalRepoPath: repoPath,
-            worktreePath: repoPath.appendingPathComponent(".worktrees/\(UUID().uuidString)"),
-            branchName: "claude-worktree-\(UUID().uuidString)"
+            worktreePath: repoPath.appendingPathComponent(".worktrees/\(id.uuidString)"),
+            branchName: "claude-worktree-\(id.uuidString)"
         )
     }
 
