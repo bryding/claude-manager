@@ -88,7 +88,7 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
 
 ### Phase 6: Integration
 
-- [ ] **Task 6.1**: Update `ExecutionStateMachine.swift`
+- [x] **Task 6.1**: Update `ExecutionStateMachine.swift`
   - In `start()`: pass `attachedImages` to InterviewSession
   - In `conductInterview()`: use `execute(content:...)` with images
   - In `generateInitialPlan()`: include images in first prompt
