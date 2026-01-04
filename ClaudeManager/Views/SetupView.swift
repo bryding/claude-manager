@@ -62,7 +62,7 @@ struct SetupView: View {
     private func setupContent(context: ExecutionContext) -> some View {
         VStack(spacing: 24) {
             headerSection
-            projectSelectionSection(context: context)
+            projectSelectionSection
             if context.existingPlan != nil {
                 existingPlanSection(context: context)
             }
@@ -107,7 +107,7 @@ struct SetupView: View {
         }
     }
 
-    private func projectSelectionSection(context: ExecutionContext) -> some View {
+    private var projectSelectionSection: some View {
         GroupBox("Project Directory") {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {

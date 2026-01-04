@@ -46,6 +46,7 @@
 		A5000002210000010000000F /* MockGitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5000002110000010000000F /* MockGitService.swift */; };
 		AD000001210000010000000F /* MockBuildTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD000001110000010000000F /* MockBuildTestService.swift */; };
 		B5000001210000010000000F /* MockWorktreeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5000001110000010000000F /* MockWorktreeService.swift */; };
+		B7000001210000010000000F /* TabManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7000001110000010000000F /* TabManagerTests.swift */; };
 		AF000001210000010000000F /* InterviewSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF000001110000010000000F /* InterviewSessionTests.swift */; };
 		B0000001210000010000000F /* ExecutionContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000001110000010000000F /* ExecutionContextTests.swift */; };
 		B2000001210000010000000F /* PromptContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000001110000010000000F /* PromptContentTests.swift */; };
@@ -114,6 +115,7 @@
 		A5000002110000010000000F /* MockGitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGitService.swift; sourceTree = "<group>"; };
 		AD000001110000010000000F /* MockBuildTestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockBuildTestService.swift; sourceTree = "<group>"; };
 		B5000001110000010000000F /* MockWorktreeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWorktreeService.swift; sourceTree = "<group>"; };
+		B7000001110000010000000F /* TabManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabManagerTests.swift; sourceTree = "<group>"; };
 		AF000001110000010000000F /* InterviewSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewSessionTests.swift; sourceTree = "<group>"; };
 		B0000001110000010000000F /* ExecutionContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContextTests.swift; sourceTree = "<group>"; };
 		B2000001110000010000000F /* PromptContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptContentTests.swift; sourceTree = "<group>"; };
@@ -266,6 +268,7 @@
 				AF000001110000010000000F /* InterviewSessionTests.swift */,
 				A2000003110000010000000F /* PlanServiceTests.swift */,
 				B2000001110000010000000F /* PromptContentTests.swift */,
+				B7000001110000010000000F /* TabManagerTests.swift */,
 			);
 			path = ClaudeManagerTests;
 			sourceTree = "<group>";
@@ -439,6 +442,7 @@
 				A5000002210000010000000F /* MockGitService.swift in Sources */,
 				AD000001210000010000000F /* MockBuildTestService.swift in Sources */,
 				B5000001210000010000000F /* MockWorktreeService.swift in Sources */,
+				B7000001210000010000000F /* TabManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

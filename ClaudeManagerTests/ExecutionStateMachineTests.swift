@@ -662,6 +662,12 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testRetryOnTransientError() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"
+        context.retryConfiguration = RetryConfiguration(
+            maxAttempts: 3,
+            initialDelay: 0.01,
+            backoffMultiplier: 1.0,
+            maxDelay: 0.01
+        )
         mockClaudeService.failuresBeforeSuccess = 2
         configureMockWithPlan(tasks: [(1, "Implement Service", "Core logic")])
 
@@ -1611,8 +1617,13 @@ final class ExecutionStateMachineTests: XCTestCase {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.sessionId = "test-session"
         context.phase = .conductingInterview
+        context.interviewSession = InterviewSession(featureDescription: "Test")
+        // Return an AskUserQuestion to set phase to waitingForUser and prevent runLoop
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What next?", header: "Q")
+        ]
         mockClaudeService.executeResult = ClaudeExecutionResult(
-            result: "ok",
+            result: "asked question",
             sessionId: "test-session",
             totalCostUsd: 0.0,
             durationMs: 100,
@@ -1701,8 +1712,12 @@ final class ExecutionStateMachineTests: XCTestCase {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.sessionId = "test-session"
         context.phase = .generatingInitialPlan
+        // Return an AskUserQuestion to set phase to waitingForUser and prevent runLoop
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What next?", header: "Q")
+        ]
         mockClaudeService.executeResult = ClaudeExecutionResult(
-            result: "ok",
+            result: "asked question",
             sessionId: "test-session",
             totalCostUsd: 0.0,
             durationMs: 100,
@@ -1718,8 +1733,12 @@ final class ExecutionStateMachineTests: XCTestCase {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.sessionId = "test-session"
         context.phase = .rewritingPlan
+        // Return an AskUserQuestion to set phase to waitingForUser and prevent runLoop
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What next?", header: "Q")
+        ]
         mockClaudeService.executeResult = ClaudeExecutionResult(
-            result: "ok",
+            result: "asked question",
             sessionId: "test-session",
             totalCostUsd: 0.0,
             durationMs: 100,

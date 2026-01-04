@@ -32,7 +32,7 @@ struct ControlsView: View {
     private func controlsContent(context: ExecutionContext) -> some View {
         HStack(spacing: 16) {
             if context.canStart {
-                startButton(context: context)
+                startButton
             } else {
                 pauseResumeButton(context: context)
                 stopButton(context: context)
@@ -115,7 +115,7 @@ struct ControlsView: View {
         .tint(.orange)
     }
 
-    private func startButton(context: ExecutionContext) -> some View {
+    private var startButton: some View {
         Button(action: startExecution) {
             HStack(spacing: 6) {
                 Image(systemName: "play.circle.fill")
