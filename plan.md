@@ -13,7 +13,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
   - Conform to `Identifiable`, `Sendable`, `Equatable`
   - File: `ClaudeManager/Models/WorktreeInfo.swift`
 
-- [ ] **Task 1.2**: Create `Tab.swift` model
+- [x] **Task 1.2**: Create `Tab.swift` model
   - `@MainActor @Observable` class with: `id: UUID`, `label: String`, `context: ExecutionContext`, `stateMachine: ExecutionStateMachine`, `worktreeInfo: WorktreeInfo?`
   - Computed `effectiveProjectPath: URL?` returns worktree path if present, else context.projectPath
   - Factory `init` that creates fresh services (ClaudeCLIService, PlanService, GitService, BuildTestService)
