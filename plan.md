@@ -21,7 +21,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
 
 ### Phase 2: Services
 
-- [ ] **Task 2.1**: Create `WorktreeServiceProtocol.swift`
+- [x] **Task 2.1**: Create `WorktreeServiceProtocol.swift`
   - Protocol with: `createWorktree(from: URL) async throws -> WorktreeInfo`, `removeWorktree(_: WorktreeInfo) async throws`, `listWorktrees(in: URL) async throws -> [WorktreeInfo]`
   - File: `ClaudeManager/Services/Protocols/WorktreeServiceProtocol.swift`
 

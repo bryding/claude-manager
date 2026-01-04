@@ -28,6 +28,7 @@
 		A100000E210000010000000F /* GitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000E110000010000000F /* GitService.swift */; };
 		A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */; };
 		A4000002210000010000000F /* GitServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4000002110000010000000F /* GitServiceProtocol.swift */; };
+		B4000001210000010000000F /* WorktreeServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4000001110000010000000F /* WorktreeServiceProtocol.swift */; };
 		A100000B210000010000000F /* Plan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000B110000010000000F /* Plan.swift */; };
 		A100000C210000010000000F /* ExecutionPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000C110000010000000F /* ExecutionPhase.swift */; };
 		A100000D210000010000000F /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000D110000010000000F /* LogEntry.swift */; };
@@ -90,6 +91,7 @@
 		A100000E110000010000000F /* GitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitService.swift; sourceTree = "<group>"; };
 		A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCLIServiceProtocol.swift; sourceTree = "<group>"; };
 		A4000002110000010000000F /* GitServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitServiceProtocol.swift; sourceTree = "<group>"; };
+		B4000001110000010000000F /* WorktreeServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorktreeServiceProtocol.swift; sourceTree = "<group>"; };
 		A100000B110000010000000F /* Plan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plan.swift; sourceTree = "<group>"; };
 		A100000C110000010000000F /* ExecutionPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionPhase.swift; sourceTree = "<group>"; };
 		A100000D110000010000000F /* LogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntry.swift; sourceTree = "<group>"; };
@@ -211,6 +213,7 @@
 				A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */,
 				A4000002110000010000000F /* GitServiceProtocol.swift */,
 				AC000002110000010000000F /* BuildTestServiceProtocol.swift */,
+				B4000001110000010000000F /* WorktreeServiceProtocol.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -394,6 +397,7 @@
 				A4000002210000010000000F /* GitServiceProtocol.swift in Sources */,
 				AC000001210000010000000F /* BuildTestService.swift in Sources */,
 				AC000002210000010000000F /* BuildTestServiceProtocol.swift in Sources */,
+				B4000001210000010000000F /* WorktreeServiceProtocol.swift in Sources */,
 				A9000002210000010000000F /* UserPreferences.swift in Sources */,
 				AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */,
 				AA000002210000010000000F /* ProjectConfiguration.swift in Sources */,
