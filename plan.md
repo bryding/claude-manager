@@ -46,7 +46,7 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
   - Write stdin data after process.run(), close handle
   - File: `ClaudeManager/Services/ClaudeProcess.swift`
 
-- [ ] **Task 4.2**: Update `ClaudeCLIServiceProtocol.swift`
+- [x] **Task 4.2**: Update `ClaudeCLIServiceProtocol.swift`
   - Add `execute(content: PromptContent, ...)` method signature
   - File: `ClaudeManager/Services/Protocols/ClaudeCLIServiceProtocol.swift`
 
