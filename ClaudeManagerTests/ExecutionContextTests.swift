@@ -190,15 +190,17 @@ final class ExecutionContextTests: XCTestCase {
 
     // MARK: - Log Rotation Tests
 
-    func testResetForNewFeatureClearsLogs() {
+    func testResetForNewFeaturePreservesLogsAndAddsSeparator() {
         context.addLog(type: .info, message: "Test log 1")
         context.addLog(type: .info, message: "Test log 2")
         XCTAssertEqual(context.logs.count, 2)
 
         context.resetForNewFeature()
 
-        XCTAssertEqual(context.logs.count, 1)
-        XCTAssertEqual(context.logs.first?.type, .separator)
+        XCTAssertEqual(context.logs.count, 3)
+        XCTAssertTrue(context.logs.contains { $0.message == "Test log 1" })
+        XCTAssertTrue(context.logs.contains { $0.message == "Test log 2" })
+        XCTAssertEqual(context.logs.last?.type, .separator)
     }
 
     func testLogsDoNotExceedMaxEntries() {

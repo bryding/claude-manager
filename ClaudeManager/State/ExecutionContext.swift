@@ -289,7 +289,6 @@ final class ExecutionContext {
     }
 
     func resetForNewFeature() {
-        logs = []
         let separatorEntry = LogEntry(
             phase: .idle,
             type: .separator,
