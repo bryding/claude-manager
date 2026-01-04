@@ -110,7 +110,57 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
         timeout: TimeInterval? = nil,
         onMessage: @escaping @Sendable (ClaudeStreamMessage) async -> Void
     ) async throws -> ClaudeExecutionResult {
-        // Verify executable exists
+        try await executeInternal(
+            prompt: prompt,
+            stdinData: nil,
+            workingDirectory: workingDirectory,
+            permissionMode: permissionMode,
+            sessionId: sessionId,
+            timeout: timeout,
+            onMessage: onMessage
+        )
+    }
+
+    func execute(
+        content: PromptContent,
+        workingDirectory: URL,
+        permissionMode: PermissionMode,
+        sessionId: String? = nil,
+        timeout: TimeInterval? = nil,
+        onMessage: @escaping @Sendable (ClaudeStreamMessage) async -> Void
+    ) async throws -> ClaudeExecutionResult {
+        if content.hasImages {
+            let stdinData = try content.toJSONData()
+            return try await executeInternal(
+                prompt: "-",
+                stdinData: stdinData,
+                workingDirectory: workingDirectory,
+                permissionMode: permissionMode,
+                sessionId: sessionId,
+                timeout: timeout,
+                onMessage: onMessage
+            )
+        } else {
+            return try await execute(
+                prompt: content.text,
+                workingDirectory: workingDirectory,
+                permissionMode: permissionMode,
+                sessionId: sessionId,
+                timeout: timeout,
+                onMessage: onMessage
+            )
+        }
+    }
+
+    private func executeInternal(
+        prompt: String,
+        stdinData: Data?,
+        workingDirectory: URL,
+        permissionMode: PermissionMode,
+        sessionId: String?,
+        timeout: TimeInterval?,
+        onMessage: @escaping @Sendable (ClaudeStreamMessage) async -> Void
+    ) async throws -> ClaudeExecutionResult {
         guard FileManager.default.isExecutableFile(atPath: executablePath) else {
             print("[ClaudeCLI] Executable not found at: \(executablePath)")
             throw ClaudeCLIServiceError.executableNotFound(executablePath)
@@ -126,12 +176,16 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
         )
 
         print("[ClaudeCLI] Arguments: \(arguments)")
+        if stdinData != nil {
+            print("[ClaudeCLI] Sending content via stdin")
+        }
 
         let process = ClaudeProcess(
             executablePath: executablePath,
             arguments: arguments,
             workingDirectory: workingDirectory,
-            timeout: timeout
+            timeout: timeout,
+            stdinData: stdinData
         )
         currentProcess = process
 
