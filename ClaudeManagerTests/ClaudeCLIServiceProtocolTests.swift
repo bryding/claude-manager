@@ -273,4 +273,78 @@ final class ClaudeCLIServiceProtocolTests: XCTestCase {
         // Default implementation passes only text
         XCTAssertEqual(mockService.lastPrompt, "Multiple images")
     }
+
+    // MARK: - Mock Tracking Tests
+
+    func testMockTracksLastContent() async throws {
+        let image = makeTestImage()
+        let content = PromptContent(text: "Track content", images: [image])
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.lastContent?.text, "Track content")
+        XCTAssertEqual(mockService.lastContent?.images.count, 1)
+    }
+
+    func testMockTracksAllContents() async throws {
+        let content1 = PromptContent(text: "First")
+        let content2 = PromptContent(text: "Second", images: [makeTestImage()])
+
+        _ = try await mockService.execute(
+            content: content1,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        _ = try await mockService.execute(
+            content: content2,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.allContents.count, 2)
+        XCTAssertEqual(mockService.allContents[0].text, "First")
+        XCTAssertEqual(mockService.allContents[1].text, "Second")
+        XCTAssertTrue(mockService.allContents[1].hasImages)
+    }
+
+    func testMockContentTrackingIndependentOfPromptTracking() async throws {
+        let content = PromptContent(text: "Content call")
+
+        _ = try await mockService.execute(
+            content: content,
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        _ = try await mockService.execute(
+            prompt: "Prompt call",
+            workingDirectory: tempDirectory,
+            permissionMode: .plan,
+            sessionId: nil,
+            timeout: nil,
+            onMessage: { _ in }
+        )
+
+        XCTAssertEqual(mockService.allContents.count, 1)
+        XCTAssertEqual(mockService.allPrompts.count, 2)
+        XCTAssertEqual(mockService.lastPrompt, "Prompt call")
+        XCTAssertEqual(mockService.lastContent?.text, "Content call")
+    }
 }

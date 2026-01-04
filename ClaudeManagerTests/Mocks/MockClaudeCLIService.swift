@@ -8,7 +8,6 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
     var executeCalled = false
     var lastPrompt: String?
     var lastContent: PromptContent?
-    var lastImages: [AttachedImage]?
     var lastPermissionMode: PermissionMode?
     var lastSessionId: String?
     var lastTimeout: TimeInterval?
@@ -79,7 +78,6 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
         onMessage: @escaping @Sendable (ClaudeStreamMessage) async -> Void
     ) async throws -> ClaudeExecutionResult {
         lastContent = content
-        lastImages = content.images
         allContents.append(content)
 
         return try await execute(
