@@ -81,7 +81,7 @@ final class WorktreeService: WorktreeServiceProtocol, @unchecked Sendable {
 
     private func parseWorktreeList(_ output: String, originalRepoPath: URL) -> [WorktreeInfo] {
         var worktrees: [WorktreeInfo] = []
-        let worktreesDirPath = originalRepoPath.appendingPathComponent(".worktrees").path
+        let worktreesDirURL = originalRepoPath.appendingPathComponent(".worktrees").standardizedFileURL
 
         let entries = output.components(separatedBy: "\n\n")
 
@@ -107,28 +107,27 @@ final class WorktreeService: WorktreeServiceProtocol, @unchecked Sendable {
                 }
             }
 
-            guard let path = worktreePath,
-                  path.hasPrefix(worktreesDirPath),
-                  let branch = branchName else {
+            guard let path = worktreePath, let branch = branchName else {
                 continue
             }
 
-            let pathURL = URL(fileURLWithPath: path)
-            let uuidString = pathURL.lastPathComponent
+            let pathURL = URL(fileURLWithPath: path).standardizedFileURL
 
-            guard let id = UUID(uuidString: uuidString) else {
+            guard pathURL.deletingLastPathComponent() == worktreesDirURL else {
                 continue
             }
 
-            let worktreeInfo = WorktreeInfo(
+            guard let id = UUID(uuidString: pathURL.lastPathComponent) else {
+                continue
+            }
+
+            worktrees.append(WorktreeInfo(
                 id: id,
                 originalRepoPath: originalRepoPath,
                 worktreePath: pathURL,
                 branchName: branch,
                 createdAt: Date()
-            )
-
-            worktrees.append(worktreeInfo)
+            ))
         }
 
         return worktrees
