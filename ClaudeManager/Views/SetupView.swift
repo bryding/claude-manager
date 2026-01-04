@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 struct SetupView: View {
     // MARK: - Environment
@@ -10,10 +11,12 @@ struct SetupView: View {
 
     @State private var isStarting = false
     @State private var errorMessage: String?
+    @State private var imageError: String?
 
     // MARK: - Dependencies
 
     private let planService = PlanService()
+    private let imageProcessor = ImageProcessor()
 
     // MARK: - Computed Properties
 
@@ -135,19 +138,100 @@ struct SetupView: View {
                     .font(.callout)
                     .foregroundStyle(.secondary)
 
-                TextEditor(text: $context.featureDescription)
-                    .font(.body)
-                    .frame(minHeight: 150)
-                    .scrollContentBackground(.hidden)
-                    .padding(8)
-                    .background(Color(nsColor: .textBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
+                if !appState.context.attachedImages.isEmpty {
+                    AttachedImagesView(
+                        images: appState.context.attachedImages,
+                        onRemove: { id in
+                            appState.context.removeImage(id: id)
+                        },
+                        onRemoveAll: {
+                            appState.context.removeAllImages()
+                        }
                     )
+                }
+
+                PastableTextEditor(text: $context.featureDescription) { image in
+                    handleImagePaste(image)
+                }
+                .frame(minHeight: 150)
+                .background(Color(nsColor: .textBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
+                )
+                .onDrop(of: [.image, .fileURL], isTargeted: nil) { providers in
+                    handleImageDrop(providers)
+                }
+
+                HStack(spacing: 4) {
+                    Image(systemName: "info.circle")
+                    Text("You can paste or drag images (PNG, JPEG) to include with your description")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+                if let imageError = imageError {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                        Text(imageError)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                }
             }
             .padding(.vertical, 8)
+        }
+    }
+
+    // MARK: - Image Handling
+
+    private func handleImagePaste(_ image: NSImage) {
+        imageError = nil
+
+        switch imageProcessor.process(image: image) {
+        case .success(let attachedImage):
+            appState.context.addImage(attachedImage)
+        case .failure(let error):
+            imageError = errorMessage(for: error)
+        }
+    }
+
+    private func handleImageDrop(_ providers: [NSItemProvider]) -> Bool {
+        imageError = nil
+
+        for provider in providers {
+            if provider.hasItemConformingToTypeIdentifier("public.image") {
+                provider.loadDataRepresentation(forTypeIdentifier: "public.image") { data, _ in
+                    guard let data = data else { return }
+
+                    DispatchQueue.main.async {
+                        switch imageProcessor.process(data: data) {
+                        case .success(let attachedImage):
+                            appState.context.addImage(attachedImage)
+                        case .failure(let error):
+                            imageError = errorMessage(for: error)
+                        }
+                    }
+                }
+                return true
+            }
+        }
+        return false
+    }
+
+    private func errorMessage(for error: ImageProcessorError) -> String {
+        switch error {
+        case .invalidImageData:
+            return "Could not read image data"
+        case .unsupportedFormat:
+            return "Only PNG and JPEG images are supported"
+        case .imageTooLarge(let size, let limit):
+            let sizeMB = Double(size) / (1024 * 1024)
+            let limitMB = Double(limit) / (1024 * 1024)
+            return String(format: "Image too large (%.1f MB). Maximum size is %.0f MB.", sizeMB, limitMB)
+        case .thumbnailCreationFailed:
+            return "Failed to create image thumbnail"
         }
     }
 

@@ -69,17 +69,17 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
   - Callback: `onImagePaste: (NSImage) -> Void`
   - File: `ClaudeManager/Views/Components/PastableTextEditor.swift`
 
-- [ ] **Task 5.2**: Create `ImageThumbnailView.swift`
+- [x] **Task 5.2**: Create `ImageThumbnailView.swift`
   - 80x80 thumbnail with hover-to-remove X button
   - Show file size and dimensions in tooltip
   - File: `ClaudeManager/Views/Components/ImageThumbnailView.swift`
 
-- [ ] **Task 5.3**: Create `AttachedImagesView.swift`
+- [x] **Task 5.3**: Create `AttachedImagesView.swift`
   - Horizontal ScrollView of thumbnails
   - "Remove All" button, image count label
   - File: `ClaudeManager/Views/Components/AttachedImagesView.swift`
 
-- [ ] **Task 5.4**: Update `SetupView.swift`
+- [x] **Task 5.4**: Update `SetupView.swift`
   - Replace TextEditor with PastableTextEditor
   - Add AttachedImagesView above text input
   - Add drop delegate for drag-and-drop

@@ -59,6 +59,8 @@
 		A6000007210000010000000F /* ExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000007110000010000000F /* ExecutionView.swift */; };
 		A6000008210000010000000F /* ManualInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000008110000010000000F /* ManualInputView.swift */; };
 		B7000001210000010000000F /* PastableTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7000001110000010000000F /* PastableTextEditor.swift */; };
+		B8000001210000010000000F /* ImageThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000001110000010000000F /* ImageThumbnailView.swift */; };
+		B8000002210000010000000F /* AttachedImagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000002110000010000000F /* AttachedImagesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -126,6 +128,8 @@
 		A6000007110000010000000F /* ExecutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionView.swift; sourceTree = "<group>"; };
 		A6000008110000010000000F /* ManualInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualInputView.swift; sourceTree = "<group>"; };
 		B7000001110000010000000F /* PastableTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastableTextEditor.swift; sourceTree = "<group>"; };
+		B8000001110000010000000F /* ImageThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageThumbnailView.swift; sourceTree = "<group>"; };
+		B8000002110000010000000F /* AttachedImagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachedImagesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,6 +258,8 @@
 		B7000002110000010000000F /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				B8000002110000010000000F /* AttachedImagesView.swift */,
+				B8000001110000010000000F /* ImageThumbnailView.swift */,
 				B7000001110000010000000F /* PastableTextEditor.swift */,
 			);
 			path = Components;
@@ -432,6 +438,8 @@
 				B1000002210000010000000F /* PromptContent.swift in Sources */,
 				B3000001210000010000000F /* ImageProcessor.swift in Sources */,
 				B7000001210000010000000F /* PastableTextEditor.swift in Sources */,
+				B8000001210000010000000F /* ImageThumbnailView.swift in Sources */,
+				B8000002210000010000000F /* AttachedImagesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
