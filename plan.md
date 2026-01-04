@@ -50,13 +50,13 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
   - Add `execute(content: PromptContent, ...)` method signature
   - File: `ClaudeManager/Services/Protocols/ClaudeCLIServiceProtocol.swift`
 
-- [ ] **Task 4.3**: Update `ClaudeCLIService.swift`
+- [x] **Task 4.3**: Update `ClaudeCLIService.swift`
   - Implement content-based execution
   - Build JSON content blocks for stdin when images present
   - Delegate to text-based method when no images
   - File: `ClaudeManager/Services/ClaudeCLIService.swift`
 
-- [ ] **Task 4.4**: Update `MockClaudeCLIService.swift`
+- [x] **Task 4.4**: Update `MockClaudeCLIService.swift`
   - Add `lastContent` property and content-based execute method
   - File: `ClaudeManagerTests/Mocks/MockClaudeCLIService.swift`
 
