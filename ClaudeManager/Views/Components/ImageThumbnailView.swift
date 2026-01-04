@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct ImageThumbnailView: View {
     let image: AttachedImage

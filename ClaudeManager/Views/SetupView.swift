@@ -1,6 +1,5 @@
 import SwiftUI
 import AppKit
-import UniformTypeIdentifiers
 
 struct SetupView: View {
     // MARK: - Environment
@@ -193,7 +192,7 @@ struct SetupView: View {
         case .success(let attachedImage):
             appState.context.addImage(attachedImage)
         case .failure(let error):
-            imageError = errorMessage(for: error)
+            imageError = displayMessage(for: error)
         }
     }
 
@@ -210,7 +209,7 @@ struct SetupView: View {
                         case .success(let attachedImage):
                             appState.context.addImage(attachedImage)
                         case .failure(let error):
-                            imageError = errorMessage(for: error)
+                            imageError = displayMessage(for: error)
                         }
                     }
                 }
@@ -220,7 +219,7 @@ struct SetupView: View {
         return false
     }
 
-    private func errorMessage(for error: ImageProcessorError) -> String {
+    private func displayMessage(for error: ImageProcessorError) -> String {
         switch error {
         case .invalidImageData:
             return "Could not read image data"
