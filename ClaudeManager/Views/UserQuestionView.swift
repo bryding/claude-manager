@@ -187,7 +187,7 @@ struct UserQuestionView: View {
         isSubmitting = true
         Task {
             do {
-                try await appState.stateMachine.answerQuestion(answer)
+                try await appState.stateMachine?.answerQuestion(answer)
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription

@@ -12,33 +12,34 @@ struct ClaudeManagerApp: App {
         .commands {
             CommandGroup(after: .appSettings) {
                 Section {
-                    Button(appState.context.canResume ? "Resume" : "Pause") {
+                    Button(appState.context?.canResume == true ? "Resume" : "Pause") {
                         togglePauseResume()
                     }
                     .keyboardShortcut("p", modifiers: .command)
-                    .disabled(!appState.context.canPause && !appState.context.canResume)
+                    .disabled(appState.context?.canPause != true && appState.context?.canResume != true)
 
                     Button("Stop Execution...") {
                         requestStop()
                     }
                     .keyboardShortcut(".", modifiers: .command)
-                    .disabled(!appState.context.canStop)
+                    .disabled(appState.context?.canStop != true)
                 }
             }
         }
     }
 
     private func togglePauseResume() {
-        if appState.context.canResume {
+        guard let context = appState.context, let stateMachine = appState.stateMachine else { return }
+        if context.canResume {
             Task {
-                try? await appState.stateMachine.resume()
+                try? await stateMachine.resume()
             }
-        } else if appState.context.canPause {
-            appState.stateMachine.pause()
+        } else if context.canPause {
+            stateMachine.pause()
         }
     }
 
     private func requestStop() {
-        appState.context.showStopConfirmation = true
+        appState.context?.showStopConfirmation = true
     }
 }

@@ -38,7 +38,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
 
 ### Phase 3: State Layer
 
-- [ ] **Task 3.1**: Create `TabManager.swift`
+- [x] **Task 3.1**: Create `TabManager.swift`
   - `@MainActor @Observable` class
   - Properties: `tabs: [Tab]`, `activeTabId: UUID?`
   - Computed: `activeTab: Tab?`
@@ -46,7 +46,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
   - Inject WorktreeService, detect duplicate projectPath before creating tab
   - File: `ClaudeManager/State/TabManager.swift`
 
-- [ ] **Task 3.2**: Refactor `AppState.swift`
+- [x] **Task 3.2**: Refactor `AppState.swift`
   - Replace `context` and `stateMachine` with `tabManager: TabManager`
   - Keep `userPreferences` as shared
   - Add computed `activeTab: Tab?`, `context: ExecutionContext?`, `stateMachine: ExecutionStateMachine?`

@@ -11,31 +11,39 @@ struct ControlsView: View {
 
     // MARK: - Computed Properties
 
-    private var context: ExecutionContext {
+    private var context: ExecutionContext? {
         appState.context
     }
 
     private var showContinueButton: Bool {
-        context.appearsStuck
+        context?.appearsStuck ?? false
     }
 
     // MARK: - Body
 
     var body: some View {
+        if let context {
+            controlsContent(context: context)
+        } else {
+            Text("No active context")
+        }
+    }
+
+    private func controlsContent(context: ExecutionContext) -> some View {
         HStack(spacing: 16) {
             if context.canStart {
-                startButton
+                startButton(context: context)
             } else {
-                pauseResumeButton
-                stopButton
+                pauseResumeButton(context: context)
+                stopButton(context: context)
                 if showContinueButton {
                     continueButton
                 }
             }
             Spacer()
-            elapsedTimeDisplay
-            contextIndicator
-            costDisplay
+            elapsedTimeDisplay(context: context)
+            contextIndicator(context: context)
+            costDisplay(context: context)
         }
         .alert("Error", isPresented: showingError, actions: {}) {
             Text(errorMessage ?? "")
@@ -46,7 +54,7 @@ struct ControlsView: View {
             titleVisibility: .visible
         ) {
             Button("Stop", role: .destructive) {
-                appState.stateMachine.stop()
+                appState.stateMachine?.stop()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -56,8 +64,8 @@ struct ControlsView: View {
 
     private var showStopConfirmation: Binding<Bool> {
         Binding(
-            get: { appState.context.showStopConfirmation },
-            set: { appState.context.showStopConfirmation = $0 }
+            get: { appState.context?.showStopConfirmation ?? false },
+            set: { appState.context?.showStopConfirmation = $0 }
         )
     }
 
@@ -70,7 +78,7 @@ struct ControlsView: View {
 
     // MARK: - View Sections
 
-    private var pauseResumeButton: some View {
+    private func pauseResumeButton(context: ExecutionContext) -> some View {
         Button(action: togglePauseResume) {
             HStack(spacing: 6) {
                 Image(systemName: context.canResume ? "play.circle.fill" : "pause.circle.fill")
@@ -82,7 +90,7 @@ struct ControlsView: View {
         .disabled(!context.canPause && !context.canResume)
     }
 
-    private var stopButton: some View {
+    private func stopButton(context: ExecutionContext) -> some View {
         Button(action: requestStop) {
             HStack(spacing: 6) {
                 Image(systemName: "stop.circle.fill")
@@ -107,7 +115,7 @@ struct ControlsView: View {
         .tint(.orange)
     }
 
-    private var startButton: some View {
+    private func startButton(context: ExecutionContext) -> some View {
         Button(action: startExecution) {
             HStack(spacing: 6) {
                 Image(systemName: "play.circle.fill")
@@ -118,12 +126,12 @@ struct ControlsView: View {
         .controlSize(.regular)
     }
 
-    private var elapsedTimeDisplay: some View {
+    private func elapsedTimeDisplay(context: ExecutionContext) -> some View {
         TimelineView(.periodic(from: .now, by: 1.0)) { _ in
             HStack(spacing: 4) {
                 Image(systemName: "clock")
                     .foregroundStyle(.secondary)
-                Text(formattedElapsedTime)
+                Text(formattedElapsedTime(context: context))
                     .fontWeight(.medium)
                     .monospacedDigit()
             }
@@ -131,29 +139,29 @@ struct ControlsView: View {
         }
     }
 
-    private var contextIndicator: some View {
+    private func contextIndicator(context: ExecutionContext) -> some View {
         HStack(spacing: 6) {
             Circle()
-                .fill(contextStatusColor)
+                .fill(contextStatusColor(context: context))
                 .frame(width: 8, height: 8)
 
             Text("Context:")
                 .foregroundStyle(.secondary)
 
-            Text(formattedContextUsage)
+            Text(formattedContextUsage(context: context))
                 .fontWeight(.medium)
                 .monospacedDigit()
-                .foregroundStyle(contextTextColor)
+                .foregroundStyle(contextTextColor(context: context))
         }
         .font(.callout)
-        .help("Context window usage: \(formattedContextUsage) used")
+        .help("Context window usage: \(formattedContextUsage(context: context)) used")
     }
 
-    private var costDisplay: some View {
+    private func costDisplay(context: ExecutionContext) -> some View {
         HStack(spacing: 4) {
             Text("Cost:")
                 .foregroundStyle(.secondary)
-            Text(formattedCost)
+            Text(formattedCost(context: context))
                 .fontWeight(.medium)
                 .monospacedDigit()
         }
@@ -162,11 +170,11 @@ struct ControlsView: View {
 
     // MARK: - Helpers
 
-    private var formattedCost: String {
+    private func formattedCost(context: ExecutionContext) -> String {
         String(format: "$%.2f", context.totalCost)
     }
 
-    private var formattedElapsedTime: String {
+    private func formattedElapsedTime(context: ExecutionContext) -> String {
         guard let elapsed = context.elapsedTime else { return "--:--" }
         let hours = Int(elapsed) / 3600
         let minutes = (Int(elapsed) % 3600) / 60
@@ -179,12 +187,12 @@ struct ControlsView: View {
         }
     }
 
-    private var formattedContextUsage: String {
+    private func formattedContextUsage(context: ExecutionContext) -> String {
         let percentage = Int(context.contextPercentUsed * 100)
         return "\(percentage)%"
     }
 
-    private var contextStatusColor: Color {
+    private func contextStatusColor(context: ExecutionContext) -> Color {
         let remaining = context.contextPercentRemaining
         if remaining < 0.10 {
             return .red
@@ -195,7 +203,7 @@ struct ControlsView: View {
         }
     }
 
-    private var contextTextColor: Color {
+    private func contextTextColor(context: ExecutionContext) -> Color {
         let remaining = context.contextPercentRemaining
         if remaining < 0.10 {
             return .red
@@ -209,45 +217,46 @@ struct ControlsView: View {
     // MARK: - Actions
 
     private func togglePauseResume() {
+        guard let context = appState.context, let stateMachine = appState.stateMachine else { return }
         if context.canResume {
             Task {
                 do {
-                    try await appState.stateMachine.resume()
+                    try await stateMachine.resume()
                 } catch {
                     errorMessage = error.localizedDescription
                 }
             }
         } else if context.canPause {
-            appState.stateMachine.pause()
+            stateMachine.pause()
         }
     }
 
     private func requestStop() {
-        appState.context.showStopConfirmation = true
+        appState.context?.showStopConfirmation = true
     }
 
     private func nudgeContinue() {
-        appState.context.suggestedManualInput = "Please continue with the interview or proceed to plan generation if you have enough information."
+        appState.context?.suggestedManualInput = "Please continue with the interview or proceed to plan generation if you have enough information."
     }
 
     private func startExecution() {
+        guard let context = appState.context, let stateMachine = appState.stateMachine else { return }
         Task {
             do {
-                // If no feature description, try to use plan.md
-                let hasFeature = !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                let hasFeature = !context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
-                if !hasFeature, let projectPath = appState.context.projectPath {
+                if !hasFeature, let projectPath = context.projectPath {
                     let planURL = projectPath.appendingPathComponent("plan.md")
                     if FileManager.default.fileExists(atPath: planURL.path) {
                         let planService = PlanService()
                         let plan = try planService.parsePlanFromFile(at: planURL)
-                        appState.context.existingPlan = plan
-                        try await appState.stateMachine.startWithExistingPlan()
+                        context.existingPlan = plan
+                        try await stateMachine.startWithExistingPlan()
                         return
                     }
                 }
 
-                try await appState.stateMachine.start()
+                try await stateMachine.start()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -260,9 +269,9 @@ struct ControlsView: View {
 #if DEBUG
 #Preview("Controls - Running") {
     let appState = AppState()
-    appState.context.phase = .executingTask
-    appState.context.totalCost = 0.42
-    appState.context.startTime = Date().addingTimeInterval(-125)
+    appState.context?.phase = .executingTask
+    appState.context?.totalCost = 0.42
+    appState.context?.startTime = Date().addingTimeInterval(-125)
     return ControlsView()
         .environment(appState)
         .padding()
@@ -270,8 +279,8 @@ struct ControlsView: View {
 
 #Preview("Controls - Paused") {
     let appState = AppState()
-    appState.context.phase = .paused
-    appState.context.totalCost = 1.25
+    appState.context?.phase = .paused
+    appState.context?.totalCost = 1.25
     return ControlsView()
         .environment(appState)
         .padding()
@@ -279,8 +288,8 @@ struct ControlsView: View {
 
 #Preview("Controls - Idle") {
     let appState = AppState()
-    appState.context.phase = .idle
-    appState.context.totalCost = 0.0
+    appState.context?.phase = .idle
+    appState.context?.totalCost = 0.0
     return ControlsView()
         .environment(appState)
         .padding()
@@ -288,9 +297,9 @@ struct ControlsView: View {
 
 #Preview("Controls - High Context Usage") {
     let appState = AppState()
-    appState.context.phase = .executingTask
-    appState.context.totalCost = 0.42
-    appState.context.lastInputTokenCount = 180_000
+    appState.context?.phase = .executingTask
+    appState.context?.totalCost = 0.42
+    appState.context?.lastInputTokenCount = 180_000
     return ControlsView()
         .environment(appState)
         .padding()
@@ -298,9 +307,9 @@ struct ControlsView: View {
 
 #Preview("Controls - Medium Context Usage") {
     let appState = AppState()
-    appState.context.phase = .executingTask
-    appState.context.totalCost = 0.25
-    appState.context.lastInputTokenCount = 160_000
+    appState.context?.phase = .executingTask
+    appState.context?.totalCost = 0.25
+    appState.context?.lastInputTokenCount = 160_000
     return ControlsView()
         .environment(appState)
         .padding()
@@ -308,10 +317,10 @@ struct ControlsView: View {
 
 #Preview("Controls - Stuck Interview") {
     let appState = AppState()
-    appState.context.phase = .conductingInterview
-    appState.context.interviewSession = InterviewSession(featureDescription: "Test feature")
-    appState.context.sessionId = "test-session"
-    appState.context.totalCost = 0.10
+    appState.context?.phase = .conductingInterview
+    appState.context?.interviewSession = InterviewSession(featureDescription: "Test feature")
+    appState.context?.sessionId = "test-session"
+    appState.context?.totalCost = 0.10
     return ControlsView()
         .environment(appState)
         .padding()

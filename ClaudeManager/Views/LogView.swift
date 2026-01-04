@@ -187,10 +187,9 @@ private struct LogEntryView: View {
 
 #if DEBUG
 #Preview("Log View") {
-    let context = ExecutionContext()
-    context.sessionId = "test-session"
-    context.phase = .executingTask
-    let appState = AppState(context: context)
+    let appState = AppState()
+    appState.context?.sessionId = "test-session"
+    appState.context?.phase = .executingTask
 
     return LogView(logs: [
         LogEntry(phase: .executingTask, type: .info, message: "Starting task execution..."),

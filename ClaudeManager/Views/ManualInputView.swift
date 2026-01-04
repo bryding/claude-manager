@@ -13,14 +13,14 @@ struct ManualInputView: View {
 
     // MARK: - Computed Properties
 
-    private var context: ExecutionContext {
+    private var context: ExecutionContext? {
         appState.context
     }
 
     private var canSubmit: Bool {
         !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !isSubmitting
-            && context.isManualInputAvailable
+            && (context?.isManualInputAvailable ?? false)
     }
 
     // MARK: - Body
@@ -36,7 +36,7 @@ struct ManualInputView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
                 )
-                .disabled(!context.isManualInputAvailable || isSubmitting)
+                .disabled(!(context?.isManualInputAvailable ?? false) || isSubmitting)
                 .onSubmit {
                     if canSubmit {
                         submit()
@@ -57,10 +57,10 @@ struct ManualInputView: View {
             .disabled(!canSubmit)
         }
         .padding(8)
-        .onChange(of: context.suggestedManualInput) { _, newValue in
-            if !newValue.isEmpty {
+        .onChange(of: context?.suggestedManualInput) { _, newValue in
+            if let newValue, !newValue.isEmpty {
                 inputText = newValue
-                appState.context.suggestedManualInput = ""
+                appState.context?.suggestedManualInput = ""
             }
         }
         .alert("Error", isPresented: showingError) {
@@ -90,7 +90,7 @@ struct ManualInputView: View {
 
         Task {
             do {
-                try await appState.stateMachine.sendManualInput(text)
+                try await appState.stateMachine?.sendManualInput(text)
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -103,10 +103,9 @@ struct ManualInputView: View {
 
 #if DEBUG
 #Preview("Manual Input Available") {
-    let context = ExecutionContext()
-    context.sessionId = "test-session"
-    context.phase = .executingTask
-    let appState = AppState(context: context)
+    let appState = AppState()
+    appState.context?.sessionId = "test-session"
+    appState.context?.phase = .executingTask
 
     return ManualInputView()
         .environment(appState)
@@ -124,11 +123,10 @@ struct ManualInputView: View {
 }
 
 #Preview("With Suggested Input") {
-    let context = ExecutionContext()
-    context.sessionId = "test-session"
-    context.phase = .conductingInterview
-    context.suggestedManualInput = "Please continue with the interview."
-    let appState = AppState(context: context)
+    let appState = AppState()
+    appState.context?.sessionId = "test-session"
+    appState.context?.phase = .conductingInterview
+    appState.context?.suggestedManualInput = "Please continue with the interview."
 
     return ManualInputView()
         .environment(appState)

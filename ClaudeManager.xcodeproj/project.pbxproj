@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		A9000001210000010000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A9000001110000010000000F /* Assets.xcassets */; };
 		A9000002210000010000000F /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9000002110000010000000F /* UserPreferences.swift */; };
+		B6000001210000010000000F /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6000001110000010000000F /* Tab.swift */; };
+		B6000002210000010000000F /* TabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6000002110000010000000F /* TabManager.swift */; };
+		B6000003210000010000000F /* WorktreeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6000003110000010000000F /* WorktreeService.swift */; };
 		AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001110000010000000F /* AutonomousConfiguration.swift */; };
 		AA000002210000010000000F /* ProjectConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002110000010000000F /* ProjectConfiguration.swift */; };
 		AB000001210000010000000F /* CommandResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000001110000010000000F /* CommandResult.swift */; };
@@ -79,6 +82,9 @@
 		B1000001110000010000000F /* AttachedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachedImage.swift; sourceTree = "<group>"; };
 		B1000002110000010000000F /* PromptContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptContent.swift; sourceTree = "<group>"; };
 		B3000001110000010000000F /* WorktreeInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorktreeInfo.swift; sourceTree = "<group>"; };
+		B6000001110000010000000F /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
+		B6000002110000010000000F /* TabManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabManager.swift; sourceTree = "<group>"; };
+		B6000003110000010000000F /* WorktreeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorktreeService.swift; sourceTree = "<group>"; };
 		AC000001110000010000000F /* BuildTestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildTestService.swift; sourceTree = "<group>"; };
 		AC000002110000010000000F /* BuildTestServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildTestServiceProtocol.swift; sourceTree = "<group>"; };
 		A1000000010000010000000F /* ClaudeManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -191,6 +197,7 @@
 				AB000001110000010000000F /* CommandResult.swift */,
 				AE000001110000010000000F /* InterviewSession.swift */,
 				B3000001110000010000000F /* WorktreeInfo.swift */,
+				B6000001110000010000000F /* Tab.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -205,6 +212,7 @@
 				A100000A110000010000000F /* PlanService.swift */,
 				A100000E110000010000000F /* GitService.swift */,
 				AC000001110000010000000F /* BuildTestService.swift */,
+				B6000003110000010000000F /* WorktreeService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -227,6 +235,7 @@
 				A3000002110000010000000F /* ExecutionStateMachine.swift */,
 				A3000003110000010000000F /* AppState.swift */,
 				A9000002110000010000000F /* UserPreferences.swift */,
+				B6000002110000010000000F /* TabManager.swift */,
 			);
 			path = State;
 			sourceTree = "<group>";
@@ -410,6 +419,9 @@
 				B1000001210000010000000F /* AttachedImage.swift in Sources */,
 				B1000002210000010000000F /* PromptContent.swift in Sources */,
 				B3000001210000010000000F /* WorktreeInfo.swift in Sources */,
+				B6000001210000010000000F /* Tab.swift in Sources */,
+				B6000002210000010000000F /* TabManager.swift in Sources */,
+				B6000003210000010000000F /* WorktreeService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

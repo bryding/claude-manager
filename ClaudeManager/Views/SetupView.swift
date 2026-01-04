@@ -17,18 +17,23 @@ struct SetupView: View {
 
     // MARK: - Computed Properties
 
+    private var context: ExecutionContext? {
+        appState.context
+    }
+
     private var hasProjectPath: Bool {
-        appState.context.projectPath != nil
+        context?.projectPath != nil
     }
 
     private var canStart: Bool {
-        let hasFeature = !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        let hasExistingPlan = appState.context.existingPlan != nil
+        guard let context else { return false }
+        let hasFeature = !context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let hasExistingPlan = context.existingPlan != nil
         return hasProjectPath && (hasExistingPlan || hasFeature) && !isStarting
     }
 
     private var projectPathDisplay: String {
-        appState.context.projectPath?.path(percentEncoded: false) ?? "No project selected"
+        context?.projectPath?.path(percentEncoded: false) ?? "No project selected"
     }
 
     // MARK: - Binding Helpers
@@ -47,13 +52,21 @@ struct SetupView: View {
     // MARK: - Body
 
     var body: some View {
+        if let context {
+            setupContent(context: context)
+        } else {
+            Text("No active context")
+        }
+    }
+
+    private func setupContent(context: ExecutionContext) -> some View {
         VStack(spacing: 24) {
             headerSection
-            projectSelectionSection
-            if appState.context.existingPlan != nil {
-                existingPlanSection
+            projectSelectionSection(context: context)
+            if context.existingPlan != nil {
+                existingPlanSection(context: context)
             }
-            featureDescriptionSection
+            featureDescriptionSection(context: context)
             autonomousConfigSection
             startButton
             Spacer()
@@ -64,11 +77,11 @@ struct SetupView: View {
             Text(errorMessage ?? "")
         }
         .onAppear {
-            if appState.context.projectPath == nil,
+            if context.projectPath == nil,
                let lastPath = appState.userPreferences.lastProjectPath {
-                appState.context.projectPath = lastPath
+                context.projectPath = lastPath
                 checkForExistingPlan()
-            } else if appState.context.projectPath != nil {
+            } else if context.projectPath != nil {
                 checkForExistingPlan()
             }
         }
@@ -94,7 +107,7 @@ struct SetupView: View {
         }
     }
 
-    private var projectSelectionSection: some View {
+    private func projectSelectionSection(context: ExecutionContext) -> some View {
         GroupBox("Project Directory") {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
@@ -126,16 +139,14 @@ struct SetupView: View {
         }
     }
 
-    private var featureDescriptionSection: some View {
+    private func featureDescriptionSection(context: ExecutionContext) -> some View {
         GroupBox("Feature Description") {
-            @Bindable var context = appState.context
-
             VStack(alignment: .leading, spacing: 8) {
                 Text("Describe the feature you want to implement:")
                     .font(.callout)
                     .foregroundStyle(.secondary)
 
-                TextEditor(text: $context.featureDescription)
+                TextEditor(text: Bindable(context).featureDescription)
                     .font(.body)
                     .frame(minHeight: 150)
                     .scrollContentBackground(.hidden)
@@ -165,10 +176,10 @@ struct SetupView: View {
         .help("Recent Projects")
     }
 
-    private var existingPlanSection: some View {
+    private func existingPlanSection(context: ExecutionContext) -> some View {
         GroupBox("Existing Plan Detected") {
             VStack(alignment: .leading, spacing: 12) {
-                if let plan = appState.context.existingPlan {
+                if let plan = context.existingPlan {
                     let taskCount = plan.tasks.count
                     Text("Found plan.md with \(taskCount) task\(taskCount == 1 ? "" : "s")")
                         .font(.callout)
@@ -180,7 +191,7 @@ struct SetupView: View {
                         .buttonStyle(.borderedProminent)
 
                         Button("Start Fresh") {
-                            appState.context.existingPlan = nil
+                            appState.context?.existingPlan = nil
                         }
                     }
                 }
@@ -257,21 +268,22 @@ struct SetupView: View {
 
         let response = await panel.begin()
         if response == .OK, let url = panel.url {
-            appState.context.projectPath = url
+            appState.context?.projectPath = url
             appState.userPreferences.lastProjectPath = url
             checkForExistingPlan()
         }
     }
 
     private func selectRecentProject(_ url: URL) {
-        appState.context.projectPath = url
+        appState.context?.projectPath = url
         appState.userPreferences.lastProjectPath = url
         checkForExistingPlan()
     }
 
     private func checkForExistingPlan() {
-        guard let projectPath = appState.context.projectPath else {
-            appState.context.existingPlan = nil
+        guard let context = appState.context else { return }
+        guard let projectPath = context.projectPath else {
+            context.existingPlan = nil
             return
         }
 
@@ -280,12 +292,12 @@ struct SetupView: View {
         if FileManager.default.fileExists(atPath: planURL.path) {
             do {
                 let plan = try planService.parsePlanFromFile(at: planURL)
-                appState.context.existingPlan = plan
+                context.existingPlan = plan
             } catch {
-                appState.context.existingPlan = nil
+                context.existingPlan = nil
             }
         } else {
-            appState.context.existingPlan = nil
+            context.existingPlan = nil
         }
     }
 
@@ -294,7 +306,7 @@ struct SetupView: View {
 
         Task {
             do {
-                try await appState.stateMachine.startWithExistingPlan()
+                try await appState.stateMachine?.startWithExistingPlan()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -303,25 +315,25 @@ struct SetupView: View {
     }
 
     private func startDevelopmentLoop() {
+        guard let context = appState.context, let stateMachine = appState.stateMachine else { return }
         isStarting = true
 
         Task {
             do {
-                // If no feature description, try to use plan.md
-                let hasFeature = !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                let hasFeature = !context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
-                if !hasFeature, let projectPath = appState.context.projectPath {
+                if !hasFeature, let projectPath = context.projectPath {
                     let planURL = projectPath.appendingPathComponent("plan.md")
                     if FileManager.default.fileExists(atPath: planURL.path) {
                         let plan = try planService.parsePlanFromFile(at: planURL)
-                        appState.context.existingPlan = plan
-                        try await appState.stateMachine.startWithExistingPlan()
+                        context.existingPlan = plan
+                        try await stateMachine.startWithExistingPlan()
                         isStarting = false
                         return
                     }
                 }
 
-                try await appState.stateMachine.start()
+                try await stateMachine.start()
             } catch {
                 errorMessage = error.localizedDescription
             }

@@ -7,26 +7,30 @@ struct ExecutionView: View {
 
     // MARK: - Computed Properties
 
-    private var context: ExecutionContext {
+    private var context: ExecutionContext? {
         appState.context
     }
 
     // MARK: - Body
 
     var body: some View {
-        HSplitView {
-            leftPane
-                .frame(minWidth: 280, idealWidth: 320, maxWidth: 400)
+        if let context {
+            HSplitView {
+                leftPane(context: context)
+                    .frame(minWidth: 280, idealWidth: 320, maxWidth: 400)
 
-            LogView(logs: context.logs)
+                LogView(logs: context.logs)
+            }
+        } else {
+            Text("No active context")
         }
     }
 
     // MARK: - View Sections
 
-    private var leftPane: some View {
+    private func leftPane(context: ExecutionContext) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            projectHeader
+            projectHeader(context: context)
 
             PhaseIndicatorView(
                 phase: context.phase,
@@ -34,7 +38,7 @@ struct ExecutionView: View {
                 isInterviewComplete: context.interviewSession?.isComplete ?? false
             )
 
-            progressSection
+            progressSection(context: context)
 
             Divider()
 
@@ -49,14 +53,14 @@ struct ExecutionView: View {
         .padding()
     }
 
-    private var progressSection: some View {
+    private func progressSection(context: ExecutionContext) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Progress")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text(progressPercentage)
+                Text(progressPercentage(context: context))
                     .font(.subheadline.monospacedDigit())
                     .fontWeight(.medium)
             }
@@ -66,12 +70,12 @@ struct ExecutionView: View {
         }
     }
 
-    private var progressPercentage: String {
+    private func progressPercentage(context: ExecutionContext) -> String {
         let percentage = Int(context.progress * 100)
         return "\(percentage)%"
     }
 
-    private var projectHeader: some View {
+    private func projectHeader(context: ExecutionContext) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Project")
@@ -85,14 +89,14 @@ struct ExecutionView: View {
 
             if context.phase == .completed {
                 Button("New Feature") {
-                    appState.context.resetForNewFeature()
+                    appState.context?.resetForNewFeature()
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
             }
 
             Button("Change Project") {
-                appState.context.reset()
+                appState.context?.reset()
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -106,18 +110,18 @@ struct ExecutionView: View {
 #if DEBUG
 #Preview("Execution - Running") {
     let appState = AppState()
-    appState.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
-    appState.context.phase = .executingTask
-    appState.context.plan = Plan(rawText: "", tasks: [
+    appState.context?.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
+    appState.context?.phase = .executingTask
+    appState.context?.plan = Plan(rawText: "", tasks: [
         PlanTask(number: 1, title: "Create project structure", description: "Set up folders", status: .completed),
         PlanTask(number: 2, title: "Implement models", description: "Create data models", status: .completed),
         PlanTask(number: 3, title: "Build services layer", description: "Implementing service layer", status: .inProgress),
         PlanTask(number: 4, title: "Create state management", description: "Add app state", status: .pending),
         PlanTask(number: 5, title: "Build UI views", description: "Create SwiftUI views", status: .pending),
     ])
-    appState.context.currentTaskIndex = 2
-    appState.context.totalCost = 0.42
-    appState.context.logs = [
+    appState.context?.currentTaskIndex = 2
+    appState.context?.totalCost = 0.42
+    appState.context?.logs = [
         LogEntry(phase: .executingTask, type: .info, message: "Starting task execution..."),
         LogEntry(phase: .executingTask, type: .output, message: "Reading file: /src/main.swift"),
         LogEntry(phase: .executingTask, type: .toolUse, message: "Read: ClaudeManager/Models/Plan.swift"),
@@ -130,16 +134,16 @@ struct ExecutionView: View {
 
 #Preview("Execution - Completed") {
     let appState = AppState()
-    appState.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
-    appState.context.phase = .completed
-    appState.context.plan = Plan(rawText: "", tasks: [
+    appState.context?.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
+    appState.context?.phase = .completed
+    appState.context?.plan = Plan(rawText: "", tasks: [
         PlanTask(number: 1, title: "Create project structure", description: "Set up folders", status: .completed),
         PlanTask(number: 2, title: "Implement models", description: "Create data models", status: .completed),
         PlanTask(number: 3, title: "Build services layer", description: "Build services", status: .completed),
     ])
-    appState.context.currentTaskIndex = 2
-    appState.context.totalCost = 1.85
-    appState.context.logs = [
+    appState.context?.currentTaskIndex = 2
+    appState.context?.totalCost = 1.85
+    appState.context?.logs = [
         LogEntry(phase: .completed, type: .result, message: "All tasks completed successfully"),
     ]
     return ExecutionView()
@@ -149,14 +153,14 @@ struct ExecutionView: View {
 
 #Preview("Execution - Waiting for User") {
     let appState = AppState()
-    appState.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
-    appState.context.phase = .waitingForUser
-    appState.context.plan = Plan(rawText: "", tasks: [
+    appState.context?.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
+    appState.context?.phase = .waitingForUser
+    appState.context?.plan = Plan(rawText: "", tasks: [
         PlanTask(number: 1, title: "Implement feature", description: "Building feature", status: .inProgress),
     ])
-    appState.context.currentTaskIndex = 0
-    appState.context.totalCost = 0.15
-    appState.context.logs = [
+    appState.context?.currentTaskIndex = 0
+    appState.context?.totalCost = 0.15
+    appState.context?.logs = [
         LogEntry(phase: .waitingForUser, type: .info, message: "Waiting for user input..."),
     ]
     return ExecutionView()
