@@ -7,12 +7,15 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
     var messagesToSend: [ClaudeStreamMessage] = []
     var executeCalled = false
     var lastPrompt: String?
+    var lastContent: PromptContent?
+    var lastImages: [AttachedImage]?
     var lastPermissionMode: PermissionMode?
     var lastSessionId: String?
     var lastTimeout: TimeInterval?
     var executeCallCount = 0
     var failuresBeforeSuccess = 0
     var allPrompts: [String] = []
+    var allContents: [PromptContent] = []
 
     private var _isRunning = false
     var isRunning: Bool { _isRunning }
@@ -65,6 +68,28 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
         }
 
         return result
+    }
+
+    func execute(
+        content: PromptContent,
+        workingDirectory: URL,
+        permissionMode: PermissionMode,
+        sessionId: String?,
+        timeout: TimeInterval?,
+        onMessage: @escaping @Sendable (ClaudeStreamMessage) async -> Void
+    ) async throws -> ClaudeExecutionResult {
+        lastContent = content
+        lastImages = content.images
+        allContents.append(content)
+
+        return try await execute(
+            prompt: content.text,
+            workingDirectory: workingDirectory,
+            permissionMode: permissionMode,
+            sessionId: sessionId,
+            timeout: timeout,
+            onMessage: onMessage
+        )
     }
 
     func terminate() {
