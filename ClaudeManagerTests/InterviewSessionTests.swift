@@ -1,3 +1,4 @@
+import AppKit
 import XCTest
 @testable import ClaudeManager
 
@@ -20,9 +21,26 @@ final class InterviewSessionTests: XCTestCase {
         let session = InterviewSession(featureDescription: "Add dark mode")
 
         XCTAssertEqual(session.featureDescription, "Add dark mode")
+        XCTAssertTrue(session.attachedImages.isEmpty)
         XCTAssertTrue(session.exchanges.isEmpty)
         XCTAssertNil(session.completedAt)
         XCTAssertFalse(session.isComplete)
+    }
+
+    func testInterviewSessionWithAttachedImages() {
+        let image = AttachedImage(
+            data: Data([0x89, 0x50, 0x4E, 0x47]),
+            mediaType: .png,
+            thumbnail: NSImage(),
+            originalSize: CGSize(width: 100, height: 100)
+        )
+        let session = InterviewSession(
+            featureDescription: "Add dark mode",
+            attachedImages: [image]
+        )
+
+        XCTAssertEqual(session.attachedImages.count, 1)
+        XCTAssertEqual(session.attachedImages[0].id, image.id)
     }
 
     func testIsCompleteReturnsTrueWhenCompletedAtIsSet() {
