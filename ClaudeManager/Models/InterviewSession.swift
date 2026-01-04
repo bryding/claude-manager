@@ -25,17 +25,20 @@ struct InterviewQA: Identifiable, Equatable, Sendable {
 
 struct InterviewSession: Equatable, Sendable {
     let featureDescription: String
+    let attachedImages: [AttachedImage]
     var exchanges: [InterviewQA]
     let startedAt: Date
     var completedAt: Date?
 
     init(
         featureDescription: String,
+        attachedImages: [AttachedImage] = [],
         exchanges: [InterviewQA] = [],
         startedAt: Date = Date(),
         completedAt: Date? = nil
     ) {
         self.featureDescription = featureDescription
+        self.attachedImages = attachedImages
         self.exchanges = exchanges
         self.startedAt = startedAt
         self.completedAt = completedAt
