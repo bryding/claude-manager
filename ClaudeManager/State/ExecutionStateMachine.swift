@@ -79,7 +79,10 @@ final class ExecutionStateMachine {
         }
 
         resetState()
-        context.interviewSession = InterviewSession(featureDescription: context.featureDescription)
+        context.interviewSession = InterviewSession(
+            featureDescription: context.featureDescription,
+            attachedImages: context.attachedImages
+        )
         context.startTime = Date()
         context.phase = .conductingInterview
         context.addLog(type: .info, message: "Starting feature interview")
@@ -817,19 +820,39 @@ final class ExecutionStateMachine {
 
         context.addLog(type: .info, message: "Conducting interview (question \(questionCount + 1)/\(Self.maxInterviewQuestions) max)")
 
-        let result = try await claudeService.execute(
-            prompt: prompt,
-            workingDirectory: projectPath,
-            permissionMode: .plan,
-            sessionId: context.sessionId,
-            timeout: context.timeoutConfiguration.planModeTimeout,
-            onMessage: { [weak self] message in
-                guard let self = self else { return }
-                await MainActor.run {
-                    self.handleInterviewMessage(message)
+        let isFirstCall = interviewSession.exchanges.isEmpty && context.sessionId == nil
+        let result: ClaudeExecutionResult
+
+        if isFirstCall && !interviewSession.attachedImages.isEmpty {
+            let content = PromptContent(text: prompt, images: interviewSession.attachedImages)
+            result = try await claudeService.execute(
+                content: content,
+                workingDirectory: projectPath,
+                permissionMode: .plan,
+                sessionId: context.sessionId,
+                timeout: context.timeoutConfiguration.planModeTimeout,
+                onMessage: { [weak self] message in
+                    guard let self = self else { return }
+                    await MainActor.run {
+                        self.handleInterviewMessage(message)
+                    }
                 }
-            }
-        )
+            )
+        } else {
+            result = try await claudeService.execute(
+                prompt: prompt,
+                workingDirectory: projectPath,
+                permissionMode: .plan,
+                sessionId: context.sessionId,
+                timeout: context.timeoutConfiguration.planModeTimeout,
+                onMessage: { [weak self] message in
+                    guard let self = self else { return }
+                    await MainActor.run {
+                        self.handleInterviewMessage(message)
+                    }
+                }
+            )
+        }
 
         if result.isError {
             context.addLog(type: .error, message: "Interview phase failed")
@@ -886,19 +909,39 @@ final class ExecutionStateMachine {
             Focus on breaking down the work into small, focused tasks that can be completed independently.
             """
 
-        let result = try await claudeService.execute(
-            prompt: prompt,
-            workingDirectory: projectPath,
-            permissionMode: .plan,
-            sessionId: nil,
-            timeout: context.timeoutConfiguration.planModeTimeout,
-            onMessage: { [weak self] message in
-                guard let self = self else { return }
-                await MainActor.run {
-                    self.handleStreamMessage(message)
+        let attachedImages = context.interviewSession?.attachedImages ?? []
+        let result: ClaudeExecutionResult
+
+        if !attachedImages.isEmpty {
+            let content = PromptContent(text: prompt, images: attachedImages)
+            result = try await claudeService.execute(
+                content: content,
+                workingDirectory: projectPath,
+                permissionMode: .plan,
+                sessionId: nil,
+                timeout: context.timeoutConfiguration.planModeTimeout,
+                onMessage: { [weak self] message in
+                    guard let self = self else { return }
+                    await MainActor.run {
+                        self.handleStreamMessage(message)
+                    }
                 }
-            }
-        )
+            )
+        } else {
+            result = try await claudeService.execute(
+                prompt: prompt,
+                workingDirectory: projectPath,
+                permissionMode: .plan,
+                sessionId: nil,
+                timeout: context.timeoutConfiguration.planModeTimeout,
+                onMessage: { [weak self] message in
+                    guard let self = self else { return }
+                    await MainActor.run {
+                        self.handleStreamMessage(message)
+                    }
+                }
+            )
+        }
 
         if result.isError {
             throw ExecutionStateMachineError.executionFailed("generateInitialPlan")
