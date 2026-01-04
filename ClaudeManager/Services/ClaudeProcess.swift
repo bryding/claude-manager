@@ -37,6 +37,7 @@ final class ClaudeProcess: @unchecked Sendable {
     let arguments: [String]
     let workingDirectory: URL
     let timeout: TimeInterval?
+    let stdinData: Data?
 
     private var process: Process?
     private var didTimeout = false
@@ -45,12 +46,14 @@ final class ClaudeProcess: @unchecked Sendable {
         executablePath: String,
         arguments: [String],
         workingDirectory: URL,
-        timeout: TimeInterval? = nil
+        timeout: TimeInterval? = nil,
+        stdinData: Data? = nil
     ) {
         self.executablePath = executablePath
         self.arguments = arguments
         self.workingDirectory = workingDirectory
         self.timeout = timeout
+        self.stdinData = stdinData
     }
 
     func run() -> AsyncThrowingStream<ClaudeStreamMessage, Error> {
@@ -58,6 +61,7 @@ final class ClaudeProcess: @unchecked Sendable {
             let process = Process()
             let stdoutPipe = Pipe()
             let stderrPipe = Pipe()
+            let stdinPipe: Pipe? = self.stdinData != nil ? Pipe() : nil
             let parser = ClaudeMessageParser()
 
             process.executableURL = URL(fileURLWithPath: executablePath)
@@ -65,6 +69,9 @@ final class ClaudeProcess: @unchecked Sendable {
             process.currentDirectoryURL = workingDirectory
             process.standardOutput = stdoutPipe
             process.standardError = stderrPipe
+            if let stdinPipe = stdinPipe {
+                process.standardInput = stdinPipe
+            }
 
             // Set up environment with PATH including node location
             var environment = ProcessInfo.processInfo.environment
@@ -90,9 +97,17 @@ final class ClaudeProcess: @unchecked Sendable {
                 }
             }
 
+            let stdinDataToWrite = self.stdinData
+
             Task {
                 do {
                     try process.run()
+
+                    if let stdinPipe = stdinPipe, let data = stdinDataToWrite {
+                        let stdinHandle = stdinPipe.fileHandleForWriting
+                        stdinHandle.write(data)
+                        try stdinHandle.close()
+                    }
 
                     let stdoutHandle = stdoutPipe.fileHandleForReading
                     for try await line in stdoutHandle.bytes.lines {

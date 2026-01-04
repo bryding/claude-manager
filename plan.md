@@ -34,14 +34,14 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
   - Update `reset()` and `resetForNewFeature()` to clear images
   - File: `ClaudeManager/State/ExecutionContext.swift`
 
-- [ ] **Task 3.2**: Update `InterviewSession.swift`
+- [x] **Task 3.2**: Update `InterviewSession.swift`
   - Add `attachedImages: [AttachedImage]` property
   - Update init to accept images
   - File: `ClaudeManager/Models/InterviewSession.swift`
 
 ### Phase 4: Service Layer
 
-- [ ] **Task 4.1**: Add stdin support to `ClaudeProcess.swift`
+- [x] **Task 4.1**: Add stdin support to `ClaudeProcess.swift`
   - Add `stdinData: Data?` parameter to init
   - Write stdin data after process.run(), close handle
   - File: `ClaudeManager/Services/ClaudeProcess.swift`
