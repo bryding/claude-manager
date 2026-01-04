@@ -15,6 +15,7 @@
 		AE000001210000010000000F /* InterviewSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE000001110000010000000F /* InterviewSession.swift */; };
 		B1000001210000010000000F /* AttachedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000001110000010000000F /* AttachedImage.swift */; };
 		B1000002210000010000000F /* PromptContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002110000010000000F /* PromptContent.swift */; };
+		B3000001210000010000000F /* ImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3000001110000010000000F /* ImageProcessor.swift */; };
 		AC000001210000010000000F /* BuildTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000001110000010000000F /* BuildTestService.swift */; };
 		AC000002210000010000000F /* BuildTestServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000002110000010000000F /* BuildTestServiceProtocol.swift */; };
 		A1000001210000010000000F /* ClaudeManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001110000010000000F /* ClaudeManagerApp.swift */; };
@@ -105,6 +106,7 @@
 		AF000001110000010000000F /* InterviewSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewSessionTests.swift; sourceTree = "<group>"; };
 		B0000001110000010000000F /* ExecutionContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContextTests.swift; sourceTree = "<group>"; };
 		B2000001110000010000000F /* PromptContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptContentTests.swift; sourceTree = "<group>"; };
+		B3000001110000010000000F /* ImageProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessor.swift; sourceTree = "<group>"; };
 		A3000001110000010000000F /* ExecutionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContext.swift; sourceTree = "<group>"; };
 		A3000002110000010000000F /* ExecutionStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionStateMachine.swift; sourceTree = "<group>"; };
 		A3000003110000010000000F /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				A1000003110000010000000F /* Models */,
 				A1000004110000010000000F /* Services */,
 				A1000005110000010000000F /* State */,
+				B3000002110000010000000F /* Utilities */,
 				A1000006110000010000000F /* Views */,
 			);
 			path = ClaudeManager;
@@ -237,6 +240,14 @@
 				A8000002110000010000000F /* TaskFailureView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		B3000002110000010000000F /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				B3000001110000010000000F /* ImageProcessor.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 		A2000000510000010000000F /* ClaudeManagerTests */ = {
@@ -399,6 +410,7 @@
 				A6000008210000010000000F /* ManualInputView.swift in Sources */,
 				B1000001210000010000000F /* AttachedImage.swift in Sources */,
 				B1000002210000010000000F /* PromptContent.swift in Sources */,
+				B3000001210000010000000F /* ImageProcessor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

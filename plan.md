@@ -20,7 +20,7 @@ Add the ability to paste/drag-drop PNG and JPEG images into the feature descript
 
 ### Phase 2: Utility
 
-- [ ] **Task 2.1**: Create `ImageProcessor.swift` utility
+- [x] **Task 2.1**: Create `ImageProcessor.swift` utility
   - Process NSImage from paste/drop
   - Validate PNG/JPEG, create thumbnails (120x120), enforce 20MB limit
   - File: `ClaudeManager/Utilities/ImageProcessor.swift`
