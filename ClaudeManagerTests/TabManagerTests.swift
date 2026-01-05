@@ -45,11 +45,11 @@ final class TabManagerTests: XCTestCase {
         XCTAssertEqual(tabManager.activeTab?.id, tab.id)
     }
 
-    func testCreateTabWithProjectPathSetsContextProjectPath() {
+    func testCreateTabWithProjectPathSetsContextProjectPath() async throws {
         let tabManager = TabManager()
         let projectPath = URL(fileURLWithPath: "/test/project")
 
-        let tab = tabManager.createTab(projectPath: projectPath)
+        let tab = try await tabManager.createTab(projectPath: projectPath)
 
         XCTAssertEqual(tab.context.projectPath, projectPath)
     }

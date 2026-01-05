@@ -30,50 +30,47 @@ final class TabManager {
 
     // MARK: - Tab Management
 
+    /// Creates a new tab, optionally with a project path.
+    /// If the project path is already in use by another tab, a worktree is created.
     @discardableResult
     func createTab(projectPath: URL? = nil) async throws -> Tab {
-        var worktreeInfo: WorktreeInfo?
-        var effectivePath = projectPath
-
-        if let projectPath {
-            let isDuplicate = tabs.contains { tab in
-                tab.context.projectPath == projectPath ||
-                tab.worktreeInfo?.originalRepoPath == projectPath
-            }
-
-            if isDuplicate {
-                worktreeInfo = try await worktreeService.createWorktree(from: projectPath)
-                effectivePath = worktreeInfo?.worktreePath
-            }
-        }
-
-        let tab = Tab.create(
-            userPreferences: userPreferences,
-            worktreeInfo: worktreeInfo
-        )
-
-        if let effectivePath {
-            tab.context.projectPath = effectivePath
-        }
-
+        let tab = Tab.create(userPreferences: userPreferences)
         tabs.append(tab)
         activeTabId = tab.id
+
+        if let projectPath {
+            try await setProjectPath(projectPath, for: tab)
+        }
 
         return tab
     }
 
+    /// Creates a new tab synchronously without worktree support.
+    /// Use this only when no project path is needed at creation time.
     @discardableResult
-    func createTab(projectPath: URL? = nil) -> Tab {
+    func createTab() -> Tab {
         let tab = Tab.create(userPreferences: userPreferences)
-
-        if let projectPath {
-            tab.context.projectPath = projectPath
-        }
-
         tabs.append(tab)
         activeTabId = tab.id
-
         return tab
+    }
+
+    /// Sets the project path for a tab, creating a worktree if the project is already in use.
+    func setProjectPath(_ projectPath: URL, for tab: Tab) async throws {
+        let isDuplicate = tabs.contains { existingTab in
+            guard existingTab.id != tab.id else { return false }
+            return existingTab.context.projectPath == projectPath ||
+                   existingTab.worktreeInfo?.originalRepoPath == projectPath
+        }
+
+        if isDuplicate {
+            let worktreeInfo = try await worktreeService.createWorktree(from: projectPath)
+            tab.worktreeInfo = worktreeInfo
+            tab.context.projectPath = worktreeInfo.worktreePath
+        } else {
+            tab.worktreeInfo = nil
+            tab.context.projectPath = projectPath
+        }
     }
 
     func closeTab(_ tab: Tab) {

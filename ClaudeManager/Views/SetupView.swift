@@ -74,11 +74,10 @@ struct SetupView: View {
         } message: {
             Text(errorMessage ?? "")
         }
-        .onAppear {
+        .task {
             if context.projectPath == nil,
                let lastPath = appState.userPreferences.lastProjectPath {
-                context.projectPath = lastPath
-                checkForExistingPlan()
+                await setProjectPath(lastPath)
             } else if context.projectPath != nil {
                 checkForExistingPlan()
             }
@@ -266,16 +265,24 @@ struct SetupView: View {
 
         let response = await panel.begin()
         if response == .OK, let url = panel.url {
-            context.projectPath = url
-            appState.userPreferences.lastProjectPath = url
-            checkForExistingPlan()
+            await setProjectPath(url)
         }
     }
 
     private func selectRecentProject(_ url: URL) {
-        context.projectPath = url
-        appState.userPreferences.lastProjectPath = url
-        checkForExistingPlan()
+        Task {
+            await setProjectPath(url)
+        }
+    }
+
+    private func setProjectPath(_ url: URL) async {
+        do {
+            try await appState.tabManager.setProjectPath(url, for: tab)
+            appState.userPreferences.lastProjectPath = url
+            checkForExistingPlan()
+        } catch {
+            errorMessage = "Failed to set project path: \(error.localizedDescription)"
+        }
     }
 
     private func checkForExistingPlan() {
