@@ -280,7 +280,7 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertTrue(context.logs.contains { $0.message.contains("My answer") })
     }
 
-    func testAnswerQuestionThrowsWithoutSessionId() async {
+    func testAnswerQuestionWorksWithoutSessionId() async throws {
         context.pendingQuestion = PendingQuestion(
             toolUseId: "tool-123",
             question: AskUserQuestionInput.Question(
@@ -292,14 +292,10 @@ final class ExecutionStateMachineTests: XCTestCase {
         )
         context.sessionId = nil
 
-        do {
-            try await stateMachine.answerQuestion("answer")
-            XCTFail("Expected noSessionId error")
-        } catch ExecutionStateMachineError.noSessionId {
-            // Expected
-        } catch {
-            XCTFail("Unexpected error: \(error)")
-        }
+        try await stateMachine.answerQuestion("answer")
+
+        XCTAssertNil(context.pendingQuestion)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("User answered: answer") })
     }
 
     func testAnswerQuestionDoesNothingWithoutPendingQuestion() async throws {
@@ -311,6 +307,214 @@ final class ExecutionStateMachineTests: XCTestCase {
         try await stateMachine.answerQuestion("answer")
 
         XCTAssertEqual(context.logs.count, logCount)
+    }
+
+    // MARK: - Question Queue Processing Tests
+
+    func testAnswerQuestionShowsNextQueuedQuestion() async throws {
+        context.sessionId = "test-session"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-1",
+            question: AskUserQuestionInput.Question(
+                question: "First question?",
+                header: "Q1",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-2",
+                question: AskUserQuestionInput.Question(
+                    question: "Second question?",
+                    header: "Q2",
+                    options: [],
+                    multiSelect: false
+                )
+            )
+        ]
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("First answer")
+
+        XCTAssertNotNil(context.pendingQuestion)
+        XCTAssertEqual(context.pendingQuestion?.question.question, "Second question?")
+        XCTAssertTrue(context.questionQueue.isEmpty)
+        XCTAssertEqual(context.phase, .waitingForUser)
+    }
+
+    func testAnswerQuestionReturnsEarlyWithQueuedQuestions() async throws {
+        context.sessionId = "test-session"
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-1",
+            question: AskUserQuestionInput.Question(
+                question: "First?",
+                header: "Q1",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-2",
+                question: AskUserQuestionInput.Question(
+                    question: "Second?",
+                    header: "Q2",
+                    options: [],
+                    multiSelect: false
+                )
+            )
+        ]
+        context.phase = .waitingForUser
+
+        let executeCallsBefore = mockClaudeService.executeCallCount
+
+        try await stateMachine.answerQuestion("Answer")
+
+        XCTAssertEqual(mockClaudeService.executeCallCount, executeCallsBefore)
+    }
+
+    func testAnswerQuestionCallsRunLoopWhenQueueEmpty() async throws {
+        context.sessionId = "test-session"
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-1",
+            question: AskUserQuestionInput.Question(
+                question: "Only question?",
+                header: "Q",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.questionQueue = []
+        context.phase = .waitingForUser
+        context.interviewSession = InterviewSession(featureDescription: "Test")
+        context.interviewSession?.markComplete()
+
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "ok",
+            sessionId: "test-session",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        let executeCallsBefore = mockClaudeService.executeCallCount
+
+        try await stateMachine.answerQuestion("Answer")
+
+        XCTAssertGreaterThan(mockClaudeService.executeCallCount, executeCallsBefore)
+    }
+
+    func testAnswerQuestionProcessesMultipleQueuedQuestions() async throws {
+        context.sessionId = "test-session"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-1",
+            question: AskUserQuestionInput.Question(
+                question: "First?",
+                header: "Q1",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-2",
+                question: AskUserQuestionInput.Question(
+                    question: "Second?",
+                    header: "Q2",
+                    options: [],
+                    multiSelect: false
+                )
+            ),
+            PendingQuestion(
+                toolUseId: "tool-3",
+                question: AskUserQuestionInput.Question(
+                    question: "Third?",
+                    header: "Q3",
+                    options: [],
+                    multiSelect: false
+                )
+            )
+        ]
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("First answer")
+
+        XCTAssertEqual(context.pendingQuestion?.question.question, "Second?")
+        XCTAssertEqual(context.questionQueue.count, 1)
+        XCTAssertEqual(context.questionQueue.first?.question.question, "Third?")
+
+        try await stateMachine.answerQuestion("Second answer")
+
+        XCTAssertEqual(context.pendingQuestion?.question.question, "Third?")
+        XCTAssertTrue(context.questionQueue.isEmpty)
+    }
+
+    func testAnswerQuestionUsesInterviewModeForInterviewQuestion() async throws {
+        context.sessionId = "test-session"
+        context.interviewSession = InterviewSession(featureDescription: "Test")
+        context.currentInterviewQuestion = "What is the scope?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-1",
+            question: AskUserQuestionInput.Question(
+                question: "What is the scope?",
+                header: "Scope",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-2",
+                question: AskUserQuestionInput.Question(
+                    question: "Next interview question?",
+                    header: "Next",
+                    options: [],
+                    multiSelect: false
+                )
+            )
+        ]
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("Small scope")
+
+        XCTAssertEqual(context.interviewSession?.exchanges.count, 1)
+        XCTAssertEqual(context.pendingQuestion?.question.question, "Next interview question?")
+        XCTAssertEqual(context.currentInterviewQuestion, "Next interview question?")
+    }
+
+    func testAnswerQuestionUsesStandardModeForNonInterviewQuestion() async throws {
+        context.sessionId = "test-session"
+        context.interviewSession = nil
+        context.currentInterviewQuestion = nil
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-1",
+            question: AskUserQuestionInput.Question(
+                question: "Choose option?",
+                header: "Choice",
+                options: [],
+                multiSelect: false
+            )
+        )
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-2",
+                question: AskUserQuestionInput.Question(
+                    question: "Another choice?",
+                    header: "Choice2",
+                    options: [],
+                    multiSelect: false
+                )
+            )
+        ]
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("Option A")
+
+        XCTAssertEqual(context.pendingQuestion?.question.question, "Another choice?")
+        XCTAssertNil(context.currentInterviewQuestion)
     }
 
     // MARK: - Error Descriptions
@@ -2188,5 +2392,443 @@ final class ExecutionStateMachineTests: XCTestCase {
         // Should not have any content with images since we skip interview and planning
         let contentsWithImages = mockClaudeService.allContents.filter { !$0.images.isEmpty }
         XCTAssertTrue(contentsWithImages.isEmpty)
+    }
+
+    // MARK: - Question Queue Tests
+
+    func testMultipleQuestionsInSingleMessageAreQueued() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessageWithMultipleQuestions([
+                (question: "What framework?", header: "Framework"),
+                (question: "What database?", header: "Database"),
+                (question: "What auth method?", header: "Auth")
+            ])
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "questions asked",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        // First question should be displayed, remaining 2 should be in queue
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertNotNil(context.pendingQuestion)
+        XCTAssertEqual(context.pendingQuestion?.question.header, "Framework")
+        XCTAssertEqual(context.questionQueue.count, 2)
+        XCTAssertEqual(context.questionQueue[0].question.header, "Database")
+        XCTAssertEqual(context.questionQueue[1].question.header, "Auth")
+    }
+
+    func testAnsweringQuestionShowsNextFromQueue() async throws {
+        context.sessionId = "test-session"
+        context.interviewSession = InterviewSession(featureDescription: "Build feature")
+        context.currentInterviewQuestion = "What framework?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "What framework?",
+                header: "Framework",
+                options: [
+                    AskUserQuestionInput.Option(label: "React", description: "React framework"),
+                    AskUserQuestionInput.Option(label: "Vue", description: "Vue framework")
+                ],
+                multiSelect: false
+            )
+        )
+        // Queue remaining questions
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-123",
+                question: AskUserQuestionInput.Question(
+                    question: "What database?",
+                    header: "Database",
+                    options: [
+                        AskUserQuestionInput.Option(label: "PostgreSQL", description: "Postgres"),
+                        AskUserQuestionInput.Option(label: "MySQL", description: "MySQL")
+                    ],
+                    multiSelect: false
+                )
+            ),
+            PendingQuestion(
+                toolUseId: "tool-123",
+                question: AskUserQuestionInput.Question(
+                    question: "What auth?",
+                    header: "Auth",
+                    options: [
+                        AskUserQuestionInput.Option(label: "JWT", description: "JWT auth"),
+                        AskUserQuestionInput.Option(label: "Session", description: "Session auth")
+                    ],
+                    multiSelect: false
+                )
+            )
+        ]
+        context.phase = .waitingForUser
+
+        try await stateMachine.answerQuestion("React")
+
+        // Should show next question from queue without calling Claude
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertNotNil(context.pendingQuestion)
+        XCTAssertEqual(context.pendingQuestion?.question.header, "Database")
+        XCTAssertEqual(context.questionQueue.count, 1)
+        XCTAssertEqual(context.questionQueue[0].question.header, "Auth")
+        // The interview exchange should be recorded
+        XCTAssertEqual(context.interviewSession?.exchanges.count, 1)
+        XCTAssertEqual(context.interviewSession?.exchanges.first?.question, "What framework?")
+        XCTAssertEqual(context.interviewSession?.exchanges.first?.answer, "React")
+    }
+
+    func testAllQARecordedInInterviewSession() async throws {
+        context.sessionId = "test-session"
+        let session = InterviewSession(featureDescription: "Build feature")
+        context.interviewSession = session
+
+        // Set up first question
+        context.currentInterviewQuestion = "Q1?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "Q1?",
+                header: "Q1",
+                options: [
+                    AskUserQuestionInput.Option(label: "A", description: "Option A"),
+                    AskUserQuestionInput.Option(label: "B", description: "Option B")
+                ],
+                multiSelect: false
+            )
+        )
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-123",
+                question: AskUserQuestionInput.Question(
+                    question: "Q2?",
+                    header: "Q2",
+                    options: [
+                        AskUserQuestionInput.Option(label: "C", description: "Option C"),
+                        AskUserQuestionInput.Option(label: "D", description: "Option D")
+                    ],
+                    multiSelect: false
+                )
+            ),
+            PendingQuestion(
+                toolUseId: "tool-123",
+                question: AskUserQuestionInput.Question(
+                    question: "Q3?",
+                    header: "Q3",
+                    options: [
+                        AskUserQuestionInput.Option(label: "E", description: "Option E"),
+                        AskUserQuestionInput.Option(label: "F", description: "Option F")
+                    ],
+                    multiSelect: false
+                )
+            )
+        ]
+        context.phase = .waitingForUser
+
+        // Answer first question
+        try await stateMachine.answerQuestion("Answer 1")
+
+        // currentInterviewQuestion should now be Q2
+        XCTAssertEqual(context.currentInterviewQuestion, "Q2?")
+        XCTAssertEqual(context.interviewSession?.exchanges.count, 1)
+
+        // Answer second question
+        try await stateMachine.answerQuestion("Answer 2")
+
+        XCTAssertEqual(context.currentInterviewQuestion, "Q3?")
+        XCTAssertEqual(context.interviewSession?.exchanges.count, 2)
+
+        // Set up mock for when queue is empty (will resume loop)
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        // Answer third (last) question
+        try await stateMachine.answerQuestion("Answer 3")
+
+        // All three Q&A pairs should be recorded
+        XCTAssertEqual(context.interviewSession?.exchanges.count, 3)
+        XCTAssertEqual(context.interviewSession?.exchanges[0].question, "Q1?")
+        XCTAssertEqual(context.interviewSession?.exchanges[0].answer, "Answer 1")
+        XCTAssertEqual(context.interviewSession?.exchanges[1].question, "Q2?")
+        XCTAssertEqual(context.interviewSession?.exchanges[1].answer, "Answer 2")
+        XCTAssertEqual(context.interviewSession?.exchanges[2].question, "Q3?")
+        XCTAssertEqual(context.interviewSession?.exchanges[2].answer, "Answer 3")
+    }
+
+    func testEmptyQueueResumesMainLoop() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.sessionId = "test-session"
+        context.interviewSession = InterviewSession(featureDescription: "Build feature")
+        context.currentInterviewQuestion = "Final question?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "Final question?",
+                header: "Final",
+                options: [
+                    AskUserQuestionInput.Option(label: "Yes", description: "Confirm"),
+                    AskUserQuestionInput.Option(label: "No", description: "Deny")
+                ],
+                multiSelect: false
+            )
+        )
+        context.questionQueue = [] // Empty queue
+        context.phase = .waitingForUser
+
+        // Set up mock to complete interview when loop resumes
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        try await stateMachine.answerQuestion("Yes")
+
+        // Should have resumed loop and completed
+        XCTAssertEqual(context.phase, .completed)
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Executing phase: conductingInterview") })
+    }
+
+    func testQuestionQueueClearedOnReset() {
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-123",
+                question: AskUserQuestionInput.Question(
+                    question: "Q1?",
+                    header: "Q1",
+                    options: [],
+                    multiSelect: false
+                )
+            ),
+            PendingQuestion(
+                toolUseId: "tool-456",
+                question: AskUserQuestionInput.Question(
+                    question: "Q2?",
+                    header: "Q2",
+                    options: [],
+                    multiSelect: false
+                )
+            )
+        ]
+
+        context.reset()
+
+        XCTAssertTrue(context.questionQueue.isEmpty)
+        XCTAssertFalse(context.hasQueuedQuestions)
+    }
+
+    func testQuestionQueueClearedOnResetForNewFeature() {
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-123",
+                question: AskUserQuestionInput.Question(
+                    question: "Q1?",
+                    header: "Q1",
+                    options: [],
+                    multiSelect: false
+                )
+            )
+        ]
+        context.addLog(type: .info, message: "Existing log")
+
+        context.resetForNewFeature()
+
+        XCTAssertTrue(context.questionQueue.isEmpty)
+        XCTAssertFalse(context.hasQueuedQuestions)
+        // Logs should be preserved
+        XCTAssertTrue(context.logs.contains { $0.message.contains("Existing log") })
+    }
+
+    func testSingleQuestionDoesNotCreateQueue() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What framework?", header: "Framework")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question asked",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertNotNil(context.pendingQuestion)
+        XCTAssertTrue(context.questionQueue.isEmpty)
+    }
+
+    func testAnswerQuestionWithQueueDoesNotCallClaude() async throws {
+        context.sessionId = "test-session"
+        context.interviewSession = InterviewSession(featureDescription: "Build feature")
+        context.currentInterviewQuestion = "Q1?"
+        context.pendingQuestion = PendingQuestion(
+            toolUseId: "tool-123",
+            question: AskUserQuestionInput.Question(
+                question: "Q1?",
+                header: "Q1",
+                options: [
+                    AskUserQuestionInput.Option(label: "A", description: "A"),
+                    AskUserQuestionInput.Option(label: "B", description: "B")
+                ],
+                multiSelect: false
+            )
+        )
+        context.questionQueue = [
+            PendingQuestion(
+                toolUseId: "tool-123",
+                question: AskUserQuestionInput.Question(
+                    question: "Q2?",
+                    header: "Q2",
+                    options: [
+                        AskUserQuestionInput.Option(label: "C", description: "C"),
+                        AskUserQuestionInput.Option(label: "D", description: "D")
+                    ],
+                    multiSelect: false
+                )
+            )
+        ]
+        context.phase = .waitingForUser
+
+        let callCountBefore = mockClaudeService.executeCallCount
+
+        try await stateMachine.answerQuestion("A")
+
+        // Should NOT have called Claude since there's another question in queue
+        XCTAssertEqual(mockClaudeService.executeCallCount, callCountBefore)
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertNotNil(context.pendingQuestion)
+    }
+
+    func testQuestionQueuePreservesToolUseId() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build a feature"
+
+        let toolId = "unique-tool-id-12345"
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessageWithMultipleQuestionsAndToolId(
+                toolId: toolId,
+                questions: [
+                    (question: "Q1?", header: "Q1"),
+                    (question: "Q2?", header: "Q2")
+                ]
+            )
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "questions asked",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        // Both questions should have the same tool use ID
+        XCTAssertEqual(context.pendingQuestion?.toolUseId, toolId)
+        XCTAssertEqual(context.questionQueue.first?.toolUseId, toolId)
+    }
+
+    func testQuestionQueueWithStandardModeQuestion() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+        context.existingPlan = Plan(rawText: "", tasks: [
+            PlanTask(id: UUID(), number: 1, title: "Test Task", description: "Test", status: .pending, subtasks: [])
+        ])
+
+        // Configure auto-answer to be disabled for standard mode questions
+        userPreferences.autonomousConfig = AutonomousConfiguration(
+            autoAnswerEnabled: false
+        )
+
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessageWithMultipleQuestions([
+                (question: "Which approach?", header: "Approach"),
+                (question: "Which library?", header: "Library")
+            ])
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "questions",
+            sessionId: "mock-session-id",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.startWithExistingPlan()
+
+        // Should pause for standard mode questions with queue
+        XCTAssertEqual(context.phase, .waitingForUser)
+        XCTAssertNotNil(context.pendingQuestion)
+        XCTAssertEqual(context.questionQueue.count, 1)
+    }
+
+    // MARK: - Additional Test Helpers
+
+    private func makeAskUserQuestionMessageWithMultipleQuestions(
+        _ questions: [(question: String, header: String)]
+    ) -> ClaudeStreamMessage {
+        makeAskUserQuestionMessageWithMultipleQuestionsAndToolId(
+            toolId: "toolu_multi",
+            questions: questions
+        )
+    }
+
+    private func makeAskUserQuestionMessageWithMultipleQuestionsAndToolId(
+        toolId: String,
+        questions: [(question: String, header: String)]
+    ) -> ClaudeStreamMessage {
+        let questionsJSON = questions.map { q in
+            """
+            {
+                "question": "\(escapeJSON(q.question))",
+                "header": "\(escapeJSON(q.header))",
+                "options": [
+                    {"label": "Option 1", "description": "First option"},
+                    {"label": "Option 2", "description": "Second option"}
+                ],
+                "multiSelect": false
+            }
+            """
+        }.joined(separator: ",\n")
+
+        let json = """
+        {
+            "type": "assistant",
+            "message": {
+                "id": "msg_test",
+                "model": "claude-opus-4-5-20251101",
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "tool_use",
+                        "id": "\(toolId)",
+                        "name": "AskUserQuestion",
+                        "input": {
+                            "questions": [
+                                \(questionsJSON)
+                            ]
+                        }
+                    }
+                ],
+                "stop_reason": null,
+                "usage": null
+            },
+            "session_id": "mock-session-id",
+            "parent_tool_use_id": null
+        }
+        """
+        return try! JSONDecoder().decode(ClaudeStreamMessage.self, from: json.data(using: .utf8)!)
     }
 }
