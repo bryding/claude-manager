@@ -194,20 +194,6 @@ struct SetupView: View {
         }
     }
 
-    private var recentProjectsMenu: some View {
-        Menu {
-            ForEach(appState.userPreferences.recentProjects, id: \.self) { url in
-                Button(action: { selectRecentProject(url) }) {
-                    Label(url.lastPathComponent, systemImage: "folder")
-                }
-            }
-        } label: {
-            Image(systemName: "clock.arrow.circlepath")
-        }
-        .menuStyle(.borderlessButton)
-        .help("Recent Projects")
-    }
-
     @ViewBuilder
     private var existingPlanBanner: some View {
         if let plan = context.existingPlan {
@@ -237,6 +223,20 @@ struct SetupView: View {
             .background(Color.secondary.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
+    }
+
+    private var recentProjectsMenu: some View {
+        Menu {
+            ForEach(appState.userPreferences.recentProjects, id: \.self) { url in
+                Button(action: { selectRecentProject(url) }) {
+                    Label(url.lastPathComponent, systemImage: "folder")
+                }
+            }
+        } label: {
+            Image(systemName: "clock.arrow.circlepath")
+        }
+        .menuStyle(.borderlessButton)
+        .help("Recent Projects")
     }
 
     private var startButton: some View {
