@@ -23,6 +23,20 @@ struct ClaudeManagerApp: App {
                 }
                 .keyboardShortcut("w", modifiers: .command)
                 .disabled(appState.activeTab == nil)
+
+                Divider()
+
+                Button("Show Next Tab") {
+                    appState.tabManager.selectNextTab()
+                }
+                .keyboardShortcut("]", modifiers: [.command, .shift])
+                .disabled(appState.tabManager.tabs.count < 2)
+
+                Button("Show Previous Tab") {
+                    appState.tabManager.selectPreviousTab()
+                }
+                .keyboardShortcut("[", modifiers: [.command, .shift])
+                .disabled(appState.tabManager.tabs.count < 2)
             }
 
             CommandGroup(after: .appSettings) {

@@ -145,7 +145,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
 
 ### Phase 8: Keyboard Shortcuts
 
-- [ ] **Task 8.1**: Add tab navigation shortcuts in ClaudeManagerApp
+- [x] **Task 8.1**: Add tab navigation shortcuts in ClaudeManagerApp
   - Next Tab: ⌘⇧]
   - Previous Tab: ⌘⇧[
   - Add methods in TabManager: selectNextTab(), selectPreviousTab()

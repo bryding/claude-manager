@@ -97,4 +97,24 @@ final class TabManager {
         guard tabs.contains(where: { $0.id == tab.id }) else { return }
         activeTabId = tab.id
     }
+
+    func selectNextTab() {
+        guard !tabs.isEmpty else { return }
+        guard let currentIndex = tabs.firstIndex(where: { $0.id == activeTabId }) else {
+            activeTabId = tabs.first?.id
+            return
+        }
+        let nextIndex = (currentIndex + 1) % tabs.count
+        activeTabId = tabs[nextIndex].id
+    }
+
+    func selectPreviousTab() {
+        guard !tabs.isEmpty else { return }
+        guard let currentIndex = tabs.firstIndex(where: { $0.id == activeTabId }) else {
+            activeTabId = tabs.last?.id
+            return
+        }
+        let previousIndex = (currentIndex - 1 + tabs.count) % tabs.count
+        activeTabId = tabs[previousIndex].id
+    }
 }
