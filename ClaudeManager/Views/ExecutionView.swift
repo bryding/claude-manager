@@ -117,8 +117,7 @@ struct ExecutionView: View {
 
 #if DEBUG
 #Preview("Execution - Running") {
-    let appState = AppState()
-    let tab = Tab.create(userPreferences: appState.userPreferences)
+    let tab = Tab.create(userPreferences: UserPreferences())
     tab.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
     tab.context.phase = .executingTask
     tab.context.plan = Plan(rawText: "", tasks: [
@@ -142,8 +141,7 @@ struct ExecutionView: View {
 }
 
 #Preview("Execution - Completed") {
-    let appState = AppState()
-    let tab = Tab.create(userPreferences: appState.userPreferences)
+    let tab = Tab.create(userPreferences: UserPreferences())
     tab.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
     tab.context.phase = .completed
     tab.context.plan = Plan(rawText: "", tasks: [
@@ -162,8 +160,7 @@ struct ExecutionView: View {
 }
 
 #Preview("Execution - Waiting for User") {
-    let appState = AppState()
-    let tab = Tab.create(userPreferences: appState.userPreferences)
+    let tab = Tab.create(userPreferences: UserPreferences())
     tab.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
     tab.context.phase = .waitingForUser
     tab.context.plan = Plan(rawText: "", tasks: [
@@ -180,9 +177,8 @@ struct ExecutionView: View {
 }
 
 #Preview("Execution - Worktree") {
-    let appState = AppState()
     let tab = Tab.create(
-        userPreferences: appState.userPreferences,
+        userPreferences: UserPreferences(),
         worktreeInfo: WorktreeInfo(
             originalRepoPath: URL(fileURLWithPath: "/Users/demo/MyProject"),
             worktreePath: URL(fileURLWithPath: "/Users/demo/MyProject/.worktrees/abc123"),
