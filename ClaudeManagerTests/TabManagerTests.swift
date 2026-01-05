@@ -290,6 +290,92 @@ final class TabManagerTests: XCTestCase {
 
     // MARK: - Select Tab
 
+    func testSelectNextTabWithNoTabsDoesNothing() {
+        let tabManager = TabManager()
+
+        tabManager.selectNextTab()
+
+        XCTAssertNil(tabManager.activeTabId)
+    }
+
+    func testSelectNextTabWithNoActiveTabSelectsFirst() {
+        let tabManager = TabManager()
+        let tab1 = tabManager.createTab()
+        _ = tabManager.createTab()
+        tabManager.activeTabId = nil
+
+        tabManager.selectNextTab()
+
+        XCTAssertEqual(tabManager.activeTabId, tab1.id)
+    }
+
+    func testSelectNextTabSelectsNextTab() {
+        let tabManager = TabManager()
+        let tab1 = tabManager.createTab()
+        let tab2 = tabManager.createTab()
+        _ = tabManager.createTab()
+        tabManager.selectTab(tab1)
+
+        tabManager.selectNextTab()
+
+        XCTAssertEqual(tabManager.activeTabId, tab2.id)
+    }
+
+    func testSelectNextTabWrapsToFirst() {
+        let tabManager = TabManager()
+        let tab1 = tabManager.createTab()
+        _ = tabManager.createTab()
+        let tab3 = tabManager.createTab()
+        tabManager.selectTab(tab3)
+
+        tabManager.selectNextTab()
+
+        XCTAssertEqual(tabManager.activeTabId, tab1.id)
+    }
+
+    func testSelectPreviousTabWithNoTabsDoesNothing() {
+        let tabManager = TabManager()
+
+        tabManager.selectPreviousTab()
+
+        XCTAssertNil(tabManager.activeTabId)
+    }
+
+    func testSelectPreviousTabWithNoActiveTabSelectsLast() {
+        let tabManager = TabManager()
+        _ = tabManager.createTab()
+        let tab2 = tabManager.createTab()
+        tabManager.activeTabId = nil
+
+        tabManager.selectPreviousTab()
+
+        XCTAssertEqual(tabManager.activeTabId, tab2.id)
+    }
+
+    func testSelectPreviousTabSelectsPreviousTab() {
+        let tabManager = TabManager()
+        _ = tabManager.createTab()
+        let tab2 = tabManager.createTab()
+        let tab3 = tabManager.createTab()
+        tabManager.selectTab(tab3)
+
+        tabManager.selectPreviousTab()
+
+        XCTAssertEqual(tabManager.activeTabId, tab2.id)
+    }
+
+    func testSelectPreviousTabWrapsToLast() {
+        let tabManager = TabManager()
+        let tab1 = tabManager.createTab()
+        _ = tabManager.createTab()
+        let tab3 = tabManager.createTab()
+        tabManager.selectTab(tab1)
+
+        tabManager.selectPreviousTab()
+
+        XCTAssertEqual(tabManager.activeTabId, tab3.id)
+    }
+
     func testSelectTabChangesActiveTab() {
         let tabManager = TabManager()
         let tab1 = tabManager.createTab()
