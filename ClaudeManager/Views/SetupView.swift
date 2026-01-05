@@ -42,19 +42,6 @@ struct SetupView: View {
         context.projectPath?.path(percentEncoded: false) ?? "No project selected"
     }
 
-    // MARK: - Binding Helpers
-
-    private func binding<T>(for keyPath: WritableKeyPath<AutonomousConfiguration, T>) -> Binding<T> {
-        Binding(
-            get: { appState.userPreferences.autonomousConfig[keyPath: keyPath] },
-            set: { newValue in
-                var config = appState.userPreferences.autonomousConfig
-                config[keyPath: keyPath] = newValue
-                appState.userPreferences.autonomousConfig = config
-            }
-        )
-    }
-
     // MARK: - Body
 
     var body: some View {
@@ -67,7 +54,6 @@ struct SetupView: View {
                         existingPlanSection
                     }
                     featureDescriptionSection
-                    autonomousConfigSection
                 }
                 .padding(32)
                 .padding(.bottom, 8)
@@ -245,45 +231,6 @@ struct SetupView: View {
                 }
             }
             .padding(.vertical, 8)
-        }
-    }
-
-    private var autonomousConfigSection: some View {
-        let config = appState.userPreferences.autonomousConfig
-
-        return GroupBox("Autonomous Mode") {
-            VStack(alignment: .leading, spacing: 12) {
-                Toggle("Enable Autonomous Mode", isOn: binding(for: \.autoAnswerEnabled))
-
-                if config.autoAnswerEnabled {
-                    Divider()
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Project Context")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                        TextField("e.g., Mimicking BEYOND laser show UI", text: binding(for: \.projectContext))
-                            .textFieldStyle(.roundedBorder)
-                    }
-
-                    Picker("On Failure", selection: binding(for: \.autoFailureHandling)) {
-                        ForEach(AutoFailureHandling.allCases, id: \.self) { handling in
-                            Text(handling.displayName).tag(handling)
-                        }
-                    }
-
-                    Stepper("Max Retries: \(config.maxTaskRetries)",
-                            value: binding(for: \.maxTaskRetries),
-                            in: 1...10)
-
-                    Divider()
-
-                    Toggle("Run Build After Implementation", isOn: binding(for: \.runBuildAfterCommit))
-                    Toggle("Run Tests After Writing", isOn: binding(for: \.runTestsAfterCommit))
-                }
-            }
-            .padding(.vertical, 8)
-            .animation(.easeInOut(duration: 0.2), value: config.autoAnswerEnabled)
         }
     }
 
