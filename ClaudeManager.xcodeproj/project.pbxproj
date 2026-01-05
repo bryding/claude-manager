@@ -9,17 +9,20 @@
 /* Begin PBXBuildFile section */
 		A9000001210000010000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A9000001110000010000000F /* Assets.xcassets */; };
 		A9000002210000010000000F /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9000002110000010000000F /* UserPreferences.swift */; };
+		B6000001210000010000000F /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6000001110000010000000F /* Tab.swift */; };
+		B6000002210000010000000F /* TabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6000002110000010000000F /* TabManager.swift */; };
+		B6000003210000010000000F /* WorktreeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6000003110000010000000F /* WorktreeService.swift */; };
 		AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001110000010000000F /* AutonomousConfiguration.swift */; };
 		AA000002210000010000000F /* ProjectConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002110000010000000F /* ProjectConfiguration.swift */; };
 		AB000001210000010000000F /* CommandResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB000001110000010000000F /* CommandResult.swift */; };
 		AE000001210000010000000F /* InterviewSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE000001110000010000000F /* InterviewSession.swift */; };
 		B1000001210000010000000F /* AttachedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000001110000010000000F /* AttachedImage.swift */; };
 		B1000002210000010000000F /* PromptContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002110000010000000F /* PromptContent.swift */; };
-		B3000001210000010000000F /* ImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3000001110000010000000F /* ImageProcessor.swift */; };
+		B3000001210000010000000F /* WorktreeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3000001110000010000000F /* WorktreeInfo.swift */; };
+		B3000002210000010000000F /* ImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3000002110000010000000F /* ImageProcessor.swift */; };
 		AC000001210000010000000F /* BuildTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000001110000010000000F /* BuildTestService.swift */; };
 		AC000002210000010000000F /* BuildTestServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC000002110000010000000F /* BuildTestServiceProtocol.swift */; };
 		A1000001210000010000000F /* ClaudeManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001110000010000000F /* ClaudeManagerApp.swift */; };
-		A1000002210000010000000F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002110000010000000F /* ContentView.swift */; };
 		A1000003210000010000000F /* ClaudeStreamMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000003210000010000000A /* ClaudeStreamMessage.swift */; };
 		A1000007210000010000000F /* ClaudeMessageParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000007110000010000000F /* ClaudeMessageParser.swift */; };
 		A1000008210000010000000F /* ClaudeProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000008110000010000000F /* ClaudeProcess.swift */; };
@@ -28,6 +31,7 @@
 		A100000E210000010000000F /* GitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000E110000010000000F /* GitService.swift */; };
 		A4000001210000010000000F /* ClaudeCLIServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */; };
 		A4000002210000010000000F /* GitServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4000002110000010000000F /* GitServiceProtocol.swift */; };
+		B4000001210000010000000F /* WorktreeServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4000001110000010000000F /* WorktreeServiceProtocol.swift */; };
 		A100000B210000010000000F /* Plan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000B110000010000000F /* Plan.swift */; };
 		A100000C210000010000000F /* ExecutionPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000C110000010000000F /* ExecutionPhase.swift */; };
 		A100000D210000010000000F /* LogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000D110000010000000F /* LogEntry.swift */; };
@@ -41,6 +45,10 @@
 		A5000001210000010000000F /* MockClaudeCLIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5000001110000010000000F /* MockClaudeCLIService.swift */; };
 		A5000002210000010000000F /* MockGitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5000002110000010000000F /* MockGitService.swift */; };
 		AD000001210000010000000F /* MockBuildTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD000001110000010000000F /* MockBuildTestService.swift */; };
+		B5000001210000010000000F /* MockWorktreeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5000001110000010000000F /* MockWorktreeService.swift */; };
+		B7000001210000010000000F /* TabManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7000001110000010000000F /* TabManagerTests.swift */; };
+		BB000001210000010000000F /* WorktreeServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000001110000010000000F /* WorktreeServiceTests.swift */; };
+		BA000001210000010000000F /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA000001110000010000000F /* AppStateTests.swift */; };
 		AF000001210000010000000F /* InterviewSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF000001110000010000000F /* InterviewSessionTests.swift */; };
 		B0000001210000010000000F /* ExecutionContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000001110000010000000F /* ExecutionContextTests.swift */; };
 		B2000001210000010000000F /* PromptContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000001110000010000000F /* PromptContentTests.swift */; };
@@ -59,8 +67,13 @@
 		A6000007210000010000000F /* ExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000007110000010000000F /* ExecutionView.swift */; };
 		A6000008210000010000000F /* ManualInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000008110000010000000F /* ManualInputView.swift */; };
 		B7000001210000010000000F /* PastableTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7000001110000010000000F /* PastableTextEditor.swift */; };
-		B8000001210000010000000F /* ImageThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000001110000010000000F /* ImageThumbnailView.swift */; };
-		B8000002210000010000000F /* AttachedImagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000002110000010000000F /* AttachedImagesView.swift */; };
+		B7000002210000010000000F /* ImageThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7000002110000010000000F /* ImageThumbnailView.swift */; };
+		B7000003210000010000000F /* AttachedImagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7000003110000010000000F /* AttachedImagesView.swift */; };
+		B8000001210000010000000F /* TabItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000001110000010000000F /* TabItemView.swift */; };
+		B8000002210000010000000F /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000002110000010000000F /* TabBarView.swift */; };
+		B9000001210000010000000F /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9000001110000010000000F /* MainView.swift */; };
+		B9000002210000010000000F /* TabContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9000002110000010000000F /* TabContentView.swift */; };
+		B9000003210000010000000F /* EmptyTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9000003110000010000000F /* EmptyTabView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,11 +95,14 @@
 		AE000001110000010000000F /* InterviewSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewSession.swift; sourceTree = "<group>"; };
 		B1000001110000010000000F /* AttachedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachedImage.swift; sourceTree = "<group>"; };
 		B1000002110000010000000F /* PromptContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptContent.swift; sourceTree = "<group>"; };
+		B3000001110000010000000F /* WorktreeInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorktreeInfo.swift; sourceTree = "<group>"; };
+		B6000001110000010000000F /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
+		B6000002110000010000000F /* TabManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabManager.swift; sourceTree = "<group>"; };
+		B6000003110000010000000F /* WorktreeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorktreeService.swift; sourceTree = "<group>"; };
 		AC000001110000010000000F /* BuildTestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildTestService.swift; sourceTree = "<group>"; };
 		AC000002110000010000000F /* BuildTestServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildTestServiceProtocol.swift; sourceTree = "<group>"; };
 		A1000000010000010000000F /* ClaudeManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000001110000010000000F /* ClaudeManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeManagerApp.swift; sourceTree = "<group>"; };
-		A1000002110000010000000F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1000003210000010000000A /* ClaudeStreamMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStreamMessage.swift; sourceTree = "<group>"; };
 		A1000007110000010000000F /* ClaudeMessageParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeMessageParser.swift; sourceTree = "<group>"; };
 		A1000008110000010000000F /* ClaudeProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeProcess.swift; sourceTree = "<group>"; };
@@ -95,6 +111,7 @@
 		A100000E110000010000000F /* GitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitService.swift; sourceTree = "<group>"; };
 		A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCLIServiceProtocol.swift; sourceTree = "<group>"; };
 		A4000002110000010000000F /* GitServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitServiceProtocol.swift; sourceTree = "<group>"; };
+		B4000001110000010000000F /* WorktreeServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorktreeServiceProtocol.swift; sourceTree = "<group>"; };
 		A100000B110000010000000F /* Plan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plan.swift; sourceTree = "<group>"; };
 		A100000C110000010000000F /* ExecutionPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionPhase.swift; sourceTree = "<group>"; };
 		A100000D110000010000000F /* LogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEntry.swift; sourceTree = "<group>"; };
@@ -109,6 +126,10 @@
 		A5000001110000010000000F /* MockClaudeCLIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockClaudeCLIService.swift; sourceTree = "<group>"; };
 		A5000002110000010000000F /* MockGitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGitService.swift; sourceTree = "<group>"; };
 		AD000001110000010000000F /* MockBuildTestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockBuildTestService.swift; sourceTree = "<group>"; };
+		B5000001110000010000000F /* MockWorktreeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWorktreeService.swift; sourceTree = "<group>"; };
+		B7000001110000010000000F /* TabManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabManagerTests.swift; sourceTree = "<group>"; };
+		BB000001110000010000000F /* WorktreeServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorktreeServiceTests.swift; sourceTree = "<group>"; };
+		BA000001110000010000000F /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
 		AF000001110000010000000F /* InterviewSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewSessionTests.swift; sourceTree = "<group>"; };
 		B0000001110000010000000F /* ExecutionContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContextTests.swift; sourceTree = "<group>"; };
 		B2000001110000010000000F /* PromptContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptContentTests.swift; sourceTree = "<group>"; };
@@ -128,8 +149,13 @@
 		A6000007110000010000000F /* ExecutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionView.swift; sourceTree = "<group>"; };
 		A6000008110000010000000F /* ManualInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualInputView.swift; sourceTree = "<group>"; };
 		B7000001110000010000000F /* PastableTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastableTextEditor.swift; sourceTree = "<group>"; };
-		B8000001110000010000000F /* ImageThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageThumbnailView.swift; sourceTree = "<group>"; };
-		B8000002110000010000000F /* AttachedImagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachedImagesView.swift; sourceTree = "<group>"; };
+		B7000002110000010000000F /* ImageThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageThumbnailView.swift; sourceTree = "<group>"; };
+		B7000003110000010000000F /* AttachedImagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachedImagesView.swift; sourceTree = "<group>"; };
+		B8000001110000010000000F /* TabItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItemView.swift; sourceTree = "<group>"; };
+		B8000002110000010000000F /* TabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarView.swift; sourceTree = "<group>"; };
+		B9000001110000010000000F /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		B9000002110000010000000F /* TabContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabContentView.swift; sourceTree = "<group>"; };
+		B9000003110000010000000F /* EmptyTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyTabView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,7 +189,6 @@
 			isa = PBXGroup;
 			children = (
 				A1000001110000010000000F /* ClaudeManagerApp.swift */,
-				A1000002110000010000000F /* ContentView.swift */,
 				A9000001110000010000000F /* Assets.xcassets */,
 				A1000003110000010000000F /* Models */,
 				A1000004110000010000000F /* Services */,
@@ -199,6 +224,8 @@
 				AA000002110000010000000F /* ProjectConfiguration.swift */,
 				AB000001110000010000000F /* CommandResult.swift */,
 				AE000001110000010000000F /* InterviewSession.swift */,
+				B3000001110000010000000F /* WorktreeInfo.swift */,
+				B6000001110000010000000F /* Tab.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -213,6 +240,7 @@
 				A100000A110000010000000F /* PlanService.swift */,
 				A100000E110000010000000F /* GitService.swift */,
 				AC000001110000010000000F /* BuildTestService.swift */,
+				B6000003110000010000000F /* WorktreeService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -223,6 +251,7 @@
 				A4000001110000010000000F /* ClaudeCLIServiceProtocol.swift */,
 				A4000002110000010000000F /* GitServiceProtocol.swift */,
 				AC000002110000010000000F /* BuildTestServiceProtocol.swift */,
+				B4000001110000010000000F /* WorktreeServiceProtocol.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -234,6 +263,7 @@
 				A3000002110000010000000F /* ExecutionStateMachine.swift */,
 				A3000003110000010000000F /* AppState.swift */,
 				A9000002110000010000000F /* UserPreferences.swift */,
+				B6000002110000010000000F /* TabManager.swift */,
 			);
 			path = State;
 			sourceTree = "<group>";
@@ -241,7 +271,7 @@
 		A1000006110000010000000F /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				B7000002110000010000000F /* Components */,
+				B7000004110000010000000F /* Components */,
 				A6000001110000010000000F /* SetupView.swift */,
 				A6000002110000010000000F /* PhaseIndicatorView.swift */,
 				A6000003110000010000000F /* TaskListView.swift */,
@@ -251,16 +281,21 @@
 				A6000007110000010000000F /* ExecutionView.swift */,
 				A6000008110000010000000F /* ManualInputView.swift */,
 				A8000002110000010000000F /* TaskFailureView.swift */,
+				B9000001110000010000000F /* MainView.swift */,
+				B9000002110000010000000F /* TabContentView.swift */,
+				B9000003110000010000000F /* EmptyTabView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		B7000002110000010000000F /* Components */ = {
+		B7000004110000010000000F /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				B8000002110000010000000F /* AttachedImagesView.swift */,
-				B8000001110000010000000F /* ImageThumbnailView.swift */,
+				B7000003110000010000000F /* AttachedImagesView.swift */,
+				B7000002110000010000000F /* ImageThumbnailView.swift */,
 				B7000001110000010000000F /* PastableTextEditor.swift */,
+				B8000001110000010000000F /* TabItemView.swift */,
+				B8000002110000010000000F /* TabBarView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -268,7 +303,7 @@
 		B3000002110000010000000F /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				B3000001110000010000000F /* ImageProcessor.swift */,
+				B3000002110000010000000F /* ImageProcessor.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -277,15 +312,18 @@
 			isa = PBXGroup;
 			children = (
 				A5000003110000010000000F /* Mocks */,
+				BA000001110000010000000F /* AppStateTests.swift */,
+				B4000001110000010000000F /* ClaudeProcessTests.swift */,
 				B5000001110000010000000F /* ClaudeCLIServiceProtocolTests.swift */,
 				B6000001110000010000000F /* ClaudeCLIServiceTests.swift */,
-				B4000001110000010000000F /* ClaudeProcessTests.swift */,
 				A2000001110000010000000F /* ClaudeStreamMessageTests.swift */,
 				B0000001110000010000000F /* ExecutionContextTests.swift */,
 				A2000004110000010000000F /* ExecutionStateMachineTests.swift */,
 				AF000001110000010000000F /* InterviewSessionTests.swift */,
 				A2000003110000010000000F /* PlanServiceTests.swift */,
 				B2000001110000010000000F /* PromptContentTests.swift */,
+				B7000001110000010000000F /* TabManagerTests.swift */,
+				BB000001110000010000000F /* WorktreeServiceTests.swift */,
 			);
 			path = ClaudeManagerTests;
 			sourceTree = "<group>";
@@ -296,6 +334,7 @@
 				A5000001110000010000000F /* MockClaudeCLIService.swift */,
 				A5000002110000010000000F /* MockGitService.swift */,
 				AD000001110000010000000F /* MockBuildTestService.swift */,
+				B5000001110000010000000F /* MockWorktreeService.swift */,
 			);
 			path = Mocks;
 			sourceTree = "<group>";
@@ -400,7 +439,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000001210000010000000F /* ClaudeManagerApp.swift in Sources */,
-				A1000002210000010000000F /* ContentView.swift in Sources */,
 				A1000003210000010000000F /* ClaudeStreamMessage.swift in Sources */,
 				A1000007210000010000000F /* ClaudeMessageParser.swift in Sources */,
 				A1000008210000010000000F /* ClaudeProcess.swift in Sources */,
@@ -428,6 +466,7 @@
 				A4000002210000010000000F /* GitServiceProtocol.swift in Sources */,
 				AC000001210000010000000F /* BuildTestService.swift in Sources */,
 				AC000002210000010000000F /* BuildTestServiceProtocol.swift in Sources */,
+				B4000001210000010000000F /* WorktreeServiceProtocol.swift in Sources */,
 				A9000002210000010000000F /* UserPreferences.swift in Sources */,
 				AA000001210000010000000F /* AutonomousConfiguration.swift in Sources */,
 				AA000002210000010000000F /* ProjectConfiguration.swift in Sources */,
@@ -436,10 +475,19 @@
 				A6000008210000010000000F /* ManualInputView.swift in Sources */,
 				B1000001210000010000000F /* AttachedImage.swift in Sources */,
 				B1000002210000010000000F /* PromptContent.swift in Sources */,
-				B3000001210000010000000F /* ImageProcessor.swift in Sources */,
+				B3000001210000010000000F /* WorktreeInfo.swift in Sources */,
+				B3000002210000010000000F /* ImageProcessor.swift in Sources */,
+				B6000001210000010000000F /* Tab.swift in Sources */,
+				B6000002210000010000000F /* TabManager.swift in Sources */,
+				B6000003210000010000000F /* WorktreeService.swift in Sources */,
 				B7000001210000010000000F /* PastableTextEditor.swift in Sources */,
-				B8000001210000010000000F /* ImageThumbnailView.swift in Sources */,
-				B8000002210000010000000F /* AttachedImagesView.swift in Sources */,
+				B7000002210000010000000F /* ImageThumbnailView.swift in Sources */,
+				B7000003210000010000000F /* AttachedImagesView.swift in Sources */,
+				B8000001210000010000000F /* TabItemView.swift in Sources */,
+				B8000002210000010000000F /* TabBarView.swift in Sources */,
+				B9000001210000010000000F /* MainView.swift in Sources */,
+				B9000002210000010000000F /* TabContentView.swift in Sources */,
+				B9000003210000010000000F /* EmptyTabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -447,9 +495,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BA000001210000010000000F /* AppStateTests.swift in Sources */,
+				B4000001210000010000000F /* ClaudeProcessTests.swift in Sources */,
 				B5000001210000010000000F /* ClaudeCLIServiceProtocolTests.swift in Sources */,
 				B6000001210000010000000F /* ClaudeCLIServiceTests.swift in Sources */,
-				B4000001210000010000000F /* ClaudeProcessTests.swift in Sources */,
 				A2000001210000010000000F /* ClaudeStreamMessageTests.swift in Sources */,
 				B0000001210000010000000F /* ExecutionContextTests.swift in Sources */,
 				A2000004210000010000000F /* ExecutionStateMachineTests.swift in Sources */,
@@ -459,6 +508,9 @@
 				A5000001210000010000000F /* MockClaudeCLIService.swift in Sources */,
 				A5000002210000010000000F /* MockGitService.swift in Sources */,
 				AD000001210000010000000F /* MockBuildTestService.swift in Sources */,
+				B5000001210000010000000F /* MockWorktreeService.swift in Sources */,
+				B7000001210000010000000F /* TabManagerTests.swift in Sources */,
+				BB000001210000010000000F /* WorktreeServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

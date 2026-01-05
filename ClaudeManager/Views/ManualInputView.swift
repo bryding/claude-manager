@@ -3,7 +3,7 @@ import SwiftUI
 struct ManualInputView: View {
     // MARK: - Environment
 
-    @Environment(AppState.self) private var appState
+    @Environment(Tab.self) private var tab
 
     // MARK: - Local State
 
@@ -14,7 +14,11 @@ struct ManualInputView: View {
     // MARK: - Computed Properties
 
     private var context: ExecutionContext {
-        appState.context
+        tab.context
+    }
+
+    private var stateMachine: ExecutionStateMachine {
+        tab.stateMachine
     }
 
     private var canSubmit: Bool {
@@ -60,7 +64,7 @@ struct ManualInputView: View {
         .onChange(of: context.suggestedManualInput) { _, newValue in
             if !newValue.isEmpty {
                 inputText = newValue
-                appState.context.suggestedManualInput = ""
+                context.suggestedManualInput = ""
             }
         }
         .alert("Error", isPresented: showingError) {
@@ -90,7 +94,7 @@ struct ManualInputView: View {
 
         Task {
             do {
-                try await appState.stateMachine.sendManualInput(text)
+                try await stateMachine.sendManualInput(text)
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -103,35 +107,36 @@ struct ManualInputView: View {
 
 #if DEBUG
 #Preview("Manual Input Available") {
-    let context = ExecutionContext()
-    context.sessionId = "test-session"
-    context.phase = .executingTask
-    let appState = AppState(context: context)
+    let appState = AppState()
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.sessionId = "test-session"
+    tab.context.phase = .executingTask
 
     return ManualInputView()
-        .environment(appState)
+        .environment(tab)
         .frame(width: 600)
         .padding()
 }
 
 #Preview("Manual Input Disabled") {
     let appState = AppState()
+    let tab = Tab.create(userPreferences: appState.userPreferences)
 
     return ManualInputView()
-        .environment(appState)
+        .environment(tab)
         .frame(width: 600)
         .padding()
 }
 
 #Preview("With Suggested Input") {
-    let context = ExecutionContext()
-    context.sessionId = "test-session"
-    context.phase = .conductingInterview
-    context.suggestedManualInput = "Please continue with the interview."
-    let appState = AppState(context: context)
+    let appState = AppState()
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.sessionId = "test-session"
+    tab.context.phase = .conductingInterview
+    tab.context.suggestedManualInput = "Please continue with the interview."
 
     return ManualInputView()
-        .environment(appState)
+        .environment(tab)
         .frame(width: 600)
         .padding()
 }

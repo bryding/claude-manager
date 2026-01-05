@@ -3,7 +3,7 @@ import SwiftUI
 struct ControlsView: View {
     // MARK: - Environment
 
-    @Environment(AppState.self) private var appState
+    @Environment(Tab.self) private var tab
 
     // MARK: - Local State
 
@@ -12,11 +12,11 @@ struct ControlsView: View {
     // MARK: - Computed Properties
 
     private var context: ExecutionContext {
-        appState.context
+        tab.context
     }
 
-    private var showContinueButton: Bool {
-        context.appearsStuck
+    private var stateMachine: ExecutionStateMachine {
+        tab.stateMachine
     }
 
     // MARK: - Body
@@ -28,7 +28,7 @@ struct ControlsView: View {
             } else {
                 pauseResumeButton
                 stopButton
-                if showContinueButton {
+                if context.appearsStuck {
                     continueButton
                 }
             }
@@ -37,7 +37,9 @@ struct ControlsView: View {
             contextIndicator
             costDisplay
         }
-        .alert("Error", isPresented: showingError, actions: {}) {
+        .alert("Error", isPresented: showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
             Text(errorMessage ?? "")
         }
         .confirmationDialog(
@@ -46,7 +48,7 @@ struct ControlsView: View {
             titleVisibility: .visible
         ) {
             Button("Stop", role: .destructive) {
-                appState.stateMachine.stop()
+                stateMachine.stop()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -56,8 +58,8 @@ struct ControlsView: View {
 
     private var showStopConfirmation: Binding<Bool> {
         Binding(
-            get: { appState.context.showStopConfirmation },
-            set: { appState.context.showStopConfirmation = $0 }
+            get: { context.showStopConfirmation },
+            set: { context.showStopConfirmation = $0 }
         )
     }
 
@@ -185,24 +187,20 @@ struct ControlsView: View {
     }
 
     private var contextStatusColor: Color {
-        let remaining = context.contextPercentRemaining
-        if remaining < 0.10 {
-            return .red
-        } else if remaining < 0.25 {
-            return .orange
-        } else {
-            return .green
-        }
+        contextColor(forRemaining: context.contextPercentRemaining, defaultColor: .green)
     }
 
     private var contextTextColor: Color {
-        let remaining = context.contextPercentRemaining
+        contextColor(forRemaining: context.contextPercentRemaining, defaultColor: .primary)
+    }
+
+    private func contextColor(forRemaining remaining: Double, defaultColor: Color) -> Color {
         if remaining < 0.10 {
             return .red
         } else if remaining < 0.25 {
             return .orange
         } else {
-            return .primary
+            return defaultColor
         }
     }
 
@@ -212,42 +210,41 @@ struct ControlsView: View {
         if context.canResume {
             Task {
                 do {
-                    try await appState.stateMachine.resume()
+                    try await stateMachine.resume()
                 } catch {
                     errorMessage = error.localizedDescription
                 }
             }
         } else if context.canPause {
-            appState.stateMachine.pause()
+            stateMachine.pause()
         }
     }
 
     private func requestStop() {
-        appState.context.showStopConfirmation = true
+        context.showStopConfirmation = true
     }
 
     private func nudgeContinue() {
-        appState.context.suggestedManualInput = "Please continue with the interview or proceed to plan generation if you have enough information."
+        context.suggestedManualInput = "Please continue with the interview or proceed to plan generation if you have enough information."
     }
 
     private func startExecution() {
         Task {
             do {
-                // If no feature description, try to use plan.md
-                let hasFeature = !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                let hasFeature = !context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
-                if !hasFeature, let projectPath = appState.context.projectPath {
+                if !hasFeature, let projectPath = context.projectPath {
                     let planURL = projectPath.appendingPathComponent("plan.md")
                     if FileManager.default.fileExists(atPath: planURL.path) {
                         let planService = PlanService()
                         let plan = try planService.parsePlanFromFile(at: planURL)
-                        appState.context.existingPlan = plan
-                        try await appState.stateMachine.startWithExistingPlan()
+                        context.existingPlan = plan
+                        try await stateMachine.startWithExistingPlan()
                         return
                     }
                 }
 
-                try await appState.stateMachine.start()
+                try await stateMachine.start()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -260,60 +257,66 @@ struct ControlsView: View {
 #if DEBUG
 #Preview("Controls - Running") {
     let appState = AppState()
-    appState.context.phase = .executingTask
-    appState.context.totalCost = 0.42
-    appState.context.startTime = Date().addingTimeInterval(-125)
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .executingTask
+    tab.context.totalCost = 0.42
+    tab.context.startTime = Date().addingTimeInterval(-125)
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - Paused") {
     let appState = AppState()
-    appState.context.phase = .paused
-    appState.context.totalCost = 1.25
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .paused
+    tab.context.totalCost = 1.25
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - Idle") {
     let appState = AppState()
-    appState.context.phase = .idle
-    appState.context.totalCost = 0.0
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .idle
+    tab.context.totalCost = 0.0
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - High Context Usage") {
     let appState = AppState()
-    appState.context.phase = .executingTask
-    appState.context.totalCost = 0.42
-    appState.context.lastInputTokenCount = 180_000
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .executingTask
+    tab.context.totalCost = 0.42
+    tab.context.lastInputTokenCount = 180_000
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - Medium Context Usage") {
     let appState = AppState()
-    appState.context.phase = .executingTask
-    appState.context.totalCost = 0.25
-    appState.context.lastInputTokenCount = 160_000
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .executingTask
+    tab.context.totalCost = 0.25
+    tab.context.lastInputTokenCount = 160_000
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - Stuck Interview") {
     let appState = AppState()
-    appState.context.phase = .conductingInterview
-    appState.context.interviewSession = InterviewSession(featureDescription: "Test feature")
-    appState.context.sessionId = "test-session"
-    appState.context.totalCost = 0.10
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .conductingInterview
+    tab.context.interviewSession = InterviewSession(featureDescription: "Test feature")
+    tab.context.sessionId = "test-session"
+    tab.context.totalCost = 0.10
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 #endif

@@ -203,15 +203,17 @@ final class ExecutionContextTests: XCTestCase {
 
     // MARK: - Log Rotation Tests
 
-    func testResetForNewFeatureClearsLogs() {
+    func testResetForNewFeaturePreservesLogsAndAddsSeparator() {
         context.addLog(type: .info, message: "Test log 1")
         context.addLog(type: .info, message: "Test log 2")
         XCTAssertEqual(context.logs.count, 2)
 
         context.resetForNewFeature()
 
-        XCTAssertEqual(context.logs.count, 1)
-        XCTAssertEqual(context.logs.first?.type, .separator)
+        XCTAssertEqual(context.logs.count, 3)
+        XCTAssertTrue(context.logs.contains { $0.message == "Test log 1" })
+        XCTAssertTrue(context.logs.contains { $0.message == "Test log 2" })
+        XCTAssertEqual(context.logs.last?.type, .separator)
     }
 
     func testLogsDoNotExceedMaxEntries() {
@@ -361,5 +363,143 @@ final class ExecutionContextTests: XCTestCase {
         content = context.promptContent
         XCTAssertEqual(content.text, "Updated")
         XCTAssertEqual(content.images.count, 2)
+    }
+
+    // MARK: - canPause Tests
+
+    func testCanPauseReturnsTrueWhenRunningAndNotWaitingForUser() {
+        context.phase = .executingTask
+        XCTAssertTrue(context.canPause)
+    }
+
+    func testCanPauseReturnsTrueWhenGeneratingPlan() {
+        context.phase = .generatingInitialPlan
+        XCTAssertTrue(context.canPause)
+    }
+
+    func testCanPauseReturnsTrueWhenReviewingCode() {
+        context.phase = .reviewingCode
+        XCTAssertTrue(context.canPause)
+    }
+
+    func testCanPauseReturnsFalseWhenWaitingForUser() {
+        context.phase = .waitingForUser
+        XCTAssertFalse(context.canPause)
+    }
+
+    func testCanPauseReturnsFalseWhenIdle() {
+        context.phase = .idle
+        XCTAssertFalse(context.canPause)
+    }
+
+    func testCanPauseReturnsFalseWhenPaused() {
+        context.phase = .paused
+        XCTAssertFalse(context.canPause)
+    }
+
+    func testCanPauseReturnsFalseWhenCompleted() {
+        context.phase = .completed
+        XCTAssertFalse(context.canPause)
+    }
+
+    func testCanPauseReturnsFalseWhenFailed() {
+        context.phase = .failed
+        XCTAssertFalse(context.canPause)
+    }
+
+    // MARK: - canResume Tests
+
+    func testCanResumeReturnsTrueWhenPaused() {
+        context.phase = .paused
+        XCTAssertTrue(context.canResume)
+    }
+
+    func testCanResumeReturnsFalseWhenIdle() {
+        context.phase = .idle
+        XCTAssertFalse(context.canResume)
+    }
+
+    func testCanResumeReturnsFalseWhenExecutingTask() {
+        context.phase = .executingTask
+        XCTAssertFalse(context.canResume)
+    }
+
+    func testCanResumeReturnsFalseWhenCompleted() {
+        context.phase = .completed
+        XCTAssertFalse(context.canResume)
+    }
+
+    func testCanResumeReturnsFalseWhenFailed() {
+        context.phase = .failed
+        XCTAssertFalse(context.canResume)
+    }
+
+    func testCanResumeReturnsFalseWhenWaitingForUser() {
+        context.phase = .waitingForUser
+        XCTAssertFalse(context.canResume)
+    }
+
+    // MARK: - canStop Tests
+
+    func testCanStopReturnsTrueWhenExecutingTask() {
+        context.phase = .executingTask
+        XCTAssertTrue(context.canStop)
+    }
+
+    func testCanStopReturnsTrueWhenPaused() {
+        context.phase = .paused
+        XCTAssertTrue(context.canStop)
+    }
+
+    func testCanStopReturnsTrueWhenWaitingForUser() {
+        context.phase = .waitingForUser
+        XCTAssertTrue(context.canStop)
+    }
+
+    func testCanStopReturnsTrueWhenGeneratingPlan() {
+        context.phase = .generatingInitialPlan
+        XCTAssertTrue(context.canStop)
+    }
+
+    func testCanStopReturnsFalseWhenIdle() {
+        context.phase = .idle
+        XCTAssertFalse(context.canStop)
+    }
+
+    func testCanStopReturnsFalseWhenCompleted() {
+        context.phase = .completed
+        XCTAssertFalse(context.canStop)
+    }
+
+    func testCanStopReturnsFalseWhenFailed() {
+        context.phase = .failed
+        XCTAssertFalse(context.canStop)
+    }
+
+    // MARK: - showStopConfirmation Tests
+
+    func testShowStopConfirmationInitializesToFalse() {
+        XCTAssertFalse(context.showStopConfirmation)
+    }
+
+    func testShowStopConfirmationCanBeSet() {
+        context.showStopConfirmation = true
+        XCTAssertTrue(context.showStopConfirmation)
+    }
+
+    func testShowStopConfirmationResetClearsValue() {
+        context.showStopConfirmation = true
+
+        context.reset()
+
+        XCTAssertFalse(context.showStopConfirmation)
+    }
+
+    func testShowStopConfirmationResetForNewFeatureClearsValue() {
+        context.showStopConfirmation = true
+
+        context.resetForNewFeature()
+
+        XCTAssertFalse(context.showStopConfirmation)
     }
 }

@@ -1,11 +1,21 @@
 import SwiftUI
 
 struct LogView: View {
-    let logs: [LogEntry]
+    // MARK: - Environment
+
+    @Environment(Tab.self) private var tab
+
+    // MARK: - State
 
     @State private var searchText = ""
     @State private var selectedFilter: LogFilter = .all
     @State private var autoScroll = true
+
+    // MARK: - Computed Properties
+
+    private var logs: [LogEntry] {
+        tab.context.logs
+    }
 
     private var filteredLogs: [LogEntry] {
         logs.filter { entry in
@@ -187,12 +197,10 @@ private struct LogEntryView: View {
 
 #if DEBUG
 #Preview("Log View") {
-    let context = ExecutionContext()
-    context.sessionId = "test-session"
-    context.phase = .executingTask
-    let appState = AppState(context: context)
-
-    return LogView(logs: [
+    let tab = Tab.create(userPreferences: UserPreferences())
+    tab.context.sessionId = "test-session"
+    tab.context.phase = .executingTask
+    tab.context.logs = [
         LogEntry(phase: .executingTask, type: .info, message: "Starting task execution..."),
         LogEntry(phase: .executingTask, type: .output, message: "Reading file: /src/main.swift"),
         LogEntry(phase: .executingTask, type: .toolUse, message: "Read: ClaudeManager/Models/Plan.swift"),
@@ -201,16 +209,16 @@ private struct LogEntryView: View {
         LogEntry(phase: .executingTask, type: .error, message: "Build failed: Type 'Foo' has no member 'bar'"),
         LogEntry(phase: .executingTask, type: .output, message: "Fixing compilation error..."),
         LogEntry(phase: .executingTask, type: .result, message: "Task completed successfully"),
-    ])
-    .environment(appState)
-    .frame(width: 800, height: 400)
+    ]
+    return LogView()
+        .environment(tab)
+        .frame(width: 800, height: 400)
 }
 
 #Preview("Log View Empty") {
-    let appState = AppState()
-
-    return LogView(logs: [])
-        .environment(appState)
+    let tab = Tab.create(userPreferences: UserPreferences())
+    return LogView()
+        .environment(tab)
         .frame(width: 800, height: 400)
 }
 #endif

@@ -4,6 +4,7 @@ import AppKit
 struct SetupView: View {
     // MARK: - Environment
 
+    @Environment(Tab.self) private var tab
     @Environment(AppState.self) private var appState
 
     // MARK: - Local State
@@ -19,18 +20,26 @@ struct SetupView: View {
 
     // MARK: - Computed Properties
 
+    private var context: ExecutionContext {
+        tab.context
+    }
+
+    private var stateMachine: ExecutionStateMachine {
+        tab.stateMachine
+    }
+
     private var hasProjectPath: Bool {
-        appState.context.projectPath != nil
+        context.projectPath != nil
     }
 
     private var canStart: Bool {
-        let hasFeature = !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        let hasExistingPlan = appState.context.existingPlan != nil
+        let hasFeature = !context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let hasExistingPlan = context.existingPlan != nil
         return hasProjectPath && (hasExistingPlan || hasFeature) && !isStarting
     }
 
     private var projectPathDisplay: String {
-        appState.context.projectPath?.path(percentEncoded: false) ?? "No project selected"
+        context.projectPath?.path(percentEncoded: false) ?? "No project selected"
     }
 
     // MARK: - Binding Helpers
@@ -52,7 +61,7 @@ struct SetupView: View {
         VStack(spacing: 24) {
             headerSection
             projectSelectionSection
-            if appState.context.existingPlan != nil {
+            if context.existingPlan != nil {
                 existingPlanSection
             }
             featureDescriptionSection
@@ -62,15 +71,16 @@ struct SetupView: View {
         }
         .padding(32)
         .frame(minWidth: 600, minHeight: 500)
-        .alert("Error", isPresented: showingError, actions: {}) {
+        .alert("Error", isPresented: showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
             Text(errorMessage ?? "")
         }
-        .onAppear {
-            if appState.context.projectPath == nil,
+        .task {
+            if context.projectPath == nil,
                let lastPath = appState.userPreferences.lastProjectPath {
-                appState.context.projectPath = lastPath
-                checkForExistingPlan()
-            } else if appState.context.projectPath != nil {
+                await setProjectPath(lastPath)
+            } else if context.projectPath != nil {
                 checkForExistingPlan()
             }
         }
@@ -130,21 +140,19 @@ struct SetupView: View {
 
     private var featureDescriptionSection: some View {
         GroupBox("Feature Description") {
-            @Bindable var context = appState.context
-
             VStack(alignment: .leading, spacing: 8) {
                 Text("Describe the feature you want to implement:")
                     .font(.callout)
                     .foregroundStyle(.secondary)
 
-                if !appState.context.attachedImages.isEmpty {
+                if !context.attachedImages.isEmpty {
                     AttachedImagesView(
-                        images: appState.context.attachedImages,
+                        images: context.attachedImages,
                         onRemove: { id in
-                            appState.context.removeImage(id: id)
+                            context.removeImage(id: id)
                         },
                         onRemoveAll: {
-                            appState.context.removeAllImages()
+                            context.removeAllImages()
                         }
                     )
                 }
@@ -210,7 +218,7 @@ struct SetupView: View {
     private var existingPlanSection: some View {
         GroupBox("Existing Plan Detected") {
             VStack(alignment: .leading, spacing: 12) {
-                if let plan = appState.context.existingPlan {
+                if let plan = context.existingPlan {
                     let taskCount = plan.tasks.count
                     Text("Found plan.md with \(taskCount) task\(taskCount == 1 ? "" : "s")")
                         .font(.callout)
@@ -222,7 +230,7 @@ struct SetupView: View {
                         .buttonStyle(.borderedProminent)
 
                         Button("Start Fresh") {
-                            appState.context.existingPlan = nil
+                            context.existingPlan = nil
                         }
                     }
                 }
@@ -299,21 +307,29 @@ struct SetupView: View {
 
         let response = await panel.begin()
         if response == .OK, let url = panel.url {
-            appState.context.projectPath = url
-            appState.userPreferences.lastProjectPath = url
-            checkForExistingPlan()
+            await setProjectPath(url)
         }
     }
 
     private func selectRecentProject(_ url: URL) {
-        appState.context.projectPath = url
-        appState.userPreferences.lastProjectPath = url
-        checkForExistingPlan()
+        Task {
+            await setProjectPath(url)
+        }
+    }
+
+    private func setProjectPath(_ url: URL) async {
+        do {
+            try await appState.tabManager.setProjectPath(url, for: tab)
+            appState.userPreferences.lastProjectPath = url
+            checkForExistingPlan()
+        } catch {
+            errorMessage = "Failed to set project path: \(error.localizedDescription)"
+        }
     }
 
     private func checkForExistingPlan() {
-        guard let projectPath = appState.context.projectPath else {
-            appState.context.existingPlan = nil
+        guard let projectPath = context.projectPath else {
+            context.existingPlan = nil
             return
         }
 
@@ -322,12 +338,12 @@ struct SetupView: View {
         if FileManager.default.fileExists(atPath: planURL.path) {
             do {
                 let plan = try planService.parsePlanFromFile(at: planURL)
-                appState.context.existingPlan = plan
+                context.existingPlan = plan
             } catch {
-                appState.context.existingPlan = nil
+                context.existingPlan = nil
             }
         } else {
-            appState.context.existingPlan = nil
+            context.existingPlan = nil
         }
     }
 
@@ -336,7 +352,7 @@ struct SetupView: View {
 
         Task {
             do {
-                try await appState.stateMachine.startWithExistingPlan()
+                try await stateMachine.startWithExistingPlan()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -349,21 +365,20 @@ struct SetupView: View {
 
         Task {
             do {
-                // If no feature description, try to use plan.md
-                let hasFeature = !appState.context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                let hasFeature = !context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
-                if !hasFeature, let projectPath = appState.context.projectPath {
+                if !hasFeature, let projectPath = context.projectPath {
                     let planURL = projectPath.appendingPathComponent("plan.md")
                     if FileManager.default.fileExists(atPath: planURL.path) {
                         let plan = try planService.parsePlanFromFile(at: planURL)
-                        appState.context.existingPlan = plan
-                        try await appState.stateMachine.startWithExistingPlan()
+                        context.existingPlan = plan
+                        try await stateMachine.startWithExistingPlan()
                         isStarting = false
                         return
                     }
                 }
 
-                try await appState.stateMachine.start()
+                try await stateMachine.start()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -375,10 +390,13 @@ struct SetupView: View {
 // MARK: - Preview
 
 #if DEBUG
-struct SetupView_Previews: PreviewProvider {
-    static var previews: some View {
-        SetupView()
-            .environment(AppState())
-    }
+#Preview("SetupView") {
+    let appState = AppState()
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+
+    return SetupView()
+        .environment(tab)
+        .environment(appState)
+        .frame(width: 700, height: 600)
 }
 #endif

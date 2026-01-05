@@ -61,30 +61,14 @@ struct PhaseIndicatorView: View {
         if phase == .conductingInterview && hasQuestion {
             return .yellow
         }
-        switch phase {
-        case .idle, .paused:
-            return .gray
-        case .waitingForUser:
-            return .yellow
-        case .completed:
-            return .green
-        case .failed:
-            return .red
-        default:
-            return .blue
-        }
+        return phase.statusColor
     }
 
     private var isActive: Bool {
         if phase == .conductingInterview && hasQuestion {
             return false
         }
-        switch phase {
-        case .idle, .paused, .waitingForUser, .completed, .failed:
-            return false
-        default:
-            return true
-        }
+        return phase.isActivePhase
     }
 }
 

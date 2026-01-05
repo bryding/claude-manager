@@ -84,8 +84,15 @@ final class ExecutionStateMachine {
             attachedImages: context.attachedImages
         )
         context.startTime = Date()
-        context.phase = .conductingInterview
-        context.addLog(type: .info, message: "Starting feature interview")
+
+        if let existingSession = context.interviewSession, existingSession.isComplete {
+            context.phase = .generatingInitialPlan
+            context.addLog(type: .info, message: "Resuming from completed interview")
+        } else {
+            context.interviewSession = InterviewSession(featureDescription: context.featureDescription)
+            context.phase = .conductingInterview
+            context.addLog(type: .info, message: "Starting feature interview")
+        }
 
         await runLoop()
     }

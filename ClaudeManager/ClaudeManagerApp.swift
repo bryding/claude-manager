@@ -6,39 +6,83 @@ struct ClaudeManagerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
                 .environment(appState)
         }
         .commands {
+            CommandGroup(replacing: .newItem) {
+                Button("New Tab") {
+                    createNewTab()
+                }
+                .keyboardShortcut("t", modifiers: .command)
+            }
+
+            CommandGroup(after: .newItem) {
+                Button("Close Tab") {
+                    closeCurrentTab()
+                }
+                .keyboardShortcut("w", modifiers: .command)
+                .disabled(appState.activeTab == nil)
+
+                Divider()
+
+                Button("Show Next Tab") {
+                    appState.tabManager.selectNextTab()
+                }
+                .keyboardShortcut("]", modifiers: [.command, .shift])
+                .disabled(appState.tabManager.tabs.count < 2)
+
+                Button("Show Previous Tab") {
+                    appState.tabManager.selectPreviousTab()
+                }
+                .keyboardShortcut("[", modifiers: [.command, .shift])
+                .disabled(appState.tabManager.tabs.count < 2)
+            }
+
             CommandGroup(after: .appSettings) {
                 Section {
-                    Button(appState.context.canResume ? "Resume" : "Pause") {
+                    let context = appState.activeTab?.context
+                    let canPauseOrResume = context?.canPause == true || context?.canResume == true
+
+                    Button(context?.canResume == true ? "Resume" : "Pause") {
                         togglePauseResume()
                     }
                     .keyboardShortcut("p", modifiers: .command)
-                    .disabled(!appState.context.canPause && !appState.context.canResume)
+                    .disabled(!canPauseOrResume)
 
                     Button("Stop Execution...") {
                         requestStop()
                     }
                     .keyboardShortcut(".", modifiers: .command)
-                    .disabled(!appState.context.canStop)
+                    .disabled(context?.canStop != true)
                 }
             }
         }
     }
 
+    private func createNewTab() {
+        appState.tabManager.createTab()
+    }
+
+    private func closeCurrentTab() {
+        guard let tab = appState.activeTab else { return }
+        Task {
+            try? await appState.tabManager.closeTab(tab)
+        }
+    }
+
     private func togglePauseResume() {
-        if appState.context.canResume {
+        guard let tab = appState.activeTab else { return }
+        if tab.context.canResume {
             Task {
-                try? await appState.stateMachine.resume()
+                try? await tab.stateMachine.resume()
             }
-        } else if appState.context.canPause {
-            appState.stateMachine.pause()
+        } else if tab.context.canPause {
+            tab.stateMachine.pause()
         }
     }
 
     private func requestStop() {
-        appState.context.showStopConfirmation = true
+        appState.activeTab?.context.showStopConfirmation = true
     }
 }
