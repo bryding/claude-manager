@@ -49,10 +49,8 @@ struct SetupView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     headerSection
+                    existingPlanBanner
                     projectSelectionSection
-                    if context.existingPlan != nil {
-                        existingPlanSection
-                    }
                     featureDescriptionSection
                 }
                 .padding(32)
@@ -210,27 +208,34 @@ struct SetupView: View {
         .help("Recent Projects")
     }
 
-    private var existingPlanSection: some View {
-        GroupBox("Existing Plan Detected") {
-            VStack(alignment: .leading, spacing: 12) {
-                if let plan = context.existingPlan {
-                    let taskCount = plan.tasks.count
-                    Text("Found plan.md with \(taskCount) task\(taskCount == 1 ? "" : "s")")
-                        .font(.callout)
+    @ViewBuilder
+    private var existingPlanBanner: some View {
+        if let plan = context.existingPlan {
+            let taskCount = plan.tasks.count
+            HStack(spacing: 12) {
+                Image(systemName: "doc.text.fill")
+                    .foregroundStyle(.blue)
 
-                    HStack {
-                        Button("Resume Plan") {
-                            startWithExistingPlan()
-                        }
-                        .buttonStyle(.borderedProminent)
+                Text("Found plan.md with \(taskCount) task\(taskCount == 1 ? "" : "s")")
+                    .font(.callout)
 
-                        Button("Start Fresh") {
-                            context.existingPlan = nil
-                        }
-                    }
+                Spacer()
+
+                Button("Use Existing Plan") {
+                    startWithExistingPlan()
                 }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+
+                Button("Dismiss") {
+                    context.existingPlan = nil
+                }
+                .controlSize(.small)
             }
-            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color.secondary.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
         }
     }
 
