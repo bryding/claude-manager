@@ -266,4 +266,92 @@ final class TabManagerTests: XCTestCase {
         XCTAssertEqual(tab.context.projectPath, projectPath)
         XCTAssertNil(tab.worktreeInfo)
     }
+
+    func testSetProjectPathThrowsWhenWorktreeCreationFails() async {
+        let mockWorktreeService = MockWorktreeService()
+        mockWorktreeService.createWorktreeError = NSError(
+            domain: "TestError",
+            code: 1,
+            userInfo: [NSLocalizedDescriptionKey: "Git worktree failed"]
+        )
+        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let projectPath = URL(fileURLWithPath: "/test/project")
+
+        let tab1 = tabManager.createTab()
+        tab1.context.projectPath = projectPath
+
+        let tab2 = tabManager.createTab()
+
+        do {
+            try await tabManager.setProjectPath(projectPath, for: tab2)
+            XCTFail("Expected error to be thrown")
+        } catch {
+            XCTAssertNil(tab2.worktreeInfo)
+        }
+    }
+
+    func testCreateTabWithProjectPathCreatesWorktreeForDuplicate() async throws {
+        let mockWorktreeService = MockWorktreeService()
+        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let projectPath = URL(fileURLWithPath: "/test/project")
+
+        let tab1 = tabManager.createTab()
+        tab1.context.projectPath = projectPath
+
+        let tab2 = try await tabManager.createTab(projectPath: projectPath)
+
+        XCTAssertEqual(mockWorktreeService.createWorktreeCalls.count, 1)
+        XCTAssertNotNil(tab2.worktreeInfo)
+        XCTAssertEqual(tab2.worktreeInfo?.originalRepoPath, projectPath)
+    }
+
+    func testMultipleTabsWithSameProjectEachGetWorktree() async throws {
+        let mockWorktreeService = MockWorktreeService()
+        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let projectPath = URL(fileURLWithPath: "/test/project")
+
+        let tab1 = tabManager.createTab()
+        tab1.context.projectPath = projectPath
+
+        let tab2 = tabManager.createTab()
+        try await tabManager.setProjectPath(projectPath, for: tab2)
+
+        let tab3 = tabManager.createTab()
+        try await tabManager.setProjectPath(projectPath, for: tab3)
+
+        XCTAssertEqual(mockWorktreeService.createWorktreeCalls.count, 2)
+        XCTAssertNil(tab1.worktreeInfo)
+        XCTAssertNotNil(tab2.worktreeInfo)
+        XCTAssertNotNil(tab3.worktreeInfo)
+        XCTAssertNotEqual(tab2.worktreeInfo?.id, tab3.worktreeInfo?.id)
+    }
+
+    func testSetProjectPathWorktreeInfoHasCorrectOriginalPath() async throws {
+        let mockWorktreeService = MockWorktreeService()
+        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let projectPath = URL(fileURLWithPath: "/test/project")
+
+        let tab1 = tabManager.createTab()
+        tab1.context.projectPath = projectPath
+
+        let tab2 = tabManager.createTab()
+        try await tabManager.setProjectPath(projectPath, for: tab2)
+
+        XCTAssertEqual(tab2.worktreeInfo?.originalRepoPath, projectPath)
+    }
+
+    func testSetProjectPathWithDifferentPathsNoDuplicateDetection() async throws {
+        let mockWorktreeService = MockWorktreeService()
+        let tabManager = TabManager(worktreeService: mockWorktreeService)
+
+        let tab1 = tabManager.createTab()
+        try await tabManager.setProjectPath(URL(fileURLWithPath: "/project/a"), for: tab1)
+
+        let tab2 = tabManager.createTab()
+        try await tabManager.setProjectPath(URL(fileURLWithPath: "/project/b"), for: tab2)
+
+        XCTAssertEqual(mockWorktreeService.createWorktreeCalls.count, 0)
+        XCTAssertNil(tab1.worktreeInfo)
+        XCTAssertNil(tab2.worktreeInfo)
+    }
 }
