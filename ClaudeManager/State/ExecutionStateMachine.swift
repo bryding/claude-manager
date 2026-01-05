@@ -826,15 +826,19 @@ final class ExecutionStateMachine {
 
         context.addLog(type: .info, message: "Conducting interview (question \(questionCount + 1)/\(Self.maxInterviewQuestions) max)")
 
-        let isFirstCall = interviewSession.exchanges.isEmpty && context.sessionId == nil
+        let isFirstCall = interviewSession.exchanges.isEmpty
         let images = isFirstCall ? interviewSession.attachedImages : []
         let content = PromptContent(text: prompt, images: images)
+
+        // Don't resume session for subsequent interview calls - previous Q&A is included
+        // in the prompt text via previousExchanges, so resuming would cause tool result confusion
+        let effectiveSessionId: String? = isFirstCall ? context.sessionId : nil
 
         let result = try await claudeService.execute(
             content: content,
             workingDirectory: projectPath,
             permissionMode: .plan,
-            sessionId: context.sessionId,
+            sessionId: effectiveSessionId,
             timeout: context.timeoutConfiguration.planModeTimeout,
             onMessage: { [weak self] message in
                 guard let self = self else { return }
