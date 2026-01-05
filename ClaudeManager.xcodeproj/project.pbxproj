@@ -63,6 +63,9 @@
 		A6000008210000010000000F /* ManualInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000008110000010000000F /* ManualInputView.swift */; };
 		B8000001210000010000000F /* TabItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000001110000010000000F /* TabItemView.swift */; };
 		B8000002210000010000000F /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000002110000010000000F /* TabBarView.swift */; };
+		B9000001210000010000000F /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9000001110000010000000F /* MainView.swift */; };
+		B9000002210000010000000F /* TabContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9000002110000010000000F /* TabContentView.swift */; };
+		B9000003210000010000000F /* EmptyTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9000003110000010000000F /* EmptyTabView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -134,6 +137,9 @@
 		A6000008110000010000000F /* ManualInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualInputView.swift; sourceTree = "<group>"; };
 		B8000001110000010000000F /* TabItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItemView.swift; sourceTree = "<group>"; };
 		B8000002110000010000000F /* TabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarView.swift; sourceTree = "<group>"; };
+		B9000001110000010000000F /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		B9000002110000010000000F /* TabContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabContentView.swift; sourceTree = "<group>"; };
+		B9000003110000010000000F /* EmptyTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyTabView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -259,6 +265,9 @@
 				A6000007110000010000000F /* ExecutionView.swift */,
 				A6000008110000010000000F /* ManualInputView.swift */,
 				A8000002110000010000000F /* TaskFailureView.swift */,
+				B9000001110000010000000F /* MainView.swift */,
+				B9000002110000010000000F /* TabContentView.swift */,
+				B9000003110000010000000F /* EmptyTabView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -441,6 +450,9 @@
 				B6000003210000010000000F /* WorktreeService.swift in Sources */,
 				B8000001210000010000000F /* TabItemView.swift in Sources */,
 				B8000002210000010000000F /* TabBarView.swift in Sources */,
+				B9000001210000010000000F /* MainView.swift in Sources */,
+				B9000002210000010000000F /* TabContentView.swift in Sources */,
+				B9000003210000010000000F /* EmptyTabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
