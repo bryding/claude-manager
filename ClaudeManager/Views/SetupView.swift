@@ -69,7 +69,9 @@ struct SetupView: View {
         }
         .padding(32)
         .frame(minWidth: 600, minHeight: 500)
-        .alert("Error", isPresented: showingError, actions: {}) {
+        .alert("Error", isPresented: showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
             Text(errorMessage ?? "")
         }
         .onAppear {

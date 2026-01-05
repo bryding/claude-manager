@@ -45,7 +45,9 @@ struct ControlsView: View {
             contextIndicator(context: context)
             costDisplay(context: context)
         }
-        .alert("Error", isPresented: showingError, actions: {}) {
+        .alert("Error", isPresented: showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
             Text(errorMessage ?? "")
         }
         .confirmationDialog(
