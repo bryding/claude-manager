@@ -166,9 +166,10 @@ final class ExecutionStateMachine {
 
     func answerQuestion(_ answer: String) async throws {
         guard context.pendingQuestion != nil else { return }
-        guard context.sessionId != nil else {
-            throw ExecutionStateMachineError.noSessionId
-        }
+
+        // Determine the mode based on whether this is an interview question
+        let isInterviewQuestion = context.currentInterviewQuestion != nil
+        let mode: MessageHandlerMode = isInterviewQuestion ? .interview : .standard
 
         // Record interview answer if this was an interview question
         if let currentQuestion = context.currentInterviewQuestion,
@@ -182,6 +183,12 @@ final class ExecutionStateMachine {
 
         context.pendingQuestion = nil
         context.addLog(type: .info, message: "User answered: \(answer)")
+
+        // Check if there are more queued questions to show
+        if context.hasQueuedQuestions {
+            showNextQueuedQuestion(mode: mode)
+            return
+        }
 
         await runLoop()
     }
