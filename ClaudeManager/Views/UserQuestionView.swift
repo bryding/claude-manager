@@ -3,7 +3,7 @@ import SwiftUI
 struct UserQuestionView: View {
     // MARK: - Environment
 
-    @Environment(AppState.self) private var appState
+    @Environment(Tab.self) private var tab
     @Environment(\.dismiss) private var dismiss
 
     // MARK: - Properties
@@ -18,6 +18,10 @@ struct UserQuestionView: View {
     @State private var errorMessage: String?
 
     // MARK: - Computed Properties
+
+    private var stateMachine: ExecutionStateMachine {
+        tab.stateMachine
+    }
 
     private var question: AskUserQuestionInput.Question {
         pendingQuestion.question
@@ -187,7 +191,7 @@ struct UserQuestionView: View {
         isSubmitting = true
         Task {
             do {
-                try await appState.stateMachine?.answerQuestion(answer)
+                try await stateMachine.answerQuestion(answer)
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription
@@ -251,6 +255,9 @@ private struct OptionRow: View {
 #if DEBUG
 struct UserQuestionView_Previews: PreviewProvider {
     static var previews: some View {
+        let appState = AppState()
+        let tab = Tab.create(userPreferences: appState.userPreferences)
+
         let singleSelectQuestion = PendingQuestion(
             toolUseId: "test-1",
             question: AskUserQuestionInput.Question(
@@ -309,15 +316,15 @@ struct UserQuestionView_Previews: PreviewProvider {
 
         Group {
             UserQuestionView(pendingQuestion: singleSelectQuestion)
-                .environment(AppState())
+                .environment(tab)
                 .previewDisplayName("Single Select")
 
             UserQuestionView(pendingQuestion: multiSelectQuestion)
-                .environment(AppState())
+                .environment(tab)
                 .previewDisplayName("Multi Select")
 
             UserQuestionView(pendingQuestion: freeformQuestion)
-                .environment(AppState())
+                .environment(tab)
                 .previewDisplayName("Freeform")
         }
     }
