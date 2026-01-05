@@ -45,7 +45,11 @@ struct MainView: View {
 
 #Preview("Main View Empty") {
     let tabManager = TabManager(userPreferences: UserPreferences())
-    let appState = AppState(tabManager: tabManager)
+    let appState = AppState(tabManager: tabManager, userPreferences: UserPreferences())
+    // Close the auto-created tab to test empty state
+    if let tab = tabManager.tabs.first {
+        tabManager.closeTab(tab)
+    }
 
     return MainView()
         .environment(appState)
