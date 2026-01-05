@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct EmptyTabView: View {
-    // MARK: - Properties
+    // MARK: - Environment
 
     @Environment(AppState.self) private var appState
 
