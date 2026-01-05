@@ -24,6 +24,21 @@ final class ExecutionContextTests: XCTestCase {
         )
     }
 
+    private func makeTestQuestion(toolUseId: String = "test-id") -> PendingQuestion {
+        PendingQuestion(
+            toolUseId: toolUseId,
+            question: AskUserQuestionInput.Question(
+                question: "Test question?",
+                header: "Test",
+                options: [
+                    AskUserQuestionInput.Option(label: "Yes", description: "Confirm"),
+                    AskUserQuestionInput.Option(label: "No", description: "Deny")
+                ],
+                multiSelect: false
+            )
+        )
+    }
+
     // MARK: - isManualInputAvailable Tests
 
     func testIsManualInputAvailableReturnsFalseWhenIdle() {
@@ -158,18 +173,7 @@ final class ExecutionContextTests: XCTestCase {
 
     func testAppearsStuckReturnsFalseWhenPendingQuestionExists() {
         context.phase = .conductingInterview
-        context.pendingQuestion = PendingQuestion(
-            toolUseId: "test-id",
-            question: AskUserQuestionInput.Question(
-                question: "Test question?",
-                header: "Test",
-                options: [
-                    AskUserQuestionInput.Option(label: "Yes", description: "Confirm"),
-                    AskUserQuestionInput.Option(label: "No", description: "Deny")
-                ],
-                multiSelect: false
-            )
-        )
+        context.pendingQuestion = makeTestQuestion()
         context.interviewSession = InterviewSession(featureDescription: "Test feature")
 
         XCTAssertFalse(context.appearsStuck)
@@ -474,6 +478,40 @@ final class ExecutionContextTests: XCTestCase {
     func testCanStopReturnsFalseWhenFailed() {
         context.phase = .failed
         XCTAssertFalse(context.canStop)
+    }
+
+    // MARK: - questionQueue Tests
+
+    func testQuestionQueueInitializesToEmpty() {
+        XCTAssertTrue(context.questionQueue.isEmpty)
+    }
+
+    func testHasQueuedQuestionsReturnsFalseWhenEmpty() {
+        XCTAssertFalse(context.hasQueuedQuestions)
+    }
+
+    func testHasQueuedQuestionsReturnsTrueWhenNotEmpty() {
+        context.questionQueue.append(makeTestQuestion())
+
+        XCTAssertTrue(context.hasQueuedQuestions)
+    }
+
+    func testQuestionQueueResetClearsValue() {
+        context.questionQueue.append(makeTestQuestion())
+
+        context.reset()
+
+        XCTAssertTrue(context.questionQueue.isEmpty)
+        XCTAssertFalse(context.hasQueuedQuestions)
+    }
+
+    func testQuestionQueueResetForNewFeatureClearsValue() {
+        context.questionQueue.append(makeTestQuestion())
+
+        context.resetForNewFeature()
+
+        XCTAssertTrue(context.questionQueue.isEmpty)
+        XCTAssertFalse(context.hasQueuedQuestions)
     }
 
     // MARK: - showStopConfirmation Tests
