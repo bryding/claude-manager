@@ -69,6 +69,7 @@ final class TabManager {
         }
     }
 
+    /// Closes a tab, stopping any running execution and cleaning up its worktree if present.
     func closeTab(_ tab: Tab) async throws {
         guard let index = tabs.firstIndex(where: { $0.id == tab.id }) else { return }
 
