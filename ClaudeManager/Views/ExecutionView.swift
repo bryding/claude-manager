@@ -18,7 +18,7 @@ struct ExecutionView: View {
             leftPane(context: context)
                 .frame(minWidth: 280, idealWidth: 320, maxWidth: 400)
 
-            LogView(logs: context.logs)
+            LogView()
         }
     }
 
