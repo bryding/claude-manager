@@ -31,14 +31,14 @@ Refactor SetupView to use a more robust layout architecture that handles window 
 - [x] Add dismiss functionality that sets `context.existingPlan = nil`
 - [x] Ensure the banner doesn't disrupt the form flow or take excessive vertical space
 
-## Task 4: Clean Up Layout Spacing and Padding
+## Task 4: Clean Up Layout Spacing and Padding ✅
 **Description:** Ensure consistent spacing throughout the refactored layout and remove any redundant padding that could cause layout issues.
 
-- [ ] Standardize VStack spacing (use 16pt for main sections)
-- [ ] Review and adjust GroupBox internal padding for consistency
-- [ ] Ensure the ScrollView has appropriate content insets
-- [ ] Add proper padding to the sticky footer area
-- [ ] Test the layout at various window sizes (narrow, short, wide, tall)
+- [x] Standardize VStack spacing (use 16pt for main sections)
+- [x] Review and adjust GroupBox internal padding for consistency
+- [x] Ensure the ScrollView has appropriate content insets
+- [x] Add proper padding to the sticky footer area
+- [x] Test the layout at various window sizes (narrow, short, wide, tall)
 
 ## Task 5: Update TabContentView Frame Constraints
 **Description:** Review and update frame constraints in TabContentView to work harmoniously with the new SetupView layout.

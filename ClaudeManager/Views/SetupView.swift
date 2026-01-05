@@ -47,22 +47,23 @@ struct SetupView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 16) {
                     headerSection
                     existingPlanBanner
                     projectSelectionSection
                     featureDescriptionSection
                 }
-                .padding(32)
-                .padding(.bottom, 8)
+                .padding(24)
             }
             .frame(maxHeight: .infinity)
+            .scrollContentBackground(.hidden)
 
             Divider()
 
             startButton
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 24)
                 .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
         }
         .alert("Error", isPresented: showingError) {
             Button("OK", role: .cancel) {}
@@ -127,7 +128,7 @@ struct SetupView: View {
                 }
                 .font(.callout)
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 4)
         }
     }
 
@@ -177,7 +178,7 @@ struct SetupView: View {
                     .foregroundStyle(.red)
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 4)
         }
     }
 
