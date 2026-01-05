@@ -55,13 +55,13 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
 
 ### Phase 4: Tab Bar UI
 
-- [ ] **Task 4.1**: Create `TabItemView.swift`
+- [x] **Task 4.1**: Create `TabItemView.swift`
   - Parameters: `tab: Tab`, `isActive: Bool`, `onSelect: () -> Void`, `onClose: () -> Void`
   - Display: label (truncated), status dot (color by phase), close button (X)
   - Styling: highlight background when active, hover effects
   - File: `ClaudeManager/Views/Components/TabItemView.swift`
 
-- [ ] **Task 4.2**: Create `TabBarView.swift`
+- [x] **Task 4.2**: Create `TabBarView.swift`
   - Horizontal ScrollView of TabItemView for each tab
   - "+" button at end to create new tab
   - Wire up selection and close actions to TabManager

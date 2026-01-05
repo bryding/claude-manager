@@ -61,6 +61,8 @@
 		A6000006210000010000000F /* ControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000006110000010000000F /* ControlsView.swift */; };
 		A6000007210000010000000F /* ExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000007110000010000000F /* ExecutionView.swift */; };
 		A6000008210000010000000F /* ManualInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6000008110000010000000F /* ManualInputView.swift */; };
+		B8000001210000010000000F /* TabItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000001110000010000000F /* TabItemView.swift */; };
+		B8000002210000010000000F /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000002110000010000000F /* TabBarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +132,8 @@
 		A6000006110000010000000F /* ControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsView.swift; sourceTree = "<group>"; };
 		A6000007110000010000000F /* ExecutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionView.swift; sourceTree = "<group>"; };
 		A6000008110000010000000F /* ManualInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualInputView.swift; sourceTree = "<group>"; };
+		B8000001110000010000000F /* TabItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItemView.swift; sourceTree = "<group>"; };
+		B8000002110000010000000F /* TabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -245,6 +249,7 @@
 		A1000006110000010000000F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B8000003110000010000000F /* Components */,
 				A6000001110000010000000F /* SetupView.swift */,
 				A6000002110000010000000F /* PhaseIndicatorView.swift */,
 				A6000003110000010000000F /* TaskListView.swift */,
@@ -256,6 +261,15 @@
 				A8000002110000010000000F /* TaskFailureView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		B8000003110000010000000F /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				B8000001110000010000000F /* TabItemView.swift */,
+				B8000002110000010000000F /* TabBarView.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		A2000000510000010000000F /* ClaudeManagerTests */ = {
@@ -425,6 +439,8 @@
 				B6000001210000010000000F /* Tab.swift in Sources */,
 				B6000002210000010000000F /* TabManager.swift in Sources */,
 				B6000003210000010000000F /* WorktreeService.swift in Sources */,
+				B8000001210000010000000F /* TabItemView.swift in Sources */,
+				B8000002210000010000000F /* TabBarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

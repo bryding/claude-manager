@@ -142,6 +142,7 @@ struct TabItemView: View {
     .padding()
 }
 
+@MainActor
 private func makeTabItem(label: String, phase: ExecutionPhase, isActive: Bool) -> some View {
     let tab = Tab.create(label: label, userPreferences: UserPreferences())
     tab.context.phase = phase
