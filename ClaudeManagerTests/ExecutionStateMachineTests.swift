@@ -2024,6 +2024,45 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertTrue(secondContent?.images.isEmpty ?? false)
     }
 
+    func testConductInterviewDoesNotResumeSessionForSubsequentCalls() async throws {
+        context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.featureDescription = "Build feature"
+
+        // First call: ask a question (returns a session ID)
+        mockClaudeService.messagesToSend = [
+            makeAskUserQuestionMessage(question: "What scope?", header: "Scope")
+        ]
+        mockClaudeService.executeResult = ClaudeExecutionResult(
+            result: "question",
+            sessionId: "interview-session-1",
+            totalCostUsd: 0.0,
+            durationMs: 100,
+            isError: false
+        )
+
+        try await stateMachine.start()
+
+        XCTAssertEqual(context.phase, .waitingForUser)
+        // First interview call should have nil sessionId (fresh session)
+        XCTAssertEqual(mockClaudeService.allSessionIds.count, 1)
+        XCTAssertNil(mockClaudeService.allSessionIds[0])
+
+        // Prepare for second call
+        mockClaudeService.allSessionIds.removeAll()
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
+
+        // Answer the question (triggers second interview call)
+        try await stateMachine.answerQuestion("Small scope")
+
+        // Second interview call should also have nil sessionId (not resuming)
+        // to avoid tool result confusion since previous Q&A is in prompt text
+        XCTAssertGreaterThanOrEqual(mockClaudeService.allSessionIds.count, 1)
+        XCTAssertNil(mockClaudeService.allSessionIds[0])
+    }
+
     func testConductInterviewWithNoImagesUsesEmptyContent() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build feature"

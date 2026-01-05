@@ -15,6 +15,7 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
     var failuresBeforeSuccess = 0
     var allPrompts: [String] = []
     var allContents: [PromptContent] = []
+    var allSessionIds: [String?] = []
 
     private var _isRunning = false
     var isRunning: Bool { _isRunning }
@@ -33,6 +34,7 @@ final class MockClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable 
         allPrompts.append(prompt)
         lastPermissionMode = permissionMode
         lastSessionId = sessionId
+        allSessionIds.append(sessionId)
         lastTimeout = timeout
         _isRunning = true
 
