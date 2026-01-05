@@ -69,8 +69,16 @@ final class TabManager {
         }
     }
 
-    func closeTab(_ tab: Tab) {
+    func closeTab(_ tab: Tab) async throws {
         guard let index = tabs.firstIndex(where: { $0.id == tab.id }) else { return }
+
+        if tab.context.canStop {
+            tab.stateMachine.stop()
+        }
+
+        if let worktreeInfo = tab.worktreeInfo {
+            try await worktreeService.removeWorktree(worktreeInfo)
+        }
 
         let wasActive = activeTabId == tab.id
         tabs.remove(at: index)

@@ -35,23 +35,21 @@ struct MainView: View {
 
 #if DEBUG
 #Preview("Main View with Tabs") {
-    let appState = AppState()
-    appState.tabManager.tabs[0].label = "Feature A"
+    let appState: AppState = {
+        let state = AppState()
+        state.tabManager.tabs[0].label = "Feature A"
+        return state
+    }()
 
-    return MainView()
+    MainView()
         .environment(appState)
         .frame(width: 900, height: 700)
 }
 
 #Preview("Main View Empty") {
-    let tabManager = TabManager(userPreferences: UserPreferences())
-    let appState = AppState(tabManager: tabManager, userPreferences: UserPreferences())
-    // Close the auto-created tab to test empty state
-    if let tab = tabManager.tabs.first {
-        tabManager.closeTab(tab)
-    }
+    let appState = AppState(createInitialTab: false)
 
-    return MainView()
+    MainView()
         .environment(appState)
         .frame(width: 900, height: 700)
 }

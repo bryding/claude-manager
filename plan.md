@@ -138,7 +138,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
   - Store WorktreeInfo in tab
   - File: `ClaudeManager/State/TabManager.swift`
 
-- [ ] **Task 7.2**: Implement worktree cleanup in TabManager.closeTab
+- [x] **Task 7.2**: Implement worktree cleanup in TabManager.closeTab
   - If tab.worktreeInfo != nil, stop execution first
   - Call worktreeService.removeWorktree()
   - File: `ClaudeManager/State/TabManager.swift`

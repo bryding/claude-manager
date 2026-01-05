@@ -46,13 +46,13 @@ final class AppStateTests: XCTestCase {
         XCTAssertTrue(appState.activeTab === expectedTab)
     }
 
-    func testActiveTabReturnsNilWhenNoActiveTab() {
+    func testActiveTabReturnsNilWhenNoActiveTab() async throws {
         let tabManager = TabManager()
         tabManager.createTab()
         let appState = AppState(tabManager: tabManager)
 
         if let tab = tabManager.tabs.first {
-            tabManager.closeTab(tab)
+            try await tabManager.closeTab(tab)
         }
 
         XCTAssertNil(appState.activeTab)
@@ -65,13 +65,13 @@ final class AppStateTests: XCTestCase {
         XCTAssertTrue(appState.context === expectedContext)
     }
 
-    func testContextReturnsNilWhenNoActiveTab() {
+    func testContextReturnsNilWhenNoActiveTab() async throws {
         let tabManager = TabManager()
         tabManager.createTab()
         let appState = AppState(tabManager: tabManager)
 
         if let tab = tabManager.tabs.first {
-            tabManager.closeTab(tab)
+            try await tabManager.closeTab(tab)
         }
 
         XCTAssertNil(appState.context)
@@ -84,13 +84,13 @@ final class AppStateTests: XCTestCase {
         XCTAssertTrue(appState.stateMachine === expectedStateMachine)
     }
 
-    func testStateMachineReturnsNilWhenNoActiveTab() {
+    func testStateMachineReturnsNilWhenNoActiveTab() async throws {
         let tabManager = TabManager()
         tabManager.createTab()
         let appState = AppState(tabManager: tabManager)
 
         if let tab = tabManager.tabs.first {
-            tabManager.closeTab(tab)
+            try await tabManager.closeTab(tab)
         }
 
         XCTAssertNil(appState.stateMachine)

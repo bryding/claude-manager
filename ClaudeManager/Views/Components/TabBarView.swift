@@ -15,7 +15,11 @@ struct TabBarView: View {
                         tab: tab,
                         isActive: tab.id == tabManager.activeTabId,
                         onSelect: { tabManager.selectTab(tab) },
-                        onClose: { tabManager.closeTab(tab) }
+                        onClose: {
+                            Task {
+                                try? await tabManager.closeTab(tab)
+                            }
+                        }
                     )
                 }
 

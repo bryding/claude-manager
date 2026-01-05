@@ -69,70 +69,143 @@ final class TabManagerTests: XCTestCase {
 
     // MARK: - Close Tab
 
-    func testCloseTabRemovesTab() {
+    func testCloseTabRemovesTab() async throws {
         let tabManager = TabManager()
         let tab = tabManager.createTab()
 
-        tabManager.closeTab(tab)
+        try await tabManager.closeTab(tab)
 
         XCTAssertTrue(tabManager.tabs.isEmpty)
     }
 
-    func testCloseActiveTabSelectsNextTab() {
+    func testCloseActiveTabSelectsNextTab() async throws {
         let tabManager = TabManager()
         _ = tabManager.createTab()
         let tab2 = tabManager.createTab()
         let tab3 = tabManager.createTab()
 
         tabManager.selectTab(tab2)
-        tabManager.closeTab(tab2)
+        try await tabManager.closeTab(tab2)
 
         XCTAssertEqual(tabManager.tabs.count, 2)
         XCTAssertEqual(tabManager.activeTabId, tab3.id)
     }
 
-    func testCloseLastTabSelectsPreviousTab() {
+    func testCloseLastTabSelectsPreviousTab() async throws {
         let tabManager = TabManager()
         let tab1 = tabManager.createTab()
         let tab2 = tabManager.createTab()
 
-        tabManager.closeTab(tab2)
+        try await tabManager.closeTab(tab2)
 
         XCTAssertEqual(tabManager.activeTabId, tab1.id)
     }
 
-    func testCloseOnlyTabClearsActiveTab() {
+    func testCloseOnlyTabClearsActiveTab() async throws {
         let tabManager = TabManager()
         let tab = tabManager.createTab()
 
-        tabManager.closeTab(tab)
+        try await tabManager.closeTab(tab)
 
         XCTAssertNil(tabManager.activeTabId)
         XCTAssertNil(tabManager.activeTab)
     }
 
-    func testCloseNonActiveTabPreservesActiveTab() {
+    func testCloseNonActiveTabPreservesActiveTab() async throws {
         let tabManager = TabManager()
         let tab1 = tabManager.createTab()
         _ = tabManager.createTab()
         let tab3 = tabManager.createTab()
 
         tabManager.selectTab(tab3)
-        tabManager.closeTab(tab1)
+        try await tabManager.closeTab(tab1)
 
         XCTAssertEqual(tabManager.activeTabId, tab3.id)
         XCTAssertEqual(tabManager.tabs.count, 2)
     }
 
-    func testCloseNonExistentTabDoesNothing() {
+    func testCloseNonExistentTabDoesNothing() async throws {
         let tabManager = TabManager()
         let tab1 = tabManager.createTab()
         let orphanTab = Tab.create(userPreferences: UserPreferences())
 
-        tabManager.closeTab(orphanTab)
+        try await tabManager.closeTab(orphanTab)
 
         XCTAssertEqual(tabManager.tabs.count, 1)
         XCTAssertEqual(tabManager.activeTabId, tab1.id)
+    }
+
+    func testCloseTabRemovesWorktree() async throws {
+        let mockWorktreeService = MockWorktreeService()
+        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let projectPath = URL(fileURLWithPath: "/test/project")
+
+        let tab1 = tabManager.createTab()
+        tab1.context.projectPath = projectPath
+
+        let tab2 = tabManager.createTab()
+        try await tabManager.setProjectPath(projectPath, for: tab2)
+
+        let worktreeInfo = tab2.worktreeInfo!
+
+        try await tabManager.closeTab(tab2)
+
+        XCTAssertEqual(mockWorktreeService.removeWorktreeCalls.count, 1)
+        XCTAssertEqual(mockWorktreeService.removeWorktreeCalls.first?.id, worktreeInfo.id)
+    }
+
+    func testCloseTabDoesNotRemoveWorktreeWhenNone() async throws {
+        let mockWorktreeService = MockWorktreeService()
+        let tabManager = TabManager(worktreeService: mockWorktreeService)
+
+        let tab = tabManager.createTab()
+        tab.context.projectPath = URL(fileURLWithPath: "/test/project")
+
+        try await tabManager.closeTab(tab)
+
+        XCTAssertEqual(mockWorktreeService.removeWorktreeCalls.count, 0)
+    }
+
+    func testCloseTabStopsExecutionBeforeRemovingWorktree() async throws {
+        let mockWorktreeService = MockWorktreeService()
+        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let projectPath = URL(fileURLWithPath: "/test/project")
+
+        let tab1 = tabManager.createTab()
+        tab1.context.projectPath = projectPath
+
+        let tab2 = tabManager.createTab()
+        try await tabManager.setProjectPath(projectPath, for: tab2)
+        tab2.context.phase = .executingTask
+
+        try await tabManager.closeTab(tab2)
+
+        XCTAssertTrue(tabManager.tabs.isEmpty || !tabManager.tabs.contains { $0.id == tab2.id })
+        XCTAssertEqual(mockWorktreeService.removeWorktreeCalls.count, 1)
+    }
+
+    func testCloseTabThrowsWhenWorktreeRemovalFails() async {
+        let mockWorktreeService = MockWorktreeService()
+        mockWorktreeService.removeWorktreeError = NSError(
+            domain: "TestError",
+            code: 1,
+            userInfo: [NSLocalizedDescriptionKey: "Git worktree removal failed"]
+        )
+        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let projectPath = URL(fileURLWithPath: "/test/project")
+
+        let tab1 = tabManager.createTab()
+        tab1.context.projectPath = projectPath
+
+        let tab2 = tabManager.createTab()
+        try? await tabManager.setProjectPath(projectPath, for: tab2)
+
+        do {
+            try await tabManager.closeTab(tab2)
+            XCTFail("Expected error to be thrown")
+        } catch {
+            XCTAssertEqual(mockWorktreeService.removeWorktreeCalls.count, 1)
+        }
     }
 
     // MARK: - Select Tab

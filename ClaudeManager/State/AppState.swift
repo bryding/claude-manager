@@ -26,14 +26,15 @@ final class AppState {
 
     init(
         tabManager: TabManager? = nil,
-        userPreferences: UserPreferences? = nil
+        userPreferences: UserPreferences? = nil,
+        createInitialTab: Bool = true
     ) {
         let resolvedPreferences = userPreferences ?? UserPreferences()
         self.userPreferences = resolvedPreferences
         self.tabManager = tabManager ?? TabManager(userPreferences: resolvedPreferences)
 
-        // Create initial tab if none exist
-        if self.tabManager.tabs.isEmpty {
+        // Create initial tab if none exist and flag is set
+        if createInitialTab && self.tabManager.tabs.isEmpty {
             self.tabManager.createTab()
         }
     }

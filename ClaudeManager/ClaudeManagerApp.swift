@@ -52,7 +52,9 @@ struct ClaudeManagerApp: App {
 
     private func closeCurrentTab() {
         guard let tab = appState.activeTab else { return }
-        appState.tabManager.closeTab(tab)
+        Task {
+            try? await appState.tabManager.closeTab(tab)
+        }
     }
 
     private func togglePauseResume() {

@@ -30,15 +30,9 @@ struct EmptyTabView: View {
 
 #if DEBUG
 #Preview("Empty Tab View") {
-    let userPreferences = UserPreferences()
-    let tabManager = TabManager(userPreferences: userPreferences)
-    let appState = AppState(tabManager: tabManager, userPreferences: userPreferences)
+    let appState = AppState(createInitialTab: false)
 
-    if let tab = tabManager.tabs.first {
-        tabManager.closeTab(tab)
-    }
-
-    return EmptyTabView()
+    EmptyTabView()
         .environment(appState)
         .frame(width: 600, height: 400)
 }
