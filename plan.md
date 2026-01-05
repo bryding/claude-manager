@@ -1,48 +1,54 @@
-# SetupView Layout Refactor
+# Fix Interview Process and Execution Transition Bugs
 
-Refactor SetupView to use a more robust layout architecture that handles window resizing gracefully, remove unused autonomous mode UI, and replace the existing plan modal with a persistent inline indicator.
+Fix bugs in the interview modal, question handling, and transition to autonomous execution mode.
 
-## Task 1: Restructure SetupView with Scroll + Sticky Footer Pattern
-**Description:** Refactor SetupView to use a robust layout with a scrollable content area and a sticky footer for the start button, preventing layout issues when the window is resized.
+## Task 1: Add Question Queue to ExecutionContext ✅
+**Description:** Add a question queue property to ExecutionContext to store incoming questions instead of overwriting them.
 
-- [ ] Replace the current VStack layout with a VStack containing two sections: scrollable content and fixed footer
-- [ ] Wrap header, project selection, feature description sections in a ScrollView
-- [ ] Keep the start button outside the ScrollView in a fixed footer area
-- [ ] Use `.frame(maxHeight: .infinity)` on the ScrollView to fill available space
-- [ ] Remove the hardcoded `.frame(minWidth: 600, minHeight: 500)` constraint from the root view
-- [ ] Test that the layout handles very short window heights gracefully
+- [x] Add `var questionQueue: [PendingQuestion] = []` property after `pendingQuestion`
+- [x] Add `var hasQueuedQuestions: Bool` computed property
+- [x] Update `reset()` method to clear `questionQueue = []`
+- [x] Update `resetForNewFeature()` method to clear `questionQueue = []`
 
-## Task 2: Remove Autonomous Mode UI ✅
-**Description:** Remove the "Enable Autonomous Mode" checkbox and all related UI elements from SetupView since they don't have functional backing.
+## Task 2: Fix Session Resume for Interview Follow-ups
+**Description:** Stop resuming the Claude session for subsequent interview calls to prevent tool result confusion.
 
-- [x] Delete the `autonomousConfigSection` computed property
-- [x] Remove the reference to `autonomousConfigSection` from the main body
-- [x] Remove any related bindings or helper methods for autonomous mode (if unused elsewhere)
-- [x] Verify the `AutonomousConfig` model and `userPreferences` are still needed for other features, or mark for future cleanup
+- [ ] In `conductInterview()`, change `isFirstCall` check to only look at `interviewSession.exchanges.isEmpty`
+- [ ] Create `effectiveSessionId` that is `nil` for non-first calls
+- [ ] Pass `effectiveSessionId` instead of `context.sessionId` to `claudeService.execute()`
+- [ ] Verify previous Q&A is included in prompt text via `previousExchanges`
 
-## Task 3: Replace Existing Plan Modal with Inline Indicator ✅
-**Description:** Replace the conditional GroupBox "Existing Plan Detected" section with a subtle, persistent inline banner that appears below the header when a plan.md file is detected.
+## Task 3: Implement Question Queuing in handleAskUserQuestion
+**Description:** Replace direct assignment of pendingQuestion with queue-based approach that handles multiple questions.
 
-- [x] Delete the `existingPlanSection` GroupBox computed property
-- [x] Create a new `ExistingPlanBanner` view component (inline in SetupView or separate file)
-- [x] Design the banner as a horizontal HStack with: icon, text showing task count, "Use Existing Plan" button, and "Dismiss" button
-- [x] Style the banner with a subtle background color (e.g., `.secondary.opacity(0.1)`) and rounded corners
-- [x] Position the banner between the header and project selection sections
-- [x] Add dismiss functionality that sets `context.existingPlan = nil`
-- [x] Ensure the banner doesn't disrupt the form flow or take excessive vertical space
+- [ ] Extract ALL questions from `input.questions`, not just first
+- [ ] Append each question to `context.questionQueue`
+- [ ] Only call `showNextQueuedQuestion()` if `context.pendingQuestion == nil`
+- [ ] Add new helper method `showNextQueuedQuestion(mode:)` that dequeues and displays
 
-## Task 4: Clean Up Layout Spacing and Padding ✅
-**Description:** Ensure consistent spacing throughout the refactored layout and remove any redundant padding that could cause layout issues.
+## Task 4: Process Question Queue After Answering
+**Description:** Modify answerQuestion to check queue before resuming the main loop.
 
-- [x] Standardize VStack spacing (use 16pt for main sections)
-- [x] Review and adjust GroupBox internal padding for consistency
-- [x] Ensure the ScrollView has appropriate content insets
-- [x] Add proper padding to the sticky footer area
-- [x] Test the layout at various window sizes (narrow, short, wide, tall)
+- [ ] After clearing `pendingQuestion`, check `context.hasQueuedQuestions`
+- [ ] If queue has items, call `showNextQueuedQuestion()` and return early
+- [ ] Only call `runLoop()` when queue is empty
+- [ ] Remove `guard context.sessionId != nil` check (may not have sessionId on subsequent calls)
 
-## Task 5: Update TabContentView Frame Constraints
-**Description:** Review and update frame constraints in TabContentView to work harmoniously with the new SetupView layout.
+## Task 5: Add Unit Tests for Question Queue
+**Description:** Write tests to verify the question queuing behavior works correctly.
 
-- [ ] Remove or relax the `minWidth`/`minHeight` constraints if they conflict with the new flexible layout
-- [ ] Ensure the content area properly fills available space without overlap with tab bar
-- [ ] Test switching between SetupView and ExecutionView at various window sizes
+- [ ] Test multiple questions in single message are queued
+- [ ] Test answering question shows next from queue
+- [ ] Test all Q&A pairs recorded in interviewSession.exchanges
+- [ ] Test empty queue resumes main loop
+- [ ] Test queue cleared on reset
+
+## Task 6: End-to-End Verification
+**Description:** Manually test the complete flow from feature description to execution.
+
+- [ ] Start new feature description and verify interview questions appear one at a time
+- [ ] Verify modal stays open until submit button is pressed
+- [ ] Verify Claude doesn't spam the same question after answering
+- [ ] Verify interview completes and transitions to plan generation
+- [ ] Verify plan generation creates valid tasks
+- [ ] Verify execution starts with tasks visible in left panel

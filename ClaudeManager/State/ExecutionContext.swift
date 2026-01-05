@@ -106,6 +106,7 @@ final class ExecutionContext {
     // MARK: - User Interaction
 
     var pendingQuestion: PendingQuestion?
+    var questionQueue: [PendingQuestion] = []
 
     // MARK: - Cost Tracking
 
@@ -258,6 +259,10 @@ final class ExecutionContext {
         phase == .conductingInterview && pendingQuestion == nil && interviewSession?.isComplete != true
     }
 
+    var hasQueuedQuestions: Bool {
+        !questionQueue.isEmpty
+    }
+
     var promptContent: PromptContent {
         PromptContent(text: featureDescription, images: attachedImages)
     }
@@ -275,6 +280,7 @@ final class ExecutionContext {
         startTime = nil
         logs = []
         pendingQuestion = nil
+        questionQueue = []
         totalCost = 0.0
         errors = []
         totalInputTokens = 0
@@ -313,6 +319,7 @@ final class ExecutionContext {
         sessionId = nil
         startTime = nil
         pendingQuestion = nil
+        questionQueue = []
         totalCost = 0.0
         errors = []
         totalInputTokens = 0
