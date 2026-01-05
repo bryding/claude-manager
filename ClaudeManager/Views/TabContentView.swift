@@ -20,11 +20,7 @@ struct TabContentView: View {
             UserQuestionView(pendingQuestion: question)
         }
         .sheet(item: Bindable(tab.context).pendingTaskFailure) { failure in
-            TaskFailureView(failure: failure) { response in
-                Task {
-                    await tab.stateMachine.handleTaskFailureResponse(response)
-                }
-            }
+            TaskFailureView(failure: failure)
         }
     }
 }
