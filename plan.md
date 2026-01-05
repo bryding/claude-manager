@@ -131,7 +131,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
 
 ### Phase 7: Worktree Integration
 
-- [ ] **Task 7.1**: Integrate worktree creation in TabManager.createTab
+- [x] **Task 7.1**: Integrate worktree creation in TabManager.createTab
   - Check if any existing tab has same projectPath
   - If duplicate, call worktreeService.createWorktree()
   - Set new tab's context.projectPath to worktree path

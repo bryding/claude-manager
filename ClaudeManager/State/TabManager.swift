@@ -31,6 +31,38 @@ final class TabManager {
     // MARK: - Tab Management
 
     @discardableResult
+    func createTab(projectPath: URL? = nil) async throws -> Tab {
+        var worktreeInfo: WorktreeInfo?
+        var effectivePath = projectPath
+
+        if let projectPath {
+            let isDuplicate = tabs.contains { tab in
+                tab.context.projectPath == projectPath ||
+                tab.worktreeInfo?.originalRepoPath == projectPath
+            }
+
+            if isDuplicate {
+                worktreeInfo = try await worktreeService.createWorktree(from: projectPath)
+                effectivePath = worktreeInfo?.worktreePath
+            }
+        }
+
+        let tab = Tab.create(
+            userPreferences: userPreferences,
+            worktreeInfo: worktreeInfo
+        )
+
+        if let effectivePath {
+            tab.context.projectPath = effectivePath
+        }
+
+        tabs.append(tab)
+        activeTabId = tab.id
+
+        return tab
+    }
+
+    @discardableResult
     func createTab(projectPath: URL? = nil) -> Tab {
         let tab = Tab.create(userPreferences: userPreferences)
 
