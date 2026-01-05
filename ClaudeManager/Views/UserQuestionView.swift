@@ -253,80 +253,83 @@ private struct OptionRow: View {
 // MARK: - Preview
 
 #if DEBUG
-struct UserQuestionView_Previews: PreviewProvider {
-    static var previews: some View {
-        let appState = AppState()
-        let tab = Tab.create(userPreferences: appState.userPreferences)
+#Preview("Single Select") {
+    let appState = AppState()
+    let tab = Tab.create(userPreferences: appState.userPreferences)
 
-        let singleSelectQuestion = PendingQuestion(
-            toolUseId: "test-1",
-            question: AskUserQuestionInput.Question(
-                question: "Which approach would you prefer for implementing the authentication system?",
-                header: "Authentication Method",
-                options: [
-                    AskUserQuestionInput.Option(
-                        label: "OAuth 2.0",
-                        description: "Industry standard protocol with support for third-party providers"
-                    ),
-                    AskUserQuestionInput.Option(
-                        label: "JWT Tokens",
-                        description: "Stateless authentication using JSON Web Tokens"
-                    ),
-                    AskUserQuestionInput.Option(
-                        label: "Session-based",
-                        description: "Traditional server-side session management"
-                    )
-                ],
-                multiSelect: false
-            )
+    let question = PendingQuestion(
+        toolUseId: "test-1",
+        question: AskUserQuestionInput.Question(
+            question: "Which approach would you prefer for implementing the authentication system?",
+            header: "Authentication Method",
+            options: [
+                AskUserQuestionInput.Option(
+                    label: "OAuth 2.0",
+                    description: "Industry standard protocol with support for third-party providers"
+                ),
+                AskUserQuestionInput.Option(
+                    label: "JWT Tokens",
+                    description: "Stateless authentication using JSON Web Tokens"
+                ),
+                AskUserQuestionInput.Option(
+                    label: "Session-based",
+                    description: "Traditional server-side session management"
+                )
+            ],
+            multiSelect: false
         )
+    )
 
-        let multiSelectQuestion = PendingQuestion(
-            toolUseId: "test-2",
-            question: AskUserQuestionInput.Question(
-                question: "Which features should be included in the initial release?",
-                header: "Feature Selection",
-                options: [
-                    AskUserQuestionInput.Option(
-                        label: "User Profiles",
-                        description: "Allow users to customize their profile"
-                    ),
-                    AskUserQuestionInput.Option(
-                        label: "Dark Mode",
-                        description: "Support for dark color scheme"
-                    ),
-                    AskUserQuestionInput.Option(
-                        label: "Notifications",
-                        description: "Push notification support"
-                    )
-                ],
-                multiSelect: true
-            )
+    return UserQuestionView(pendingQuestion: question)
+        .environment(tab)
+}
+
+#Preview("Multi Select") {
+    let appState = AppState()
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+
+    let question = PendingQuestion(
+        toolUseId: "test-2",
+        question: AskUserQuestionInput.Question(
+            question: "Which features should be included in the initial release?",
+            header: "Feature Selection",
+            options: [
+                AskUserQuestionInput.Option(
+                    label: "User Profiles",
+                    description: "Allow users to customize their profile"
+                ),
+                AskUserQuestionInput.Option(
+                    label: "Dark Mode",
+                    description: "Support for dark color scheme"
+                ),
+                AskUserQuestionInput.Option(
+                    label: "Notifications",
+                    description: "Push notification support"
+                )
+            ],
+            multiSelect: true
         )
+    )
 
-        let freeformQuestion = PendingQuestion(
-            toolUseId: "test-3",
-            question: AskUserQuestionInput.Question(
-                question: "Please describe the specific behavior you'd like for the error handling system.",
-                header: "Error Handling",
-                options: [],
-                multiSelect: false
-            )
+    return UserQuestionView(pendingQuestion: question)
+        .environment(tab)
+}
+
+#Preview("Freeform") {
+    let appState = AppState()
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+
+    let question = PendingQuestion(
+        toolUseId: "test-3",
+        question: AskUserQuestionInput.Question(
+            question: "Please describe the specific behavior you'd like for the error handling system.",
+            header: "Error Handling",
+            options: [],
+            multiSelect: false
         )
+    )
 
-        Group {
-            UserQuestionView(pendingQuestion: singleSelectQuestion)
-                .environment(tab)
-                .previewDisplayName("Single Select")
-
-            UserQuestionView(pendingQuestion: multiSelectQuestion)
-                .environment(tab)
-                .previewDisplayName("Multi Select")
-
-            UserQuestionView(pendingQuestion: freeformQuestion)
-                .environment(tab)
-                .previewDisplayName("Freeform")
-        }
-    }
+    return UserQuestionView(pendingQuestion: question)
+        .environment(tab)
 }
 #endif
