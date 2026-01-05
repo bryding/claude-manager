@@ -90,18 +90,7 @@ struct TabItemView: View {
             return .yellow
         }
 
-        switch phase {
-        case .idle, .paused:
-            return .gray
-        case .waitingForUser:
-            return .yellow
-        case .completed:
-            return .green
-        case .failed:
-            return .red
-        default:
-            return .blue
-        }
+        return phase.statusColor
     }
 }
 
