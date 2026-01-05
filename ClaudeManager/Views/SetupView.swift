@@ -58,19 +58,28 @@ struct SetupView: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 24) {
-            headerSection
-            projectSelectionSection
-            if context.existingPlan != nil {
-                existingPlanSection
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 24) {
+                    headerSection
+                    projectSelectionSection
+                    if context.existingPlan != nil {
+                        existingPlanSection
+                    }
+                    featureDescriptionSection
+                    autonomousConfigSection
+                }
+                .padding(32)
+                .padding(.bottom, 8)
             }
-            featureDescriptionSection
-            autonomousConfigSection
+            .frame(maxHeight: .infinity)
+
+            Divider()
+
             startButton
-            Spacer()
+                .padding(.horizontal, 32)
+                .padding(.vertical, 16)
         }
-        .padding(32)
-        .frame(minWidth: 600, minHeight: 500)
         .alert("Error", isPresented: showingError) {
             Button("OK", role: .cancel) {}
         } message: {
