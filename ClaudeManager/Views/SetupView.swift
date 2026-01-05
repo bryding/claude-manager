@@ -4,6 +4,7 @@ import AppKit
 struct SetupView: View {
     // MARK: - Environment
 
+    @Environment(Tab.self) private var tab
     @Environment(AppState.self) private var appState
 
     // MARK: - Local State
@@ -17,23 +18,26 @@ struct SetupView: View {
 
     // MARK: - Computed Properties
 
-    private var context: ExecutionContext? {
-        appState.context
+    private var context: ExecutionContext {
+        tab.context
+    }
+
+    private var stateMachine: ExecutionStateMachine {
+        tab.stateMachine
     }
 
     private var hasProjectPath: Bool {
-        context?.projectPath != nil
+        context.projectPath != nil
     }
 
     private var canStart: Bool {
-        guard let context else { return false }
         let hasFeature = !context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         let hasExistingPlan = context.existingPlan != nil
         return hasProjectPath && (hasExistingPlan || hasFeature) && !isStarting
     }
 
     private var projectPathDisplay: String {
-        context?.projectPath?.path(percentEncoded: false) ?? "No project selected"
+        context.projectPath?.path(percentEncoded: false) ?? "No project selected"
     }
 
     // MARK: - Binding Helpers
@@ -52,21 +56,13 @@ struct SetupView: View {
     // MARK: - Body
 
     var body: some View {
-        if let context {
-            setupContent(context: context)
-        } else {
-            Text("No active context")
-        }
-    }
-
-    private func setupContent(context: ExecutionContext) -> some View {
         VStack(spacing: 24) {
             headerSection
             projectSelectionSection
             if context.existingPlan != nil {
-                existingPlanSection(context: context)
+                existingPlanSection
             }
-            featureDescriptionSection(context: context)
+            featureDescriptionSection
             autonomousConfigSection
             startButton
             Spacer()
@@ -139,7 +135,7 @@ struct SetupView: View {
         }
     }
 
-    private func featureDescriptionSection(context: ExecutionContext) -> some View {
+    private var featureDescriptionSection: some View {
         GroupBox("Feature Description") {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Describe the feature you want to implement:")
@@ -176,7 +172,7 @@ struct SetupView: View {
         .help("Recent Projects")
     }
 
-    private func existingPlanSection(context: ExecutionContext) -> some View {
+    private var existingPlanSection: some View {
         GroupBox("Existing Plan Detected") {
             VStack(alignment: .leading, spacing: 12) {
                 if let plan = context.existingPlan {
@@ -191,7 +187,7 @@ struct SetupView: View {
                         .buttonStyle(.borderedProminent)
 
                         Button("Start Fresh") {
-                            appState.context?.existingPlan = nil
+                            context.existingPlan = nil
                         }
                     }
                 }
@@ -268,20 +264,19 @@ struct SetupView: View {
 
         let response = await panel.begin()
         if response == .OK, let url = panel.url {
-            appState.context?.projectPath = url
+            context.projectPath = url
             appState.userPreferences.lastProjectPath = url
             checkForExistingPlan()
         }
     }
 
     private func selectRecentProject(_ url: URL) {
-        appState.context?.projectPath = url
+        context.projectPath = url
         appState.userPreferences.lastProjectPath = url
         checkForExistingPlan()
     }
 
     private func checkForExistingPlan() {
-        guard let context = appState.context else { return }
         guard let projectPath = context.projectPath else {
             context.existingPlan = nil
             return
@@ -306,7 +301,7 @@ struct SetupView: View {
 
         Task {
             do {
-                try await appState.stateMachine?.startWithExistingPlan()
+                try await stateMachine.startWithExistingPlan()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -315,7 +310,6 @@ struct SetupView: View {
     }
 
     private func startDevelopmentLoop() {
-        guard let context = appState.context, let stateMachine = appState.stateMachine else { return }
         isStarting = true
 
         Task {
@@ -345,10 +339,13 @@ struct SetupView: View {
 // MARK: - Preview
 
 #if DEBUG
-struct SetupView_Previews: PreviewProvider {
-    static var previews: some View {
-        SetupView()
-            .environment(AppState())
-    }
+#Preview("SetupView") {
+    let appState = AppState()
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+
+    return SetupView()
+        .environment(tab)
+        .environment(appState)
+        .frame(width: 700, height: 600)
 }
 #endif

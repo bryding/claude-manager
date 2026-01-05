@@ -100,7 +100,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
 
 ### Phase 6: Child View Updates
 
-- [ ] **Task 6.1**: Update `SetupView.swift`
+- [x] **Task 6.1**: Update `SetupView.swift`
   - Use `@Environment(Tab.self)` to access tab.context and tab.stateMachine
   - File: `ClaudeManager/Views/SetupView.swift`
 
