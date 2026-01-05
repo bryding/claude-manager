@@ -1,35 +1,24 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(AppState.self) private var appState
+    @Environment(Tab.self) private var tab
 
     var body: some View {
         Group {
-            if let context = appState.context {
-                contentForContext(context)
-            } else {
-                Text("No active tab")
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func contentForContext(_ context: ExecutionContext) -> some View {
-        Group {
-            if context.phase == .idle {
+            if tab.context.phase == .idle {
                 SetupView()
             } else {
                 ExecutionView()
                     .frame(minWidth: 800, minHeight: 600)
             }
         }
-        .sheet(item: Bindable(context).pendingQuestion) { question in
+        .sheet(item: Bindable(tab.context).pendingQuestion) { question in
             UserQuestionView(pendingQuestion: question)
         }
-        .sheet(item: Bindable(context).pendingTaskFailure) { failure in
+        .sheet(item: Bindable(tab.context).pendingTaskFailure) { failure in
             TaskFailureView(failure: failure) { response in
                 Task {
-                    await appState.stateMachine?.handleTaskFailureResponse(response)
+                    await tab.stateMachine.handleTaskFailureResponse(response)
                 }
             }
         }
@@ -37,10 +26,21 @@ struct ContentView: View {
 }
 
 #if DEBUG
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-            .environment(AppState())
-    }
+#Preview("ContentView - Setup") {
+    let tab = Tab.create(userPreferences: UserPreferences())
+    tab.context.phase = .idle
+
+    return ContentView()
+        .environment(tab)
+        .frame(width: 800, height: 600)
+}
+
+#Preview("ContentView - Execution") {
+    let tab = Tab.create(userPreferences: UserPreferences())
+    tab.context.phase = .executingTask
+
+    return ContentView()
+        .environment(tab)
+        .frame(width: 800, height: 600)
 }
 #endif

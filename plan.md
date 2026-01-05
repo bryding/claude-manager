@@ -93,7 +93,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
   - Add Close Tab command (⌘W)
   - File: `ClaudeManager/ClaudeManagerApp.swift`
 
-- [ ] **Task 5.5**: Update `ContentView.swift`
+- [x] **Task 5.5**: Update `ContentView.swift`
   - Accept Tab via `@Environment(Tab.self)` instead of AppState
   - Use `tab.context` and `tab.stateMachine`
   - File: `ClaudeManager/ContentView.swift`
