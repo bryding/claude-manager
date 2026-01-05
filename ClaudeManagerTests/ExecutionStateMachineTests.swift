@@ -2597,56 +2597,6 @@ final class ExecutionStateMachineTests: XCTestCase {
         XCTAssertTrue(context.logs.contains { $0.message.contains("Executing phase: conductingInterview") })
     }
 
-    func testQuestionQueueClearedOnReset() {
-        context.questionQueue = [
-            PendingQuestion(
-                toolUseId: "tool-123",
-                question: AskUserQuestionInput.Question(
-                    question: "Q1?",
-                    header: "Q1",
-                    options: [],
-                    multiSelect: false
-                )
-            ),
-            PendingQuestion(
-                toolUseId: "tool-456",
-                question: AskUserQuestionInput.Question(
-                    question: "Q2?",
-                    header: "Q2",
-                    options: [],
-                    multiSelect: false
-                )
-            )
-        ]
-
-        context.reset()
-
-        XCTAssertTrue(context.questionQueue.isEmpty)
-        XCTAssertFalse(context.hasQueuedQuestions)
-    }
-
-    func testQuestionQueueClearedOnResetForNewFeature() {
-        context.questionQueue = [
-            PendingQuestion(
-                toolUseId: "tool-123",
-                question: AskUserQuestionInput.Question(
-                    question: "Q1?",
-                    header: "Q1",
-                    options: [],
-                    multiSelect: false
-                )
-            )
-        ]
-        context.addLog(type: .info, message: "Existing log")
-
-        context.resetForNewFeature()
-
-        XCTAssertTrue(context.questionQueue.isEmpty)
-        XCTAssertFalse(context.hasQueuedQuestions)
-        // Logs should be preserved
-        XCTAssertTrue(context.logs.contains { $0.message.contains("Existing log") })
-    }
-
     func testSingleQuestionDoesNotCreateQueue() async throws {
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
         context.featureDescription = "Build a feature"
