@@ -157,7 +157,7 @@ struct SetupView: View {
                     )
                 }
 
-                PastableTextEditor(text: $context.featureDescription) { image in
+                PastableTextEditor(text: Bindable(tab.context).featureDescription) { image in
                     handleImagePaste(image)
                 }
                 .frame(minHeight: 150)
@@ -195,7 +195,7 @@ struct SetupView: View {
 
         switch imageProcessor.process(image: image) {
         case .success(let attachedImage):
-            appState.context.addImage(attachedImage)
+            context.addImage(attachedImage)
         case .failure(let error):
             imageError = error.displayMessage
         }
