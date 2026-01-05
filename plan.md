@@ -125,7 +125,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
   - Use `@Environment(Tab.self)` to access tab.context
   - File: `ClaudeManager/Views/LogView.swift`
 
-- [ ] **Task 6.7**: Update `ManualInputView.swift`
+- [x] **Task 6.7**: Update `ManualInputView.swift`
   - Use `@Environment(Tab.self)` to access tab.context and tab.stateMachine
   - File: `ClaudeManager/Views/ManualInputView.swift`
 
