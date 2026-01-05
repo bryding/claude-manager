@@ -1,27 +1,12 @@
 import SwiftUI
 
+/// Main content view that displays the appropriate UI based on the current tab's execution phase.
+/// This view delegates to `TabContentView` for the actual implementation.
 struct ContentView: View {
     @Environment(Tab.self) private var tab
 
     var body: some View {
-        Group {
-            if tab.context.phase == .idle {
-                SetupView()
-            } else {
-                ExecutionView()
-                    .frame(minWidth: 800, minHeight: 600)
-            }
-        }
-        .sheet(item: Bindable(tab.context).pendingQuestion) { question in
-            UserQuestionView(pendingQuestion: question)
-        }
-        .sheet(item: Bindable(tab.context).pendingTaskFailure) { failure in
-            TaskFailureView(failure: failure) { response in
-                Task {
-                    await tab.stateMachine.handleTaskFailureResponse(response)
-                }
-            }
-        }
+        TabContentView()
     }
 }
 
