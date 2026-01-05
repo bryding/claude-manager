@@ -46,6 +46,7 @@
 		AD000001210000010000000F /* MockBuildTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD000001110000010000000F /* MockBuildTestService.swift */; };
 		B5000001210000010000000F /* MockWorktreeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5000001110000010000000F /* MockWorktreeService.swift */; };
 		B7000001210000010000000F /* TabManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7000001110000010000000F /* TabManagerTests.swift */; };
+		BB000001210000010000000F /* WorktreeServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000001110000010000000F /* WorktreeServiceTests.swift */; };
 		BA000001210000010000000F /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA000001110000010000000F /* AppStateTests.swift */; };
 		AF000001210000010000000F /* InterviewSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF000001110000010000000F /* InterviewSessionTests.swift */; };
 		B0000001210000010000000F /* ExecutionContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000001110000010000000F /* ExecutionContextTests.swift */; };
@@ -120,6 +121,7 @@
 		AD000001110000010000000F /* MockBuildTestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockBuildTestService.swift; sourceTree = "<group>"; };
 		B5000001110000010000000F /* MockWorktreeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWorktreeService.swift; sourceTree = "<group>"; };
 		B7000001110000010000000F /* TabManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabManagerTests.swift; sourceTree = "<group>"; };
+		BB000001110000010000000F /* WorktreeServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorktreeServiceTests.swift; sourceTree = "<group>"; };
 		BA000001110000010000000F /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
 		AF000001110000010000000F /* InterviewSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewSessionTests.swift; sourceTree = "<group>"; };
 		B0000001110000010000000F /* ExecutionContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContextTests.swift; sourceTree = "<group>"; };
@@ -292,6 +294,7 @@
 				A2000003110000010000000F /* PlanServiceTests.swift */,
 				B2000001110000010000000F /* PromptContentTests.swift */,
 				B7000001110000010000000F /* TabManagerTests.swift */,
+				BB000001110000010000000F /* WorktreeServiceTests.swift */,
 			);
 			path = ClaudeManagerTests;
 			sourceTree = "<group>";
@@ -471,6 +474,7 @@
 				AD000001210000010000000F /* MockBuildTestService.swift in Sources */,
 				B5000001210000010000000F /* MockWorktreeService.swift in Sources */,
 				B7000001210000010000000F /* TabManagerTests.swift in Sources */,
+				BB000001210000010000000F /* WorktreeServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
