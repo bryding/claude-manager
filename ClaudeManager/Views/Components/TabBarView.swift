@@ -8,25 +8,31 @@ struct TabBarView: View {
     // MARK: - Body
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 4) {
-                ForEach(tabManager.tabs) { tab in
-                    TabItemView(
-                        tab: tab,
-                        isActive: tab.id == tabManager.activeTabId,
-                        onSelect: { tabManager.selectTab(tab) },
-                        onClose: {
-                            Task {
-                                try? await tabManager.closeTab(tab)
+        HStack(spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 4) {
+                    ForEach(tabManager.tabs) { tab in
+                        TabItemView(
+                            tab: tab,
+                            isActive: tab.id == tabManager.activeTabId,
+                            onSelect: { tabManager.selectTab(tab) },
+                            onClose: {
+                                Task {
+                                    try? await tabManager.closeTab(tab)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
-
-                addTabButton
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
+
+            Divider()
+                .padding(.vertical, 8)
+
+            addTabButton
+                .padding(.horizontal, 8)
         }
         .background(Color(nsColor: .windowBackgroundColor))
     }
@@ -43,7 +49,7 @@ struct TabBarView: View {
                 .frame(width: 24, height: 24)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.borderless)
         .help("New Tab")
     }
 }
