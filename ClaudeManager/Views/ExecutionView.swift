@@ -15,7 +15,7 @@ struct ExecutionView: View {
 
     var body: some View {
         HSplitView {
-            leftPane(context: context)
+            leftPane
                 .frame(minWidth: 280, idealWidth: 320, maxWidth: 400)
 
             LogView()
@@ -24,9 +24,9 @@ struct ExecutionView: View {
 
     // MARK: - View Sections
 
-    private func leftPane(context: ExecutionContext) -> some View {
+    private var leftPane: some View {
         VStack(alignment: .leading, spacing: 16) {
-            projectHeader(context: context)
+            projectHeader
 
             PhaseIndicatorView(
                 phase: context.phase,
@@ -34,7 +34,7 @@ struct ExecutionView: View {
                 isInterviewComplete: context.interviewSession?.isComplete ?? false
             )
 
-            progressSection(context: context)
+            progressSection
 
             Divider()
 
@@ -49,14 +49,14 @@ struct ExecutionView: View {
         .padding()
     }
 
-    private func progressSection(context: ExecutionContext) -> some View {
+    private var progressSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Progress")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text(progressPercentage(context: context))
+                Text(progressPercentage)
                     .font(.subheadline.monospacedDigit())
                     .fontWeight(.medium)
             }
@@ -66,12 +66,12 @@ struct ExecutionView: View {
         }
     }
 
-    private func progressPercentage(context: ExecutionContext) -> String {
+    private var progressPercentage: String {
         let percentage = Int(context.progress * 100)
         return "\(percentage)%"
     }
 
-    private func projectHeader(context: ExecutionContext) -> some View {
+    private var projectHeader: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Project")
@@ -81,14 +81,7 @@ struct ExecutionView: View {
                     Text(tab.effectiveProjectPath?.lastPathComponent ?? "No Project")
                         .font(.headline)
                     if tab.worktreeInfo != nil {
-                        Text("Worktree")
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.2))
-                            .foregroundStyle(.orange)
-                            .clipShape(Capsule())
+                        worktreeBadge
                     }
                 }
             }
@@ -110,6 +103,17 @@ struct ExecutionView: View {
             .controlSize(.small)
             .disabled(context.isRunning)
         }
+    }
+
+    private var worktreeBadge: some View {
+        Text("Worktree")
+            .font(.caption2)
+            .fontWeight(.medium)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Color.orange.opacity(0.2))
+            .foregroundStyle(.orange)
+            .clipShape(Capsule())
     }
 }
 
