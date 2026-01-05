@@ -8,31 +8,25 @@ struct TabBarView: View {
     // MARK: - Body
 
     var body: some View {
-        HStack(spacing: 0) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
-                    ForEach(tabManager.tabs) { tab in
-                        TabItemView(
-                            tab: tab,
-                            isActive: tab.id == tabManager.activeTabId,
-                            onSelect: { tabManager.selectTab(tab) },
-                            onClose: {
-                                Task {
-                                    try? await tabManager.closeTab(tab)
-                                }
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 4) {
+                ForEach(tabManager.tabs) { tab in
+                    TabItemView(
+                        tab: tab,
+                        isActive: tab.id == tabManager.activeTabId,
+                        onSelect: { tabManager.selectTab(tab) },
+                        onClose: {
+                            Task {
+                                try? await tabManager.closeTab(tab)
                             }
-                        )
-                    }
+                        }
+                    )
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
+
+                addTabButton
             }
-
-            Divider()
-                .padding(.vertical, 8)
-
-            addTabButton
-                .padding(.horizontal, 8)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
         }
         .background(Color(nsColor: .windowBackgroundColor))
     }
@@ -40,17 +34,15 @@ struct TabBarView: View {
     // MARK: - Subviews
 
     private var addTabButton: some View {
-        Button {
-            tabManager.createTab()
-        } label: {
-            Image(systemName: "plus")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.secondary)
-                .frame(width: 24, height: 24)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.borderless)
-        .help("New Tab")
+        Image(systemName: "plus")
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(.secondary)
+            .frame(width: 28, height: 28)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                tabManager.createTab()
+            }
+            .help("New Tab")
     }
 }
 
