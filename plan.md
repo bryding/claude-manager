@@ -18,13 +18,13 @@ Fix bugs in the interview modal, question handling, and transition to autonomous
 - [ ] Pass `effectiveSessionId` instead of `context.sessionId` to `claudeService.execute()`
 - [ ] Verify previous Q&A is included in prompt text via `previousExchanges`
 
-## Task 3: Implement Question Queuing in handleAskUserQuestion
+## Task 3: Implement Question Queuing in handleAskUserQuestion ✅
 **Description:** Replace direct assignment of pendingQuestion with queue-based approach that handles multiple questions.
 
-- [ ] Extract ALL questions from `input.questions`, not just first
-- [ ] Append each question to `context.questionQueue`
-- [ ] Only call `showNextQueuedQuestion()` if `context.pendingQuestion == nil`
-- [ ] Add new helper method `showNextQueuedQuestion(mode:)` that dequeues and displays
+- [x] Extract ALL questions from `input.questions`, not just first
+- [x] Append each question to `context.questionQueue`
+- [x] Only call `showNextQueuedQuestion()` if `context.pendingQuestion == nil`
+- [x] Add new helper method `showNextQueuedQuestion(mode:)` that dequeues and displays
 
 ## Task 4: Process Question Queue After Answering
 **Description:** Modify answerQuestion to check queue before resuming the main loop.

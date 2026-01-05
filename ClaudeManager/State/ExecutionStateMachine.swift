@@ -748,18 +748,33 @@ final class ExecutionStateMachine {
 
     private func handleAskUserQuestion(_ toolUse: ToolUseContent, mode: MessageHandlerMode) {
         guard let input = toolUse.askUserQuestionInput,
-              let firstQuestion = input.questions.first else {
+              !input.questions.isEmpty else {
             return
         }
 
-        let pendingQuestion = PendingQuestion(
-            toolUseId: toolUse.id,
-            question: firstQuestion
-        )
+        // Queue ALL questions from the input
+        for question in input.questions {
+            let pendingQuestion = PendingQuestion(
+                toolUseId: toolUse.id,
+                question: question
+            )
+            context.questionQueue.append(pendingQuestion)
+        }
+
+        // Only show the next question if none is currently displayed
+        if context.pendingQuestion == nil {
+            showNextQueuedQuestion(mode: mode)
+        }
+    }
+
+    private func showNextQueuedQuestion(mode: MessageHandlerMode) {
+        guard !context.questionQueue.isEmpty else { return }
+
+        let pendingQuestion = context.questionQueue.removeFirst()
 
         switch mode {
         case .interview:
-            context.currentInterviewQuestion = firstQuestion.question
+            context.currentInterviewQuestion = pendingQuestion.question.question
             context.pendingQuestion = pendingQuestion
             context.phase = .waitingForUser
             questionAskedDuringPhase = true
