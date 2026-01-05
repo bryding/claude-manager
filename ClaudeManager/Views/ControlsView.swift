@@ -19,31 +19,23 @@ struct ControlsView: View {
         tab.stateMachine
     }
 
-    private var showContinueButton: Bool {
-        context.appearsStuck
-    }
-
     // MARK: - Body
 
     var body: some View {
-        controlsContent(context: context)
-    }
-
-    private func controlsContent(context: ExecutionContext) -> some View {
         HStack(spacing: 16) {
             if context.canStart {
                 startButton
             } else {
-                pauseResumeButton(context: context)
-                stopButton(context: context)
-                if showContinueButton {
+                pauseResumeButton
+                stopButton
+                if context.appearsStuck {
                     continueButton
                 }
             }
             Spacer()
-            elapsedTimeDisplay(context: context)
-            contextIndicator(context: context)
-            costDisplay(context: context)
+            elapsedTimeDisplay
+            contextIndicator
+            costDisplay
         }
         .alert("Error", isPresented: showingError) {
             Button("OK", role: .cancel) {}
@@ -80,7 +72,7 @@ struct ControlsView: View {
 
     // MARK: - View Sections
 
-    private func pauseResumeButton(context: ExecutionContext) -> some View {
+    private var pauseResumeButton: some View {
         Button(action: togglePauseResume) {
             HStack(spacing: 6) {
                 Image(systemName: context.canResume ? "play.circle.fill" : "pause.circle.fill")
@@ -92,7 +84,7 @@ struct ControlsView: View {
         .disabled(!context.canPause && !context.canResume)
     }
 
-    private func stopButton(context: ExecutionContext) -> some View {
+    private var stopButton: some View {
         Button(action: requestStop) {
             HStack(spacing: 6) {
                 Image(systemName: "stop.circle.fill")
@@ -128,12 +120,12 @@ struct ControlsView: View {
         .controlSize(.regular)
     }
 
-    private func elapsedTimeDisplay(context: ExecutionContext) -> some View {
+    private var elapsedTimeDisplay: some View {
         TimelineView(.periodic(from: .now, by: 1.0)) { _ in
             HStack(spacing: 4) {
                 Image(systemName: "clock")
                     .foregroundStyle(.secondary)
-                Text(formattedElapsedTime(context: context))
+                Text(formattedElapsedTime)
                     .fontWeight(.medium)
                     .monospacedDigit()
             }
@@ -141,29 +133,29 @@ struct ControlsView: View {
         }
     }
 
-    private func contextIndicator(context: ExecutionContext) -> some View {
+    private var contextIndicator: some View {
         HStack(spacing: 6) {
             Circle()
-                .fill(contextStatusColor(context: context))
+                .fill(contextStatusColor)
                 .frame(width: 8, height: 8)
 
             Text("Context:")
                 .foregroundStyle(.secondary)
 
-            Text(formattedContextUsage(context: context))
+            Text(formattedContextUsage)
                 .fontWeight(.medium)
                 .monospacedDigit()
-                .foregroundStyle(contextTextColor(context: context))
+                .foregroundStyle(contextTextColor)
         }
         .font(.callout)
-        .help("Context window usage: \(formattedContextUsage(context: context)) used")
+        .help("Context window usage: \(formattedContextUsage) used")
     }
 
-    private func costDisplay(context: ExecutionContext) -> some View {
+    private var costDisplay: some View {
         HStack(spacing: 4) {
             Text("Cost:")
                 .foregroundStyle(.secondary)
-            Text(formattedCost(context: context))
+            Text(formattedCost)
                 .fontWeight(.medium)
                 .monospacedDigit()
         }
@@ -172,11 +164,11 @@ struct ControlsView: View {
 
     // MARK: - Helpers
 
-    private func formattedCost(context: ExecutionContext) -> String {
+    private var formattedCost: String {
         String(format: "$%.2f", context.totalCost)
     }
 
-    private func formattedElapsedTime(context: ExecutionContext) -> String {
+    private var formattedElapsedTime: String {
         guard let elapsed = context.elapsedTime else { return "--:--" }
         let hours = Int(elapsed) / 3600
         let minutes = (Int(elapsed) % 3600) / 60
@@ -189,30 +181,26 @@ struct ControlsView: View {
         }
     }
 
-    private func formattedContextUsage(context: ExecutionContext) -> String {
+    private var formattedContextUsage: String {
         let percentage = Int(context.contextPercentUsed * 100)
         return "\(percentage)%"
     }
 
-    private func contextStatusColor(context: ExecutionContext) -> Color {
-        let remaining = context.contextPercentRemaining
-        if remaining < 0.10 {
-            return .red
-        } else if remaining < 0.25 {
-            return .orange
-        } else {
-            return .green
-        }
+    private var contextStatusColor: Color {
+        contextColor(forRemaining: context.contextPercentRemaining, defaultColor: .green)
     }
 
-    private func contextTextColor(context: ExecutionContext) -> Color {
-        let remaining = context.contextPercentRemaining
+    private var contextTextColor: Color {
+        contextColor(forRemaining: context.contextPercentRemaining, defaultColor: .primary)
+    }
+
+    private func contextColor(forRemaining remaining: Double, defaultColor: Color) -> Color {
         if remaining < 0.10 {
             return .red
         } else if remaining < 0.25 {
             return .orange
         } else {
-            return .primary
+            return defaultColor
         }
     }
 
