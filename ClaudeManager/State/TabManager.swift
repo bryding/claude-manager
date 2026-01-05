@@ -30,18 +30,14 @@ final class TabManager {
 
     // MARK: - Tab Management
 
-    /// Creates a new tab, optionally with a project path.
+    /// Creates a new tab with a project path.
     /// If the project path is already in use by another tab, a worktree is created.
     @discardableResult
-    func createTab(projectPath: URL? = nil) async throws -> Tab {
+    func createTab(projectPath: URL) async throws -> Tab {
         let tab = Tab.create(userPreferences: userPreferences)
         tabs.append(tab)
         activeTabId = tab.id
-
-        if let projectPath {
-            try await setProjectPath(projectPath, for: tab)
-        }
-
+        try await setProjectPath(projectPath, for: tab)
         return tab
     }
 
