@@ -3,6 +3,19 @@ import XCTest
 
 @MainActor
 final class TabManagerTests: XCTestCase {
+    // MARK: - Test Helpers
+
+    private func makeTabManager(
+        worktreeService: MockWorktreeService = MockWorktreeService()
+    ) -> (TabManager, MockWorktreeService) {
+        let tabManager = TabManager(worktreeService: worktreeService)
+        return (tabManager, worktreeService)
+    }
+
+    private var testProjectPath: URL {
+        URL(fileURLWithPath: "/test/project")
+    }
+
     // MARK: - Initialization
 
     func testInitializesWithEmptyTabs() {
@@ -136,17 +149,15 @@ final class TabManagerTests: XCTestCase {
     }
 
     func testCloseTabRemovesWorktree() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
 
-        let worktreeInfo = tab2.worktreeInfo!
+        let worktreeInfo = try XCTUnwrap(tab2.worktreeInfo)
 
         try await tabManager.closeTab(tab2)
 
@@ -155,11 +166,10 @@ final class TabManagerTests: XCTestCase {
     }
 
     func testCloseTabDoesNotRemoveWorktreeWhenNone() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab = tabManager.createTab()
-        tab.context.projectPath = URL(fileURLWithPath: "/test/project")
+        tab.context.projectPath = testProjectPath
 
         try await tabManager.closeTab(tab)
 
@@ -167,38 +177,34 @@ final class TabManagerTests: XCTestCase {
     }
 
     func testCloseTabStopsExecutionBeforeRemovingWorktree() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
         tab2.context.phase = .executingTask
 
         try await tabManager.closeTab(tab2)
 
-        XCTAssertTrue(tabManager.tabs.isEmpty || !tabManager.tabs.contains { $0.id == tab2.id })
+        XCTAssertFalse(tabManager.tabs.contains { $0.id == tab2.id })
         XCTAssertEqual(mockWorktreeService.removeWorktreeCalls.count, 1)
     }
 
-    func testCloseTabThrowsWhenWorktreeRemovalFails() async {
-        let mockWorktreeService = MockWorktreeService()
+    func testCloseTabThrowsWhenWorktreeRemovalFails() async throws {
+        let (tabManager, mockWorktreeService) = makeTabManager()
         mockWorktreeService.removeWorktreeError = NSError(
             domain: "TestError",
             code: 1,
             userInfo: [NSLocalizedDescriptionKey: "Git worktree removal failed"]
         )
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
-        try? await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
 
         do {
             try await tabManager.closeTab(tab2)
@@ -209,8 +215,7 @@ final class TabManagerTests: XCTestCase {
     }
 
     func testCloseTabDoesNotStopExecutionWhenIdle() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let (tabManager, _) = makeTabManager()
 
         let tab = tabManager.createTab()
         tab.context.phase = .idle
@@ -222,40 +227,36 @@ final class TabManagerTests: XCTestCase {
     }
 
     func testCloseTabPassesCorrectWorktreeInfoToService() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
 
-        let expectedWorktreeInfo = tab2.worktreeInfo!
+        let expectedWorktreeInfo = try XCTUnwrap(tab2.worktreeInfo)
 
         try await tabManager.closeTab(tab2)
 
-        let removedWorktree = mockWorktreeService.removeWorktreeCalls.first
-        XCTAssertEqual(removedWorktree?.id, expectedWorktreeInfo.id)
-        XCTAssertEqual(removedWorktree?.originalRepoPath, expectedWorktreeInfo.originalRepoPath)
-        XCTAssertEqual(removedWorktree?.worktreePath, expectedWorktreeInfo.worktreePath)
-        XCTAssertEqual(removedWorktree?.branchName, expectedWorktreeInfo.branchName)
+        let removedWorktree = try XCTUnwrap(mockWorktreeService.removeWorktreeCalls.first)
+        XCTAssertEqual(removedWorktree.id, expectedWorktreeInfo.id)
+        XCTAssertEqual(removedWorktree.originalRepoPath, expectedWorktreeInfo.originalRepoPath)
+        XCTAssertEqual(removedWorktree.worktreePath, expectedWorktreeInfo.worktreePath)
+        XCTAssertEqual(removedWorktree.branchName, expectedWorktreeInfo.branchName)
     }
 
     func testCloseMultipleTabsWithWorktreesRemovesAll() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
 
         let tab3 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab3)
+        try await tabManager.setProjectPath(testProjectPath, for: tab3)
 
         try await tabManager.closeTab(tab2)
         try await tabManager.closeTab(tab3)
@@ -266,25 +267,23 @@ final class TabManagerTests: XCTestCase {
     }
 
     func testCloseTabWithWorktreeDoesNotAffectOtherTabs() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, _) = makeTabManager()
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
 
         let tab3 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab3)
+        try await tabManager.setProjectPath(testProjectPath, for: tab3)
 
-        let tab3WorktreeInfo = tab3.worktreeInfo
+        let tab3WorktreeInfo = try XCTUnwrap(tab3.worktreeInfo)
 
         try await tabManager.closeTab(tab2)
 
         XCTAssertNotNil(tab3.worktreeInfo)
-        XCTAssertEqual(tab3.worktreeInfo?.id, tab3WorktreeInfo?.id)
+        XCTAssertEqual(tab3.worktreeInfo?.id, tab3WorktreeInfo.id)
         XCTAssertEqual(tabManager.tabs.count, 2)
     }
 
@@ -427,47 +426,42 @@ final class TabManagerTests: XCTestCase {
     func testSetProjectPathSetsPathOnTab() async throws {
         let tabManager = TabManager()
         let tab = tabManager.createTab()
-        let projectPath = URL(fileURLWithPath: "/test/project")
 
-        try await tabManager.setProjectPath(projectPath, for: tab)
+        try await tabManager.setProjectPath(testProjectPath, for: tab)
 
-        XCTAssertEqual(tab.context.projectPath, projectPath)
+        XCTAssertEqual(tab.context.projectPath, testProjectPath)
         XCTAssertNil(tab.worktreeInfo)
     }
 
     func testSetProjectPathCreatesWorktreeForDuplicate() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
 
         XCTAssertEqual(mockWorktreeService.createWorktreeCalls.count, 1)
-        XCTAssertEqual(mockWorktreeService.createWorktreeCalls.first, projectPath)
+        XCTAssertEqual(mockWorktreeService.createWorktreeCalls.first, testProjectPath)
         XCTAssertNotNil(tab2.worktreeInfo)
         XCTAssertEqual(tab2.context.projectPath, tab2.worktreeInfo?.worktreePath)
     }
 
     func testSetProjectPathDetectsDuplicateByOriginalRepoPath() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab1 = tabManager.createTab()
         tab1.worktreeInfo = WorktreeInfo(
             id: UUID(),
-            originalRepoPath: projectPath,
+            originalRepoPath: testProjectPath,
             worktreePath: URL(fileURLWithPath: "/test/project/.worktrees/abc"),
             branchName: "worktree-branch",
             createdAt: Date()
         )
 
         let tab2 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
 
         XCTAssertEqual(mockWorktreeService.createWorktreeCalls.count, 1)
         XCTAssertNotNil(tab2.worktreeInfo)
@@ -492,37 +486,33 @@ final class TabManagerTests: XCTestCase {
     }
 
     func testSetProjectPathDoesNotTreatSameTabAsDuplicate() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab = tabManager.createTab()
-        tab.context.projectPath = projectPath
+        tab.context.projectPath = testProjectPath
 
-        try await tabManager.setProjectPath(projectPath, for: tab)
+        try await tabManager.setProjectPath(testProjectPath, for: tab)
 
         XCTAssertEqual(mockWorktreeService.createWorktreeCalls.count, 0)
-        XCTAssertEqual(tab.context.projectPath, projectPath)
+        XCTAssertEqual(tab.context.projectPath, testProjectPath)
         XCTAssertNil(tab.worktreeInfo)
     }
 
-    func testSetProjectPathThrowsWhenWorktreeCreationFails() async {
-        let mockWorktreeService = MockWorktreeService()
+    func testSetProjectPathThrowsWhenWorktreeCreationFails() async throws {
+        let (tabManager, mockWorktreeService) = makeTabManager()
         mockWorktreeService.createWorktreeError = NSError(
             domain: "TestError",
             code: 1,
             userInfo: [NSLocalizedDescriptionKey: "Git worktree failed"]
         )
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
 
         do {
-            try await tabManager.setProjectPath(projectPath, for: tab2)
+            try await tabManager.setProjectPath(testProjectPath, for: tab2)
             XCTFail("Expected error to be thrown")
         } catch {
             XCTAssertNil(tab2.worktreeInfo)
@@ -530,33 +520,29 @@ final class TabManagerTests: XCTestCase {
     }
 
     func testCreateTabWithProjectPathCreatesWorktreeForDuplicate() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
-        let tab2 = try await tabManager.createTab(projectPath: projectPath)
+        let tab2 = try await tabManager.createTab(projectPath: testProjectPath)
 
         XCTAssertEqual(mockWorktreeService.createWorktreeCalls.count, 1)
         XCTAssertNotNil(tab2.worktreeInfo)
-        XCTAssertEqual(tab2.worktreeInfo?.originalRepoPath, projectPath)
+        XCTAssertEqual(tab2.worktreeInfo?.originalRepoPath, testProjectPath)
     }
 
     func testMultipleTabsWithSameProjectEachGetWorktree() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
 
         let tab3 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab3)
+        try await tabManager.setProjectPath(testProjectPath, for: tab3)
 
         XCTAssertEqual(mockWorktreeService.createWorktreeCalls.count, 2)
         XCTAssertNil(tab1.worktreeInfo)
@@ -566,22 +552,19 @@ final class TabManagerTests: XCTestCase {
     }
 
     func testSetProjectPathWorktreeInfoHasCorrectOriginalPath() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
-        let projectPath = URL(fileURLWithPath: "/test/project")
+        let (tabManager, _) = makeTabManager()
 
         let tab1 = tabManager.createTab()
-        tab1.context.projectPath = projectPath
+        tab1.context.projectPath = testProjectPath
 
         let tab2 = tabManager.createTab()
-        try await tabManager.setProjectPath(projectPath, for: tab2)
+        try await tabManager.setProjectPath(testProjectPath, for: tab2)
 
-        XCTAssertEqual(tab2.worktreeInfo?.originalRepoPath, projectPath)
+        XCTAssertEqual(tab2.worktreeInfo?.originalRepoPath, testProjectPath)
     }
 
     func testSetProjectPathWithDifferentPathsNoDuplicateDetection() async throws {
-        let mockWorktreeService = MockWorktreeService()
-        let tabManager = TabManager(worktreeService: mockWorktreeService)
+        let (tabManager, mockWorktreeService) = makeTabManager()
 
         let tab1 = tabManager.createTab()
         try await tabManager.setProjectPath(URL(fileURLWithPath: "/project/a"), for: tab1)
