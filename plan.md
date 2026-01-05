@@ -12,13 +12,13 @@ Refactor SetupView to use a more robust layout architecture that handles window 
 - [ ] Remove the hardcoded `.frame(minWidth: 600, minHeight: 500)` constraint from the root view
 - [ ] Test that the layout handles very short window heights gracefully
 
-## Task 2: Remove Autonomous Mode UI
+## Task 2: Remove Autonomous Mode UI ✅
 **Description:** Remove the "Enable Autonomous Mode" checkbox and all related UI elements from SetupView since they don't have functional backing.
 
-- [ ] Delete the `autonomousConfigSection` computed property
-- [ ] Remove the reference to `autonomousConfigSection` from the main body
-- [ ] Remove any related bindings or helper methods for autonomous mode (if unused elsewhere)
-- [ ] Verify the `AutonomousConfig` model and `userPreferences` are still needed for other features, or mark for future cleanup
+- [x] Delete the `autonomousConfigSection` computed property
+- [x] Remove the reference to `autonomousConfigSection` from the main body
+- [x] Remove any related bindings or helper methods for autonomous mode (if unused elsewhere)
+- [x] Verify the `AutonomousConfig` model and `userPreferences` are still needed for other features, or mark for future cleanup
 
 ## Task 3: Replace Existing Plan Modal with Inline Indicator
 **Description:** Replace the conditional GroupBox "Existing Plan Detected" section with a subtle, persistent inline banner that appears below the header when a plan.md file is detected.
