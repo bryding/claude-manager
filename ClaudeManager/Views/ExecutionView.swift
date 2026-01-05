@@ -3,26 +3,22 @@ import SwiftUI
 struct ExecutionView: View {
     // MARK: - Environment
 
-    @Environment(AppState.self) private var appState
+    @Environment(Tab.self) private var tab
 
     // MARK: - Computed Properties
 
-    private var context: ExecutionContext? {
-        appState.context
+    private var context: ExecutionContext {
+        tab.context
     }
 
     // MARK: - Body
 
     var body: some View {
-        if let context {
-            HSplitView {
-                leftPane(context: context)
-                    .frame(minWidth: 280, idealWidth: 320, maxWidth: 400)
+        HSplitView {
+            leftPane(context: context)
+                .frame(minWidth: 280, idealWidth: 320, maxWidth: 400)
 
-                LogView(logs: context.logs)
-            }
-        } else {
-            Text("No active context")
+            LogView(logs: context.logs)
         }
     }
 
@@ -81,22 +77,34 @@ struct ExecutionView: View {
                 Text("Project")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Text(context.projectPath?.lastPathComponent ?? "No Project")
-                    .font(.headline)
+                HStack(spacing: 6) {
+                    Text(tab.effectiveProjectPath?.lastPathComponent ?? "No Project")
+                        .font(.headline)
+                    if tab.worktreeInfo != nil {
+                        Text("Worktree")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.2))
+                            .foregroundStyle(.orange)
+                            .clipShape(Capsule())
+                    }
+                }
             }
 
             Spacer()
 
             if context.phase == .completed {
                 Button("New Feature") {
-                    appState.context?.resetForNewFeature()
+                    context.resetForNewFeature()
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
             }
 
             Button("Change Project") {
-                appState.context?.reset()
+                context.reset()
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -110,61 +118,89 @@ struct ExecutionView: View {
 #if DEBUG
 #Preview("Execution - Running") {
     let appState = AppState()
-    appState.context?.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
-    appState.context?.phase = .executingTask
-    appState.context?.plan = Plan(rawText: "", tasks: [
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
+    tab.context.phase = .executingTask
+    tab.context.plan = Plan(rawText: "", tasks: [
         PlanTask(number: 1, title: "Create project structure", description: "Set up folders", status: .completed),
         PlanTask(number: 2, title: "Implement models", description: "Create data models", status: .completed),
         PlanTask(number: 3, title: "Build services layer", description: "Implementing service layer", status: .inProgress),
         PlanTask(number: 4, title: "Create state management", description: "Add app state", status: .pending),
         PlanTask(number: 5, title: "Build UI views", description: "Create SwiftUI views", status: .pending),
     ])
-    appState.context?.currentTaskIndex = 2
-    appState.context?.totalCost = 0.42
-    appState.context?.logs = [
+    tab.context.currentTaskIndex = 2
+    tab.context.totalCost = 0.42
+    tab.context.logs = [
         LogEntry(phase: .executingTask, type: .info, message: "Starting task execution..."),
         LogEntry(phase: .executingTask, type: .output, message: "Reading file: /src/main.swift"),
         LogEntry(phase: .executingTask, type: .toolUse, message: "Read: ClaudeManager/Models/Plan.swift"),
         LogEntry(phase: .executingTask, type: .output, message: "Analyzing code structure"),
     ]
     return ExecutionView()
-        .environment(appState)
+        .environment(tab)
         .frame(width: 1000, height: 600)
 }
 
 #Preview("Execution - Completed") {
     let appState = AppState()
-    appState.context?.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
-    appState.context?.phase = .completed
-    appState.context?.plan = Plan(rawText: "", tasks: [
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
+    tab.context.phase = .completed
+    tab.context.plan = Plan(rawText: "", tasks: [
         PlanTask(number: 1, title: "Create project structure", description: "Set up folders", status: .completed),
         PlanTask(number: 2, title: "Implement models", description: "Create data models", status: .completed),
         PlanTask(number: 3, title: "Build services layer", description: "Build services", status: .completed),
     ])
-    appState.context?.currentTaskIndex = 2
-    appState.context?.totalCost = 1.85
-    appState.context?.logs = [
+    tab.context.currentTaskIndex = 2
+    tab.context.totalCost = 1.85
+    tab.context.logs = [
         LogEntry(phase: .completed, type: .result, message: "All tasks completed successfully"),
     ]
     return ExecutionView()
-        .environment(appState)
+        .environment(tab)
         .frame(width: 1000, height: 600)
 }
 
 #Preview("Execution - Waiting for User") {
     let appState = AppState()
-    appState.context?.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
-    appState.context?.phase = .waitingForUser
-    appState.context?.plan = Plan(rawText: "", tasks: [
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject")
+    tab.context.phase = .waitingForUser
+    tab.context.plan = Plan(rawText: "", tasks: [
         PlanTask(number: 1, title: "Implement feature", description: "Building feature", status: .inProgress),
     ])
-    appState.context?.currentTaskIndex = 0
-    appState.context?.totalCost = 0.15
-    appState.context?.logs = [
+    tab.context.currentTaskIndex = 0
+    tab.context.totalCost = 0.15
+    tab.context.logs = [
         LogEntry(phase: .waitingForUser, type: .info, message: "Waiting for user input..."),
     ]
     return ExecutionView()
-        .environment(appState)
+        .environment(tab)
+        .frame(width: 1000, height: 600)
+}
+
+#Preview("Execution - Worktree") {
+    let appState = AppState()
+    let tab = Tab.create(
+        userPreferences: appState.userPreferences,
+        worktreeInfo: WorktreeInfo(
+            originalRepoPath: URL(fileURLWithPath: "/Users/demo/MyProject"),
+            worktreePath: URL(fileURLWithPath: "/Users/demo/MyProject/.worktrees/abc123"),
+            branchName: "claude-worktree-abc123"
+        )
+    )
+    tab.context.projectPath = URL(fileURLWithPath: "/Users/demo/MyProject/.worktrees/abc123")
+    tab.context.phase = .executingTask
+    tab.context.plan = Plan(rawText: "", tasks: [
+        PlanTask(number: 1, title: "Implement feature", description: "Building feature", status: .inProgress),
+    ])
+    tab.context.currentTaskIndex = 0
+    tab.context.totalCost = 0.25
+    tab.context.logs = [
+        LogEntry(phase: .executingTask, type: .info, message: "Working in worktree..."),
+    ]
+    return ExecutionView()
+        .environment(tab)
         .frame(width: 1000, height: 600)
 }
 #endif
