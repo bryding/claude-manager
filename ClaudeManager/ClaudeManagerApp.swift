@@ -27,17 +27,20 @@ struct ClaudeManagerApp: App {
 
             CommandGroup(after: .appSettings) {
                 Section {
-                    Button(appState.activeTab?.context.canResume == true ? "Resume" : "Pause") {
+                    let context = appState.activeTab?.context
+                    let canPauseOrResume = context?.canPause == true || context?.canResume == true
+
+                    Button(context?.canResume == true ? "Resume" : "Pause") {
                         togglePauseResume()
                     }
                     .keyboardShortcut("p", modifiers: .command)
-                    .disabled(appState.activeTab?.context.canPause != true && appState.activeTab?.context.canResume != true)
+                    .disabled(!canPauseOrResume)
 
                     Button("Stop Execution...") {
                         requestStop()
                     }
                     .keyboardShortcut(".", modifiers: .command)
-                    .disabled(appState.activeTab?.context.canStop != true)
+                    .disabled(context?.canStop != true)
                 }
             }
         }
