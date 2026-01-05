@@ -3,7 +3,7 @@ import SwiftUI
 struct ControlsView: View {
     // MARK: - Environment
 
-    @Environment(AppState.self) private var appState
+    @Environment(Tab.self) private var tab
 
     // MARK: - Local State
 
@@ -11,22 +11,22 @@ struct ControlsView: View {
 
     // MARK: - Computed Properties
 
-    private var context: ExecutionContext? {
-        appState.context
+    private var context: ExecutionContext {
+        tab.context
+    }
+
+    private var stateMachine: ExecutionStateMachine {
+        tab.stateMachine
     }
 
     private var showContinueButton: Bool {
-        context?.appearsStuck ?? false
+        context.appearsStuck
     }
 
     // MARK: - Body
 
     var body: some View {
-        if let context {
-            controlsContent(context: context)
-        } else {
-            Text("No active context")
-        }
+        controlsContent(context: context)
     }
 
     private func controlsContent(context: ExecutionContext) -> some View {
@@ -54,7 +54,7 @@ struct ControlsView: View {
             titleVisibility: .visible
         ) {
             Button("Stop", role: .destructive) {
-                appState.stateMachine?.stop()
+                stateMachine.stop()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -64,8 +64,8 @@ struct ControlsView: View {
 
     private var showStopConfirmation: Binding<Bool> {
         Binding(
-            get: { appState.context?.showStopConfirmation ?? false },
-            set: { appState.context?.showStopConfirmation = $0 }
+            get: { context.showStopConfirmation },
+            set: { context.showStopConfirmation = $0 }
         )
     }
 
@@ -217,7 +217,6 @@ struct ControlsView: View {
     // MARK: - Actions
 
     private func togglePauseResume() {
-        guard let context = appState.context, let stateMachine = appState.stateMachine else { return }
         if context.canResume {
             Task {
                 do {
@@ -232,15 +231,14 @@ struct ControlsView: View {
     }
 
     private func requestStop() {
-        appState.context?.showStopConfirmation = true
+        context.showStopConfirmation = true
     }
 
     private func nudgeContinue() {
-        appState.context?.suggestedManualInput = "Please continue with the interview or proceed to plan generation if you have enough information."
+        context.suggestedManualInput = "Please continue with the interview or proceed to plan generation if you have enough information."
     }
 
     private func startExecution() {
-        guard let context = appState.context, let stateMachine = appState.stateMachine else { return }
         Task {
             do {
                 let hasFeature = !context.featureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -269,60 +267,66 @@ struct ControlsView: View {
 #if DEBUG
 #Preview("Controls - Running") {
     let appState = AppState()
-    appState.context?.phase = .executingTask
-    appState.context?.totalCost = 0.42
-    appState.context?.startTime = Date().addingTimeInterval(-125)
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .executingTask
+    tab.context.totalCost = 0.42
+    tab.context.startTime = Date().addingTimeInterval(-125)
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - Paused") {
     let appState = AppState()
-    appState.context?.phase = .paused
-    appState.context?.totalCost = 1.25
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .paused
+    tab.context.totalCost = 1.25
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - Idle") {
     let appState = AppState()
-    appState.context?.phase = .idle
-    appState.context?.totalCost = 0.0
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .idle
+    tab.context.totalCost = 0.0
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - High Context Usage") {
     let appState = AppState()
-    appState.context?.phase = .executingTask
-    appState.context?.totalCost = 0.42
-    appState.context?.lastInputTokenCount = 180_000
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .executingTask
+    tab.context.totalCost = 0.42
+    tab.context.lastInputTokenCount = 180_000
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - Medium Context Usage") {
     let appState = AppState()
-    appState.context?.phase = .executingTask
-    appState.context?.totalCost = 0.25
-    appState.context?.lastInputTokenCount = 160_000
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .executingTask
+    tab.context.totalCost = 0.25
+    tab.context.lastInputTokenCount = 160_000
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 
 #Preview("Controls - Stuck Interview") {
     let appState = AppState()
-    appState.context?.phase = .conductingInterview
-    appState.context?.interviewSession = InterviewSession(featureDescription: "Test feature")
-    appState.context?.sessionId = "test-session"
-    appState.context?.totalCost = 0.10
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.phase = .conductingInterview
+    tab.context.interviewSession = InterviewSession(featureDescription: "Test feature")
+    tab.context.sessionId = "test-session"
+    tab.context.totalCost = 0.10
     return ControlsView()
-        .environment(appState)
+        .environment(tab)
         .padding()
 }
 #endif

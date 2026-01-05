@@ -109,7 +109,7 @@ Add custom in-app tabs to run multiple Claude Code CLI instances simultaneously.
   - Add worktree indicator badge next to project name if tab.worktreeInfo != nil
   - File: `ClaudeManager/Views/ExecutionView.swift`
 
-- [ ] **Task 6.3**: Update `ControlsView.swift`
+- [x] **Task 6.3**: Update `ControlsView.swift`
   - Use `@Environment(Tab.self)` to access tab.context and tab.stateMachine
   - File: `ClaudeManager/Views/ControlsView.swift`
 
