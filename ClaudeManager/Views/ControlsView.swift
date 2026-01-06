@@ -33,9 +33,7 @@ struct ControlsView: View {
                 }
             }
             Spacer()
-            elapsedTimeDisplay
-            contextIndicator
-            costDisplay
+            statsGroup
         }
         .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.controlsView)
         .alert("Error", isPresented: showingError) {
@@ -73,6 +71,16 @@ struct ControlsView: View {
     }
 
     // MARK: - View Sections
+
+    private var statsGroup: some View {
+        HStack(spacing: 16) {
+            elapsedTimeDisplay
+            contextIndicator
+            costDisplay
+        }
+        .fixedSize()
+        .layoutPriority(1)
+    }
 
     private var pauseResumeButton: some View {
         Button(action: togglePauseResume) {
@@ -140,6 +148,7 @@ struct ControlsView: View {
                     .monospacedDigit()
             }
             .font(.callout)
+            .fixedSize()
             .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.elapsedTimeDisplay)
         }
     }
@@ -159,6 +168,7 @@ struct ControlsView: View {
                 .foregroundStyle(contextTextColor)
         }
         .font(.callout)
+        .fixedSize()
         .help("Context window usage: \(formattedContextUsage) used")
     }
 
@@ -171,6 +181,7 @@ struct ControlsView: View {
                 .monospacedDigit()
         }
         .font(.callout)
+        .fixedSize()
         .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.costDisplay)
     }
 
