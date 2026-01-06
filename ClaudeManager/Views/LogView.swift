@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct LogView: View {
@@ -10,6 +11,7 @@ struct LogView: View {
     @State private var searchText = ""
     @State private var selectedFilter: LogFilter = .all
     @State private var autoScroll = true
+    @State private var showCopiedFeedback = false
 
     // MARK: - Computed Properties
 
@@ -98,6 +100,43 @@ struct LogView: View {
             .toggleStyle(.button)
             .buttonStyle(.bordered)
             .accessibilityIdentifier(AccessibilityIdentifiers.LogView.autoScrollToggle)
+
+            Button {
+                copyFilteredLogs()
+            } label: {
+                Label(
+                    showCopiedFeedback ? "Copied!" : "Copy",
+                    systemImage: showCopiedFeedback ? "checkmark" : "doc.on.doc"
+                )
+            }
+            .buttonStyle(.bordered)
+            .disabled(filteredLogs.isEmpty)
+            .accessibilityIdentifier(AccessibilityIdentifiers.LogView.copyAllButton)
+        }
+    }
+
+    // MARK: - Private Methods
+
+    private static let copyTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss.SSS"
+        return formatter
+    }()
+
+    private func copyFilteredLogs() {
+        let formattedLogs = filteredLogs.map { entry in
+            let timestamp = Self.copyTimeFormatter.string(from: entry.timestamp)
+            let type = entry.type.badgeLabel.padding(toLength: 7, withPad: " ", startingAt: 0)
+            return "[\(timestamp)] [\(type)] \(entry.message)"
+        }.joined(separator: "\n")
+
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(formattedLogs, forType: .string)
+
+        // Show feedback
+        showCopiedFeedback = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            showCopiedFeedback = false
         }
     }
 }

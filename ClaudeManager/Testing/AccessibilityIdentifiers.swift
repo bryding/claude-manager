@@ -85,6 +85,7 @@ enum AccessibilityIdentifiers {
         static let logSearchField = "logSearchField"
         static let logFilterPicker = "logFilterPicker"
         static let autoScrollToggle = "autoScrollToggle"
+        static let copyAllButton = "copyAllButton"
     }
 
     // MARK: - TaskListView
