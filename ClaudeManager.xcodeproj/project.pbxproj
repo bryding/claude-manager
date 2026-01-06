@@ -55,6 +55,7 @@
 		B7000001210000010000000F /* TabManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7000001110000010000000F /* TabManagerTests.swift */; };
 		BB000001210000010000000F /* WorktreeServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000001110000010000000F /* WorktreeServiceTests.swift */; };
 		BA000001210000010000000F /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA000001110000010000000F /* AppStateTests.swift */; };
+		C5000001210000010000000F /* TestModeConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5000001110000010000000F /* TestModeConfigurationTests.swift */; };
 		AF000001210000010000000F /* InterviewSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF000001110000010000000F /* InterviewSessionTests.swift */; };
 		B0000001210000010000000F /* ExecutionContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000001110000010000000F /* ExecutionContextTests.swift */; };
 		B2000001210000010000000F /* PromptContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000001110000010000000F /* PromptContentTests.swift */; };
@@ -148,6 +149,7 @@
 		B7000001110000010000000F /* TabManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabManagerTests.swift; sourceTree = "<group>"; };
 		BB000001110000010000000F /* WorktreeServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorktreeServiceTests.swift; sourceTree = "<group>"; };
 		BA000001110000010000000F /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
+		C5000001110000010000000F /* TestModeConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestModeConfigurationTests.swift; sourceTree = "<group>"; };
 		AF000001110000010000000F /* InterviewSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewSessionTests.swift; sourceTree = "<group>"; };
 		B0000001110000010000000F /* ExecutionContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContextTests.swift; sourceTree = "<group>"; };
 		B2000001110000010000000F /* PromptContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptContentTests.swift; sourceTree = "<group>"; };
@@ -351,6 +353,7 @@
 				A2000003110000010000000F /* PlanServiceTests.swift */,
 				B2000001110000010000000F /* PromptContentTests.swift */,
 				B7000001110000010000000F /* TabManagerTests.swift */,
+				C5000001110000010000000F /* TestModeConfigurationTests.swift */,
 				BB000001110000010000000F /* WorktreeServiceTests.swift */,
 			);
 			path = ClaudeManagerTests;
@@ -589,6 +592,7 @@
 				AD000001210000010000000F /* MockBuildTestService.swift in Sources */,
 				B5000001210000010000000F /* MockWorktreeService.swift in Sources */,
 				B7000001210000010000000F /* TabManagerTests.swift in Sources */,
+				C5000001210000010000000F /* TestModeConfigurationTests.swift in Sources */,
 				BB000001210000010000000F /* WorktreeServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

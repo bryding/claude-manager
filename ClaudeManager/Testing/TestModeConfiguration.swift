@@ -10,17 +10,19 @@ enum TestScenario: String, CaseIterable {
 }
 
 final class TestModeConfiguration {
-    static let shared = TestModeConfiguration()
+    static let shared = TestModeConfiguration(
+        arguments: ProcessInfo.processInfo.arguments,
+        environment: ProcessInfo.processInfo.environment
+    )
 
     let isUITesting: Bool
     let scenario: TestScenario?
 
-    private init() {
-        let arguments = ProcessInfo.processInfo.arguments
+    init(arguments: [String], environment: [String: String]) {
         self.isUITesting = arguments.contains("--uitesting")
 
         if isUITesting,
-           let scenarioString = ProcessInfo.processInfo.environment["TEST_SCENARIO"],
+           let scenarioString = environment["TEST_SCENARIO"],
            let scenario = TestScenario(rawValue: scenarioString) {
             self.scenario = scenario
         } else {
