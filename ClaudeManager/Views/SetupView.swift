@@ -65,6 +65,7 @@ struct SetupView: View {
                 .padding(.vertical, 16)
                 .frame(maxWidth: .infinity)
         }
+        .accessibilityIdentifier(AccessibilityIdentifiers.SetupView.setupView)
         .alert("Error", isPresented: showingError) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -109,6 +110,7 @@ struct SetupView: View {
                             await selectDirectory()
                         }
                     }
+                    .accessibilityIdentifier(AccessibilityIdentifiers.SetupView.selectFolderButton)
 
                     if !appState.userPreferences.recentProjects.isEmpty {
                         recentProjectsMenu
@@ -124,6 +126,7 @@ struct SetupView: View {
                         .foregroundStyle(hasProjectPath ? .primary : .secondary)
                         .lineLimit(1)
                         .truncationMode(.middle)
+                        .accessibilityIdentifier(AccessibilityIdentifiers.SetupView.projectPathDisplay)
                     Spacer()
                 }
                 .font(.callout)
@@ -149,6 +152,7 @@ struct SetupView: View {
                             context.removeAllImages()
                         }
                     )
+                    .accessibilityIdentifier(AccessibilityIdentifiers.SetupView.attachedImagesView)
                 }
 
                 PastableTextEditor(text: Bindable(tab.context).featureDescription) { image in
@@ -161,6 +165,7 @@ struct SetupView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
                 )
+                .accessibilityIdentifier(AccessibilityIdentifiers.SetupView.featureDescriptionEditor)
 
                 HStack(spacing: 4) {
                     Image(systemName: "info.circle")
@@ -213,16 +218,19 @@ struct SetupView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
+                .accessibilityIdentifier(AccessibilityIdentifiers.SetupView.useExistingPlanButton)
 
                 Button("Dismiss") {
                     context.existingPlan = nil
                 }
                 .controlSize(.small)
+                .accessibilityIdentifier(AccessibilityIdentifiers.SetupView.dismissPlanButton)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .background(Color.secondary.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: 8))
+            .accessibilityIdentifier(AccessibilityIdentifiers.SetupView.existingPlanBanner)
         }
     }
 
@@ -255,6 +263,7 @@ struct SetupView: View {
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .disabled(!canStart)
+        .accessibilityIdentifier(AccessibilityIdentifiers.SetupView.startButton)
     }
 
     // MARK: - Actions
