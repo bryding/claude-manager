@@ -180,15 +180,10 @@ private struct SelectableLogTextView: NSViewRepresentable {
         paragraphStyle.paragraphSpacing = 6
         paragraphStyle.lineBreakMode = .byWordWrapping
 
-        // Calculate indent for wrapped lines (timestamp + badge + spaces)
-        // This ensures wrapped message text aligns under the message start
-        let prefixWidth: CGFloat = 145 // Approximate width of "HH:mm:ss.SSS badge  "
-        let messageParagraphStyle = NSMutableParagraphStyle()
-        messageParagraphStyle.lineSpacing = 3
-        messageParagraphStyle.paragraphSpacing = 6
-        messageParagraphStyle.lineBreakMode = .byWordWrapping
-        messageParagraphStyle.headIndent = prefixWidth
-        messageParagraphStyle.firstLineHeadIndent = 0
+        // Message paragraph style with indent for wrapped lines
+        // This ensures wrapped text aligns under the message start, not the timestamp
+        let messageParagraphStyle = paragraphStyle.mutableCopy() as! NSMutableParagraphStyle
+        messageParagraphStyle.headIndent = 145 // Approximate width of "HH:mm:ss.SSS badge  "
 
         for (index, entry) in logs.enumerated() {
             if entry.type == .separator {
@@ -230,7 +225,7 @@ private struct SelectableLogTextView: NSViewRepresentable {
                 // Message - prominent, full color with proper wrapping
                 let messageAttrs: [NSAttributedString.Key: Any] = [
                     .font: messageFont,
-                    .foregroundColor: messageColor(for: entry.type),
+                    .foregroundColor: nsColor(for: entry.type),
                     .paragraphStyle: messageParagraphStyle
                 ]
                 result.append(NSAttributedString(string: entry.message, attributes: messageAttrs))
@@ -246,24 +241,6 @@ private struct SelectableLogTextView: NSViewRepresentable {
     }
 
     private func nsColor(for type: LogType) -> NSColor {
-        switch type {
-        case .output:
-            return NSColor.labelColor
-        case .toolUse:
-            return NSColor.systemBlue
-        case .result:
-            return NSColor.systemGreen
-        case .error:
-            return NSColor.systemRed
-        case .info:
-            return NSColor.secondaryLabelColor
-        case .separator:
-            return NSColor.secondaryLabelColor
-        }
-    }
-
-    /// Returns a prominent color for message text (full visibility)
-    private func messageColor(for type: LogType) -> NSColor {
         switch type {
         case .output:
             return NSColor.labelColor
