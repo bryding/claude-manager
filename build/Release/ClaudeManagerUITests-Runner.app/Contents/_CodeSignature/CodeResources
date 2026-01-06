@@ -82,10 +82,10 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			27FkfTECE5S3tUWHNfJ8NFsPAn0=
+			Oe10F4hYskiO/IBxg8KP2fck+tQ=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"dbb1647d31021394b7b5458735f27c345b0f027d" or cdhash H"d574fbbdfa22101c1a71fd6e5716ab8db6367c30"</string>
+			<string>cdhash H"39ed74178858b2488efc807183c28fd9f724fad4" or cdhash H"c76399374a3a1f7110fc6c9ada1baaa6787db53f"</string>
 		</dict>
 		<key>PlugIns/ClaudeManagerUITests.xctest.dSYM/Contents/Info.plist</key>
 		<dict>
@@ -98,21 +98,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			8BYjT7srh37+iAuDjoZj3XQuEGT4/ahN0AYEl3ahbbU=
+			XiL2AEUWrARayeQfhFTh2sjFjtUa12kn1iDaGi2TY+0=
 			</data>
 		</dict>
 		<key>PlugIns/ClaudeManagerUITests.xctest.dSYM/Contents/Resources/Relocations/aarch64/ClaudeManagerUITests.yml</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			lhWXwVVBoxZh7z/osbxcCVJiQDx28/rBscwwrs+D+i8=
+			MXYbLCzUqWaRoC2aha9ok+QM0+53BnXc64iEU3F/aBE=
 			</data>
 		</dict>
 		<key>PlugIns/ClaudeManagerUITests.xctest.dSYM/Contents/Resources/Relocations/x86_64/ClaudeManagerUITests.yml</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			YlVzSmxb75YmENEbtR3EOD9R6ECjUjlPDhH82ZC33SI=
+			9l1AbZS14VRpL4qeFS8vUH13ORXvVhQOlluOoMjqHrY=
 			</data>
 		</dict>
 	</dict>

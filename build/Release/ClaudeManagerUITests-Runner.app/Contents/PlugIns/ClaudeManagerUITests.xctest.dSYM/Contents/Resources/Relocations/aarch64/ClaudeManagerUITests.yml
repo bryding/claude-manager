@@ -2,16 +2,14 @@
 triple:          'arm64-apple-darwin'
 binary-path:     '/Users/benryding/projects/claude-manager/build/Release/ClaudeManagerUITests-Runner.app/Contents/PlugIns/ClaudeManagerUITests.xctest/Contents/MacOS/ClaudeManagerUITests'
 relocations:
-  - { offset: 0xC8D84, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAACfETo', symObjAddr: 0x248, symBinAddr: 0x10C0, symSize: 0x10 }
-  - { offset: 0xC8DB3, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAACMa', symObjAddr: 0x258, symBinAddr: 0x10D0, symSize: 0x20 }
-  - { offset: 0xC8DC7, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC15testAppLaunchesyyKFSbyKXEfu_TA', symObjAddr: 0x278, symBinAddr: 0x10F0, symSize: 0x78 }
-  - { offset: 0xC8DFD, size: 0x8, addend: 0x0, symName: '_$s6XCTest13XCTAssertTrue__4file4lineySbyKXK_SSyXKs12StaticStringVSutFfA0_SSycfu_', symObjAddr: 0x2F0, symBinAddr: 0x1168, symSize: 0xC }
-  - { offset: 0xC8EB9, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC3appSo15XCUIApplicationCSgvgTo', symObjAddr: 0x0, symBinAddr: 0xE78, symSize: 0x10 }
-  - { offset: 0xC8ED1, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC3appSo15XCUIApplicationCSgvgTo', symObjAddr: 0x0, symBinAddr: 0xE78, symSize: 0x10 }
-  - { offset: 0xC8F1A, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC3appSo15XCUIApplicationCSgvsTo', symObjAddr: 0x10, symBinAddr: 0xE88, symSize: 0x34 }
-  - { offset: 0xC8F97, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC14setUpWithErroryyKFTo', symObjAddr: 0x44, symBinAddr: 0xEBC, symSize: 0x84 }
-  - { offset: 0xC900D, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC17tearDownWithErroryyKFTo', symObjAddr: 0xC8, symBinAddr: 0xF40, symSize: 0x2C }
-  - { offset: 0xC9054, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC15testAppLaunchesyyKFTo', symObjAddr: 0xF4, symBinAddr: 0xF6C, symSize: 0x68 }
-  - { offset: 0xC9095, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAACABycfcTo', symObjAddr: 0x1CC, symBinAddr: 0x1044, symSize: 0x48 }
-  - { offset: 0xC90CA, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAACfD', symObjAddr: 0x214, symBinAddr: 0x108C, symSize: 0x34 }
+  - { offset: 0xC8D83, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAACfETo', symObjAddr: 0x23C, symBinAddr: 0x10B4, symSize: 0x10 }
+  - { offset: 0xC8DB2, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAACMa', symObjAddr: 0x24C, symBinAddr: 0x10C4, symSize: 0x20 }
+  - { offset: 0xC8DC6, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC15testAppLaunchesyyKFSbyKXEfu_TA', symObjAddr: 0x26C, symBinAddr: 0x10E4, symSize: 0x78 }
+  - { offset: 0xC8DFC, size: 0x8, addend: 0x0, symName: '_$s6XCTest13XCTAssertTrue__4file4lineySbyKXK_SSyXKs12StaticStringVSutFfA0_SSycfu_', symObjAddr: 0x2E4, symBinAddr: 0x115C, symSize: 0xC }
+  - { offset: 0xC8E48, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC14setUpWithErroryyKF', symObjAddr: 0x0, symBinAddr: 0xE78, symSize: 0x7C }
+  - { offset: 0xC8EBC, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC14setUpWithErroryyKFTo', symObjAddr: 0x7C, symBinAddr: 0xEF4, symSize: 0x40 }
+  - { offset: 0xC8EE9, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC17tearDownWithErroryyKFTo', symObjAddr: 0xBC, symBinAddr: 0xF34, symSize: 0x2C }
+  - { offset: 0xC8F30, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAAC15testAppLaunchesyyKFTo', symObjAddr: 0xE8, symBinAddr: 0xF60, symSize: 0x68 }
+  - { offset: 0xC8F71, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAACABycfcTo', symObjAddr: 0x1C0, symBinAddr: 0x1038, symSize: 0x48 }
+  - { offset: 0xC8FA6, size: 0x8, addend: 0x0, symName: '_$s20ClaudeManagerUITestsAACfD', symObjAddr: 0x208, symBinAddr: 0x1080, symSize: 0x34 }
 ...
