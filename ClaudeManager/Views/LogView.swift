@@ -35,24 +35,7 @@ struct LogView: View {
 
             Divider()
 
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 4) {
-                        ForEach(filteredLogs) { entry in
-                            LogEntryView(entry: entry)
-                                .id(entry.id)
-                        }
-                    }
-                    .padding(8)
-                }
-                .onChange(of: logs.count) { _, _ in
-                    if autoScroll, let lastLog = filteredLogs.last {
-                        withAnimation(.easeOut(duration: 0.2)) {
-                            proxy.scrollTo(lastLog.id, anchor: .bottom)
-                        }
-                    }
-                }
-            }
+            SelectableLogTextView(logs: filteredLogs, autoScroll: autoScroll)
 
             Divider()
 
@@ -131,6 +114,151 @@ struct LogView: View {
         showCopiedFeedback = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             showCopiedFeedback = false
+        }
+    }
+}
+
+// MARK: - Selectable Log Text View
+
+private struct SelectableLogTextView: NSViewRepresentable {
+    let logs: [LogEntry]
+    let autoScroll: Bool
+
+    func makeNSView(context: Context) -> NSScrollView {
+        let scrollView = NSScrollView()
+        scrollView.hasVerticalScroller = true
+        scrollView.hasHorizontalScroller = false
+        scrollView.autohidesScrollers = true
+        scrollView.borderType = .noBorder
+        scrollView.drawsBackground = false
+
+        let textView = NSTextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.drawsBackground = false
+        textView.textContainerInset = NSSize(width: 8, height: 8)
+        textView.isAutomaticQuoteSubstitutionEnabled = false
+        textView.isAutomaticDashSubstitutionEnabled = false
+        textView.isAutomaticTextReplacementEnabled = false
+
+        // Configure text container for proper wrapping
+        textView.textContainer?.widthTracksTextView = true
+        textView.textContainer?.containerSize = NSSize(
+            width: CGFloat.greatestFiniteMagnitude,
+            height: CGFloat.greatestFiniteMagnitude
+        )
+        textView.isHorizontallyResizable = false
+        textView.isVerticallyResizable = true
+        textView.autoresizingMask = [.width]
+
+        scrollView.documentView = textView
+        context.coordinator.textView = textView
+        context.coordinator.scrollView = scrollView
+
+        return scrollView
+    }
+
+    func updateNSView(_ scrollView: NSScrollView, context: Context) {
+        guard let textView = scrollView.documentView as? NSTextView else { return }
+
+        let attributedString = buildAttributedString(for: logs)
+        textView.textStorage?.setAttributedString(attributedString)
+
+        if autoScroll && !logs.isEmpty {
+            DispatchQueue.main.async {
+                textView.scrollToEndOfDocument(nil)
+            }
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    class Coordinator {
+        weak var textView: NSTextView?
+        weak var scrollView: NSScrollView?
+    }
+
+    private func buildAttributedString(for logs: [LogEntry]) -> NSAttributedString {
+        let result = NSMutableAttributedString()
+        let monoFont = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+        let captionMonoFont = NSFont.monospacedSystemFont(ofSize: 10, weight: .regular)
+        let badgeFont = NSFont.systemFont(ofSize: 9, weight: .medium)
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 2
+        paragraphStyle.paragraphSpacing = 4
+
+        for (index, entry) in logs.enumerated() {
+            if entry.type == .separator {
+                // Add separator line
+                let separatorAttrs: [NSAttributedString.Key: Any] = [
+                    .font: NSFont.systemFont(ofSize: 10, weight: .medium),
+                    .foregroundColor: NSColor.secondaryLabelColor,
+                    .paragraphStyle: paragraphStyle
+                ]
+                let separator = NSAttributedString(
+                    string: "─────────── \(entry.message) ───────────\n",
+                    attributes: separatorAttrs
+                )
+                result.append(separator)
+            } else {
+                // Timestamp
+                let timestamp = LogTimeFormatter.shared.string(from: entry.timestamp)
+                let timestampAttrs: [NSAttributedString.Key: Any] = [
+                    .font: captionMonoFont,
+                    .foregroundColor: NSColor.secondaryLabelColor
+                ]
+                result.append(NSAttributedString(string: timestamp, attributes: timestampAttrs))
+
+                // Space
+                result.append(NSAttributedString(string: "  "))
+
+                // Type badge
+                let badgeAttrs: [NSAttributedString.Key: Any] = [
+                    .font: badgeFont,
+                    .foregroundColor: nsColor(for: entry.type),
+                    .backgroundColor: nsColor(for: entry.type).withAlphaComponent(0.15)
+                ]
+                let badge = entry.type.badgeLabel.padding(toLength: 6, withPad: " ", startingAt: 0)
+                result.append(NSAttributedString(string: badge, attributes: badgeAttrs))
+
+                // Space
+                result.append(NSAttributedString(string: "  "))
+
+                // Message
+                let messageAttrs: [NSAttributedString.Key: Any] = [
+                    .font: monoFont,
+                    .foregroundColor: nsColor(for: entry.type),
+                    .paragraphStyle: paragraphStyle
+                ]
+                result.append(NSAttributedString(string: entry.message, attributes: messageAttrs))
+
+                // Newline (except for last entry)
+                if index < logs.count - 1 {
+                    result.append(NSAttributedString(string: "\n"))
+                }
+            }
+        }
+
+        return result
+    }
+
+    private func nsColor(for type: LogType) -> NSColor {
+        switch type {
+        case .output:
+            return NSColor.labelColor
+        case .toolUse:
+            return NSColor.systemBlue
+        case .result:
+            return NSColor.systemGreen
+        case .error:
+            return NSColor.systemRed
+        case .info:
+            return NSColor.secondaryLabelColor
+        case .separator:
+            return NSColor.secondaryLabelColor
         }
     }
 }
