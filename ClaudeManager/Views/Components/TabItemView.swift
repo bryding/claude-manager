@@ -64,6 +64,7 @@ struct TabItemView: View {
         }
         .buttonStyle(.plain)
         .opacity(isHovering || isActive ? 1 : 0)
+        .allowsHitTesting(isHovering || isActive)
         .accessibilityIdentifier(AccessibilityIdentifiers.TabBar.tabCloseButton(tab.id.uuidString))
     }
 

@@ -10,12 +10,15 @@ struct MainView: View {
     var body: some View {
         VStack(spacing: 0) {
             TabBarView(tabManager: appState.tabManager)
+                .fixedSize(horizontal: false, vertical: true)
+                .zIndex(1)
                 .accessibilityIdentifier(AccessibilityIdentifiers.MainView.tabBar)
 
             Divider()
 
             contentArea
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .zIndex(0)
                 .accessibilityIdentifier(AccessibilityIdentifiers.MainView.contentArea)
         }
         .accessibilityIdentifier(AccessibilityIdentifiers.MainView.mainView)

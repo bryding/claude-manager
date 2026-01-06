@@ -8,26 +8,26 @@ struct TabBarView: View {
     // MARK: - Body
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 4) {
-                ForEach(tabManager.tabs) { tab in
-                    TabItemView(
-                        tab: tab,
-                        isActive: tab.id == tabManager.activeTabId,
-                        onSelect: { tabManager.selectTab(tab) },
-                        onClose: {
-                            Task {
-                                try? await tabManager.closeTab(tab)
-                            }
+        HStack(spacing: 4) {
+            ForEach(tabManager.tabs) { tab in
+                TabItemView(
+                    tab: tab,
+                    isActive: tab.id == tabManager.activeTabId,
+                    onSelect: { tabManager.selectTab(tab) },
+                    onClose: {
+                        Task {
+                            try? await tabManager.closeTab(tab)
                         }
-                    )
-                }
-
-                addTabButton
+                    }
+                )
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
+
+            addTabButton
+
+            Spacer()
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
