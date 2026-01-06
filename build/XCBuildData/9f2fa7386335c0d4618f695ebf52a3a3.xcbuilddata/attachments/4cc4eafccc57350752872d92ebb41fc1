@@ -1,0 +1,15 @@
+{
+  "" : {
+    "const-values" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManagerUITests.build/Objects-normal/x86_64/ClaudeManagerUITests-master.swiftconstvalues",
+    "dependencies" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManagerUITests.build/Objects-normal/x86_64/ClaudeManagerUITests-master.d",
+    "diagnostics" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManagerUITests.build/Objects-normal/x86_64/ClaudeManagerUITests-master.dia",
+    "emit-module-dependencies" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManagerUITests.build/Objects-normal/x86_64/ClaudeManagerUITests-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManagerUITests.build/Objects-normal/x86_64/ClaudeManagerUITests-master-emit-module.dia",
+    "swift-dependencies" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManagerUITests.build/Objects-normal/x86_64/ClaudeManagerUITests-master.swiftdeps"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManagerUITests/ClaudeManagerUITests.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManagerUITests.build/Objects-normal/x86_64/ClaudeManagerUITests.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManagerUITests.build/Objects-normal/x86_64/ClaudeManagerUITests.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManagerUITests.build/Objects-normal/x86_64/ClaudeManagerUITests.o"
+  }
+}

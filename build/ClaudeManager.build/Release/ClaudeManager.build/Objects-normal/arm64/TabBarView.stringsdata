@@ -1,0 +1,16 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/Views/Components/TabBarView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "New Tab",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 45
+        }
+      }
+    ]
+  },
+  "version": 1
+}

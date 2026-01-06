@@ -1,0 +1,9 @@
+"/Users/benryding/projects/claude-manager/ClaudeManager/ClaudeManagerApp.swift":
+  dependencies: "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/arm64/ClaudeManager-master.d"
+  swiftmodule: "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/arm64/ClaudeManager.swiftmodule"
+  const-values: "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/arm64/ClaudeManager-master.swiftconstvalues"
+  abi-baseline-json: "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/arm64/ClaudeManager.abi.json"
+  diagnostics: "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/arm64/ClaudeManager-master.dia"
+  swiftsourceinfo: "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/arm64/ClaudeManager.swiftsourceinfo"
+  swiftdoc: "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/arm64/ClaudeManager.swiftdoc"
+  objc-header: "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/arm64/ClaudeManager-Swift.h"

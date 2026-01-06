@@ -1,0 +1,16 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/Views/TaskListView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Task %lld: %@",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 31
+        }
+      }
+    ]
+  },
+  "version": 1
+}

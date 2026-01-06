@@ -1,0 +1,16 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/Views/Components/AttachedImagesView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Remove All",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 36
+        }
+      }
+    ]
+  },
+  "version": 1
+}

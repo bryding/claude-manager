@@ -1,0 +1,48 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/Views/ExecutionView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Progress",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 55
+        }
+      },
+      {
+        "comment": "",
+        "key": "New Feature",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 92
+        }
+      },
+      {
+        "comment": "",
+        "key": "Change Project",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 99
+        }
+      },
+      {
+        "comment": "",
+        "key": "Project",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 77
+        }
+      },
+      {
+        "comment": "",
+        "key": "Worktree",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 109
+        }
+      }
+    ]
+  },
+  "version": 1
+}

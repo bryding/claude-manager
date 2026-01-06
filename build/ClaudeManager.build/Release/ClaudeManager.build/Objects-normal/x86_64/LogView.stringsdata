@@ -1,0 +1,32 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/Views/LogView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Filter",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Search logs...",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 66
+        }
+      },
+      {
+        "comment": "",
+        "key": "Auto-scroll",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 93
+        }
+      }
+    ]
+  },
+  "version": 1
+}

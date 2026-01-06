@@ -1,0 +1,64 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/ClaudeManagerApp.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "New Tab",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 14
+        }
+      },
+      {
+        "comment": "",
+        "key": "Close Tab",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 21
+        }
+      },
+      {
+        "comment": "",
+        "key": "Show Next Tab",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "Show Previous Tab",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 35
+        }
+      },
+      {
+        "comment": "",
+        "key": "Resume",
+        "location": {
+          "startingColumn": 57,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pause",
+        "location": {
+          "startingColumn": 68,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "Stop Execution...",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 53
+        }
+      }
+    ]
+  },
+  "version": 1
+}

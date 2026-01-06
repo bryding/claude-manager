@@ -1,0 +1,265 @@
+{
+  "" : {
+    "const-values" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeManager-master.swiftconstvalues",
+    "dependencies" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeManager-master.d",
+    "diagnostics" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeManager-master.dia",
+    "emit-module-dependencies" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeManager-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeManager-master-emit-module.dia",
+    "swift-dependencies" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeManager-master.swiftdeps"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/ClaudeManagerApp.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeManagerApp.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeManagerApp.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeManagerApp.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/AttachedImage.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AttachedImage.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AttachedImage.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AttachedImage.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/AutonomousConfiguration.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AutonomousConfiguration.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AutonomousConfiguration.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AutonomousConfiguration.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/ClaudeStreamMessage.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeStreamMessage.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeStreamMessage.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeStreamMessage.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/CommandResult.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/CommandResult.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/CommandResult.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/CommandResult.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/ContinuationSummary.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ContinuationSummary.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ContinuationSummary.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ContinuationSummary.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/ExecutionPhase.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionPhase.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionPhase.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionPhase.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/InterviewSession.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/InterviewSession.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/InterviewSession.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/InterviewSession.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/LogEntry.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/LogEntry.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/LogEntry.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/LogEntry.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/Plan.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/Plan.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/Plan.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/Plan.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/ProjectConfiguration.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ProjectConfiguration.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ProjectConfiguration.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ProjectConfiguration.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/PromptContent.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PromptContent.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PromptContent.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PromptContent.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/RetryConfiguration.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/RetryConfiguration.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/RetryConfiguration.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/RetryConfiguration.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/Tab.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/Tab.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/Tab.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/Tab.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/TimeoutConfiguration.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TimeoutConfiguration.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TimeoutConfiguration.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TimeoutConfiguration.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Models/WorktreeInfo.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/WorktreeInfo.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/WorktreeInfo.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/WorktreeInfo.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/BuildTestService.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/BuildTestService.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/BuildTestService.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/BuildTestService.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/ClaudeCLIService.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeCLIService.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeCLIService.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeCLIService.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/ClaudeMessageParser.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeMessageParser.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeMessageParser.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeMessageParser.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/ClaudeProcess.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeProcess.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeProcess.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeProcess.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/GitService.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/GitService.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/GitService.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/GitService.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/PlanService.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PlanService.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PlanService.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PlanService.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/Protocols/BuildTestServiceProtocol.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/BuildTestServiceProtocol.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/BuildTestServiceProtocol.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/BuildTestServiceProtocol.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/Protocols/ClaudeCLIServiceProtocol.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeCLIServiceProtocol.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeCLIServiceProtocol.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ClaudeCLIServiceProtocol.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/Protocols/GitServiceProtocol.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/GitServiceProtocol.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/GitServiceProtocol.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/GitServiceProtocol.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/Protocols/WorktreeServiceProtocol.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/WorktreeServiceProtocol.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/WorktreeServiceProtocol.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/WorktreeServiceProtocol.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Services/WorktreeService.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/WorktreeService.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/WorktreeService.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/WorktreeService.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/State/AppState.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AppState.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AppState.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AppState.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/State/ExecutionContext.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionContext.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionContext.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionContext.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/State/ExecutionStateMachine.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionStateMachine.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionStateMachine.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionStateMachine.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/State/TabManager.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabManager.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabManager.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabManager.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/State/UserPreferences.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/UserPreferences.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/UserPreferences.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/UserPreferences.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Utilities/ImageProcessor.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ImageProcessor.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ImageProcessor.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ImageProcessor.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/Components/AttachedImagesView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AttachedImagesView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AttachedImagesView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/AttachedImagesView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/Components/ImageThumbnailView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ImageThumbnailView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ImageThumbnailView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ImageThumbnailView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/Components/PastableTextEditor.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PastableTextEditor.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PastableTextEditor.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PastableTextEditor.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/Components/TabBarView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabBarView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabBarView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabBarView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/Components/TabItemView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabItemView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabItemView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabItemView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/ControlsView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ControlsView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ControlsView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ControlsView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/EmptyTabView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/EmptyTabView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/EmptyTabView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/EmptyTabView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/ExecutionView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ExecutionView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/LogView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/LogView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/LogView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/LogView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/MainView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/MainView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/MainView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/MainView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/ManualInputView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ManualInputView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ManualInputView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/ManualInputView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/PhaseIndicatorView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PhaseIndicatorView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PhaseIndicatorView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/PhaseIndicatorView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/SetupView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/SetupView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/SetupView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/SetupView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/TabContentView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabContentView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabContentView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TabContentView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/TaskFailureView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TaskFailureView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TaskFailureView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TaskFailureView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/TaskListView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TaskListView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TaskListView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/TaskListView.o"
+  },
+  "/Users/benryding/projects/claude-manager/ClaudeManager/Views/UserQuestionView.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/UserQuestionView.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/UserQuestionView.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/UserQuestionView.o"
+  },
+  "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/benryding/projects/claude-manager/build/ClaudeManager.build/Release/ClaudeManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.o"
+  }
+}

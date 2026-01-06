@@ -1,0 +1,24 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/Views/EmptyTabView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "No Open Tabs",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 16
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create New Tab",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 20
+        }
+      }
+    ]
+  },
+  "version": 1
+}

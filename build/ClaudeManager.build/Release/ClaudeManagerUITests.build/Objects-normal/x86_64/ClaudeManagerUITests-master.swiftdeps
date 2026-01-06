@@ -1,0 +1,6 @@
+version: "Apple Swift version 6.1.2 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)"
+options: "c1081555ecb53651b09d7167752c34b91024dbccd49812a5f4bdc265e73a52b3"
+build_start_time: [1767665128, 563406000]
+build_end_time: [1767665132, 258113000]
+inputs:
+  "/Users/benryding/projects/claude-manager/ClaudeManagerUITests/ClaudeManagerUITests.swift": [1767664947, 322991738]

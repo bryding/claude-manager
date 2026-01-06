@@ -1,0 +1,16 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/Views/Components/ImageThumbnailView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "%@ • %@",
+        "location": {
+          "startingColumn": 15,
+          "startingLine": 41
+        }
+      }
+    ]
+  },
+  "version": 1
+}

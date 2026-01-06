@@ -1,0 +1,40 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/Views/UserQuestionView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Error",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 58
+        }
+      },
+      {
+        "comment": "",
+        "key": "Your Response",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 133
+        }
+      },
+      {
+        "comment": "",
+        "key": "Skip",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 150
+        }
+      },
+      {
+        "comment": "",
+        "key": "Submit",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 164
+        }
+      }
+    ]
+  },
+  "version": 1
+}

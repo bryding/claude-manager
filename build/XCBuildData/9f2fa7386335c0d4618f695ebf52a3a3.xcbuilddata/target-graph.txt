@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'ClaudeManagerUITests' in project 'ClaudeManager'
+➜ Explicit dependency on target 'ClaudeManager' in project 'ClaudeManager'
+Target 'ClaudeManager' in project 'ClaudeManager' (no dependencies)

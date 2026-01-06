@@ -1,0 +1,120 @@
+{
+  "source": "/Users/benryding/projects/claude-manager/ClaudeManager/Views/SetupView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Error",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "Project Directory",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 104
+        }
+      },
+      {
+        "comment": "",
+        "key": "Feature Description",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 136
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 69
+        }
+      },
+      {
+        "comment": "",
+        "key": "Claude Manager",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 94
+        }
+      },
+      {
+        "comment": "",
+        "key": "Automated development with Claude Code",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 97
+        }
+      },
+      {
+        "comment": "",
+        "key": "Select Folder...",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 107
+        }
+      },
+      {
+        "comment": "",
+        "key": "Recent Projects",
+        "location": {
+          "startingColumn": 15,
+          "startingLine": 240
+        }
+      },
+      {
+        "comment": "",
+        "key": "Describe the feature you want to implement:",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 138
+        }
+      },
+      {
+        "comment": "",
+        "key": "You can paste or drag images (PNG, JPEG) to include with your description",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 167
+        }
+      },
+      {
+        "comment": "",
+        "key": "Found plan.md with %lld task%@",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 206
+        }
+      },
+      {
+        "comment": "",
+        "key": "Use Existing Plan",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 211
+        }
+      },
+      {
+        "comment": "",
+        "key": "Dismiss",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 217
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start Development Loop",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 251
+        }
+      }
+    ]
+  },
+  "version": 1
+}
