@@ -26,13 +26,13 @@ Fix bugs in the interview modal, question handling, and transition to autonomous
 - [x] Only call `showNextQueuedQuestion()` if `context.pendingQuestion == nil`
 - [x] Add new helper method `showNextQueuedQuestion(mode:)` that dequeues and displays
 
-## Task 4: Process Question Queue After Answering
+## Task 4: Process Question Queue After Answering ✅
 **Description:** Modify answerQuestion to check queue before resuming the main loop.
 
-- [ ] After clearing `pendingQuestion`, check `context.hasQueuedQuestions`
-- [ ] If queue has items, call `showNextQueuedQuestion()` and return early
-- [ ] Only call `runLoop()` when queue is empty
-- [ ] Remove `guard context.sessionId != nil` check (may not have sessionId on subsequent calls)
+- [x] After clearing `pendingQuestion`, check `context.hasQueuedQuestions`
+- [x] If queue has items, call `showNextQueuedQuestion()` and return early
+- [x] Only call `runLoop()` when queue is empty
+- [x] Remove `guard context.sessionId != nil` check (may not have sessionId on subsequent calls)
 
 ## Task 5: Add Unit Tests for Question Queue
 **Description:** Write tests to verify the question queuing behavior works correctly.
