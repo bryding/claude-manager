@@ -67,46 +67,35 @@ final class AppState {
 
     private static func configureTabForScenario(_ tab: Tab, scenario: TestScenario) {
         let context = tab.context
+        let mockProjectPath = URL(fileURLWithPath: "/mock/project/path")
 
         switch scenario {
         case .idle:
-            context.phase = .idle
+            break
 
         case .setupWithProject:
-            context.phase = .idle
-            context.projectPath = URL(fileURLWithPath: "/mock/project/path")
+            context.projectPath = mockProjectPath
 
         case .executingTask:
+            configureActiveExecution(context, projectPath: mockProjectPath)
             context.phase = .executingTask
-            context.projectPath = URL(fileURLWithPath: "/mock/project/path")
-            context.featureDescription = "Mock feature for UI testing"
-            context.startTime = Date()
-            context.plan = makeMockPlan()
-            context.currentTaskIndex = 0
 
         case .waitingForUserQuestion:
+            configureActiveExecution(context, projectPath: mockProjectPath)
             context.phase = .waitingForUser
-            context.projectPath = URL(fileURLWithPath: "/mock/project/path")
-            context.featureDescription = "Mock feature for UI testing"
-            context.startTime = Date()
-            context.plan = makeMockPlan()
-            context.currentTaskIndex = 0
             context.pendingQuestion = makeMockPendingQuestion()
 
         case .completed:
+            configureActiveExecution(context, projectPath: mockProjectPath)
             context.phase = .completed
-            context.projectPath = URL(fileURLWithPath: "/mock/project/path")
-            context.featureDescription = "Mock feature for UI testing"
             context.startTime = Date().addingTimeInterval(-60)
             context.plan = makeMockPlan(allCompleted: true)
             context.totalCost = 0.25
 
         case .failed:
+            configureActiveExecution(context, projectPath: mockProjectPath)
             context.phase = .failed
-            context.projectPath = URL(fileURLWithPath: "/mock/project/path")
-            context.featureDescription = "Mock feature for UI testing"
             context.startTime = Date().addingTimeInterval(-30)
-            context.plan = makeMockPlan()
             context.currentTaskIndex = 1
             context.addError(
                 message: "Mock error for UI testing",
@@ -114,6 +103,14 @@ final class AppState {
                 isRecoverable: false
             )
         }
+    }
+
+    private static func configureActiveExecution(_ context: ExecutionContext, projectPath: URL) {
+        context.projectPath = projectPath
+        context.featureDescription = "Mock feature for UI testing"
+        context.startTime = Date()
+        context.plan = makeMockPlan()
+        context.currentTaskIndex = 0
     }
 
     private static func makeMockPlan(allCompleted: Bool = false) -> Plan {
