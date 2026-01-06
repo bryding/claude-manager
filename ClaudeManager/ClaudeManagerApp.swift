@@ -6,7 +6,8 @@ struct ClaudeManagerApp: App {
 
     init() {
         let config = TestModeConfiguration.shared
-        if config.isUITesting, let scenario = config.scenario {
+        if config.isUITesting {
+            let scenario = config.scenario ?? .idle
             _appState = State(initialValue: AppState.forUITesting(scenario: scenario))
         } else {
             _appState = State(initialValue: AppState())

@@ -79,17 +79,27 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
             }
         }
 
-        // Fallback: try to find using shell
+        // Fallback: try to find using shell (with timeout to prevent hanging)
         let process = Process()
         let pipe = Pipe()
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
-        process.arguments = ["-l", "-c", "which claude"]
+        process.arguments = ["-c", "which claude"]
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
 
         do {
             try process.run()
-            process.waitUntilExit()
+
+            let deadline = Date().addingTimeInterval(2.0)
+            while process.isRunning && Date() < deadline {
+                Thread.sleep(forTimeInterval: 0.1)
+            }
+
+            if process.isRunning {
+                process.terminate()
+                return "/usr/local/bin/claude"
+            }
+
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             if let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
                !path.isEmpty {
