@@ -152,8 +152,6 @@ private struct SelectableLogTextView: NSViewRepresentable {
         textView.autoresizingMask = [.width]
 
         scrollView.documentView = textView
-        context.coordinator.textView = textView
-        context.coordinator.scrollView = scrollView
 
         return scrollView
     }
@@ -169,15 +167,6 @@ private struct SelectableLogTextView: NSViewRepresentable {
                 textView.scrollToEndOfDocument(nil)
             }
         }
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-
-    class Coordinator {
-        weak var textView: NSTextView?
-        weak var scrollView: NSScrollView?
     }
 
     private func buildAttributedString(for logs: [LogEntry]) -> NSAttributedString {
@@ -300,66 +289,6 @@ private enum LogTimeFormatter {
         formatter.dateFormat = "HH:mm:ss.SSS"
         return formatter
     }()
-}
-
-// MARK: - Log Entry View
-
-private struct LogEntryView: View {
-    let entry: LogEntry
-
-    var body: some View {
-        if entry.type == .separator {
-            separatorView
-        } else {
-            regularEntryView
-        }
-    }
-
-    private var separatorView: some View {
-        HStack(spacing: 12) {
-            Rectangle()
-                .fill(Color.secondary.opacity(0.3))
-                .frame(height: 1)
-
-            Text(entry.message)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
-
-            Rectangle()
-                .fill(Color.secondary.opacity(0.3))
-                .frame(height: 1)
-        }
-        .padding(.vertical, 12)
-    }
-
-    private var regularEntryView: some View {
-        HStack(alignment: .top, spacing: 8) {
-            Text(LogTimeFormatter.shared.string(from: entry.timestamp))
-                .font(.caption.monospaced())
-                .foregroundStyle(.secondary)
-                .frame(width: 85, alignment: .leading)
-
-            typeBadge
-                .frame(width: 70, alignment: .leading)
-
-            Text(entry.message)
-                .font(.body.monospaced())
-                .foregroundStyle(entry.type.color)
-                .textSelection(.enabled)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(.vertical, 2)
-    }
-
-    private var typeBadge: some View {
-        Text(entry.type.badgeLabel)
-            .font(.caption2.weight(.medium))
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(entry.type.color.opacity(0.15))
-            .foregroundStyle(entry.type.color)
-            .cornerRadius(4)
-    }
 }
 
 // MARK: - Preview
