@@ -117,15 +117,9 @@ struct LogView: View {
 
     // MARK: - Private Methods
 
-    private static let copyTimeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss.SSS"
-        return formatter
-    }()
-
     private func copyFilteredLogs() {
         let formattedLogs = filteredLogs.map { entry in
-            let timestamp = Self.copyTimeFormatter.string(from: entry.timestamp)
+            let timestamp = LogTimeFormatter.shared.string(from: entry.timestamp)
             let type = entry.type.badgeLabel.padding(toLength: 7, withPad: " ", startingAt: 0)
             return "[\(timestamp)] [\(type)] \(entry.message)"
         }.joined(separator: "\n")
@@ -170,16 +164,20 @@ private enum LogFilter: String, CaseIterable, Identifiable {
     }
 }
 
-// MARK: - Log Entry View
+// MARK: - Log Time Formatter
 
-private struct LogEntryView: View {
-    let entry: LogEntry
-
-    private static let timeFormatter: DateFormatter = {
+private enum LogTimeFormatter {
+    static let shared: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss.SSS"
         return formatter
     }()
+}
+
+// MARK: - Log Entry View
+
+private struct LogEntryView: View {
+    let entry: LogEntry
 
     var body: some View {
         if entry.type == .separator {
@@ -208,7 +206,7 @@ private struct LogEntryView: View {
 
     private var regularEntryView: some View {
         HStack(alignment: .top, spacing: 8) {
-            Text(Self.timeFormatter.string(from: entry.timestamp))
+            Text(LogTimeFormatter.shared.string(from: entry.timestamp))
                 .font(.caption.monospaced())
                 .foregroundStyle(.secondary)
                 .frame(width: 85, alignment: .leading)
