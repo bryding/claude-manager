@@ -8,10 +8,12 @@ struct TaskListView: View {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(tasks) { task in
                     TaskRowView(task: task)
+                        .accessibilityIdentifier(AccessibilityIdentifiers.TaskListView.task(task.number))
                 }
             }
             .padding(.vertical, 8)
         }
+        .accessibilityIdentifier(AccessibilityIdentifiers.TaskListView.taskListView)
     }
 }
 
@@ -26,6 +28,7 @@ private struct TaskRowView: View {
         HStack(alignment: .top, spacing: 12) {
             statusIcon
                 .frame(width: 20, height: 20)
+                .accessibilityIdentifier(AccessibilityIdentifiers.TaskListView.taskStatus(task.number))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Task \(task.number): \(task.title)")

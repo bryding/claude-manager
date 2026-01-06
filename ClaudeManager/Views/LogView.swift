@@ -56,6 +56,7 @@ struct LogView: View {
 
             ManualInputView()
         }
+        .accessibilityIdentifier(AccessibilityIdentifiers.LogView.logView)
     }
 
     private var filterBar: some View {
@@ -65,6 +66,7 @@ struct LogView: View {
                     .foregroundStyle(.secondary)
                 TextField("Search logs...", text: $searchText)
                     .textFieldStyle(.plain)
+                    .accessibilityIdentifier(AccessibilityIdentifiers.LogView.logSearchField)
                 if !searchText.isEmpty {
                     Button {
                         searchText = ""
@@ -86,6 +88,7 @@ struct LogView: View {
             }
             .pickerStyle(.segmented)
             .frame(maxWidth: 300)
+            .accessibilityIdentifier(AccessibilityIdentifiers.LogView.logFilterPicker)
 
             Spacer()
 
@@ -94,6 +97,7 @@ struct LogView: View {
             }
             .toggleStyle(.button)
             .buttonStyle(.bordered)
+            .accessibilityIdentifier(AccessibilityIdentifiers.LogView.autoScrollToggle)
         }
     }
 }
