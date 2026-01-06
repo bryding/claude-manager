@@ -66,12 +66,20 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
 
     private static func findClaudePath() -> String {
         // Try common installation paths
-        let commonPaths = [
+        var commonPaths = [
             "/usr/local/bin/claude",
             "/opt/homebrew/bin/claude",
-            NSHomeDirectory() + "/.nvm/versions/node/v22.15.0/bin/claude",
             NSHomeDirectory() + "/.npm-global/bin/claude"
         ]
+
+        // Dynamically search NVM versions directory for claude
+        let nvmVersionsPath = NSHomeDirectory() + "/.nvm/versions/node"
+        if let nodeVersions = try? FileManager.default.contentsOfDirectory(atPath: nvmVersionsPath) {
+            for version in nodeVersions.sorted().reversed() {
+                let claudePath = "\(nvmVersionsPath)/\(version)/bin/claude"
+                commonPaths.append(claudePath)
+            }
+        }
 
         for path in commonPaths {
             if FileManager.default.isExecutableFile(atPath: path) {
@@ -79,18 +87,19 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
             }
         }
 
-        // Fallback: try to find using shell (with timeout to prevent hanging)
+        // Fallback: try to find using login shell (with timeout to prevent hanging)
+        // Use login shell (-l) to get full PATH including nvm, homebrew, etc.
         let process = Process()
         let pipe = Pipe()
-        process.executableURL = URL(fileURLWithPath: "/bin/sh")
-        process.arguments = ["-c", "which claude"]
+        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+        process.arguments = ["-l", "-c", "which claude"]
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
 
         do {
             try process.run()
 
-            let deadline = Date().addingTimeInterval(2.0)
+            let deadline = Date().addingTimeInterval(5.0)
             while process.isRunning && Date() < deadline {
                 Thread.sleep(forTimeInterval: 0.1)
             }
@@ -102,7 +111,8 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
 
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             if let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
-               !path.isEmpty {
+               !path.isEmpty,
+               FileManager.default.isExecutableFile(atPath: path) {
                 return path
             }
         } catch {

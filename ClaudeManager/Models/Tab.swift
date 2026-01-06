@@ -47,9 +47,10 @@ final class Tab: Identifiable {
         worktreeInfo: WorktreeInfo? = nil
     ) -> Tab {
         let context = ExecutionContext()
+        let effectiveClaudeService = claudeService ?? ClaudeCLIService(executablePath: userPreferences.claudeCLIPath)
         let stateMachine = ExecutionStateMachine(
             context: context,
-            claudeService: claudeService ?? ClaudeCLIService(),
+            claudeService: effectiveClaudeService,
             planService: planService ?? PlanService(),
             gitService: gitService ?? GitService(),
             buildTestService: buildTestService ?? BuildTestService(),

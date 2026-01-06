@@ -9,6 +9,7 @@ final class UserPreferences {
         static let lastProjectPath = "lastProjectPath"
         static let recentProjects = "recentProjects"
         static let autonomousConfig = "autonomousConfig"
+        static let claudeCLIPath = "claudeCLIPath"
     }
 
     static let maxRecentProjects = 10
@@ -55,6 +56,16 @@ final class UserPreferences {
             if let data = try? JSONEncoder().encode(newValue) {
                 defaults.set(data, forKey: Keys.autonomousConfig)
             }
+        }
+    }
+
+    /// Custom path to Claude CLI executable. If nil, auto-detection is used.
+    var claudeCLIPath: String? {
+        get {
+            defaults.string(forKey: Keys.claudeCLIPath)
+        }
+        set {
+            defaults.set(newValue, forKey: Keys.claudeCLIPath)
         }
     }
 
