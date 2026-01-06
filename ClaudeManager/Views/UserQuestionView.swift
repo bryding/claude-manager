@@ -55,6 +55,7 @@ struct UserQuestionView: View {
         }
         .padding(24)
         .frame(minWidth: 500, idealWidth: 550, minHeight: 400)
+        .accessibilityIdentifier(AccessibilityIdentifiers.UserQuestionView.userQuestionView)
         .alert("Error", isPresented: showingError, actions: {}) {
             Text(errorMessage ?? "")
         }
@@ -77,6 +78,7 @@ struct UserQuestionView: View {
             Text(question.header)
                 .font(.title2)
                 .fontWeight(.semibold)
+                .accessibilityIdentifier(AccessibilityIdentifiers.UserQuestionView.questionHeader)
         }
     }
 
@@ -86,6 +88,7 @@ struct UserQuestionView: View {
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
+            .accessibilityIdentifier(AccessibilityIdentifiers.UserQuestionView.questionText)
     }
 
     private var optionsSection: some View {
@@ -99,12 +102,14 @@ struct UserQuestionView: View {
             }
             .padding(.vertical, 8)
         }
+        .accessibilityIdentifier(AccessibilityIdentifiers.UserQuestionView.optionsSection)
     }
 
     private var singleSelectOptions: some View {
-        ForEach(question.options, id: \.label) { option in
+        ForEach(Array(question.options.enumerated()), id: \.element.label) { index, option in
             OptionRow(
                 option: option,
+                index: index,
                 isSelected: selectedOptions.contains(option.label),
                 isMultiSelect: false,
                 action: { selectedOptions = [option.label] }
@@ -113,9 +118,10 @@ struct UserQuestionView: View {
     }
 
     private var multiSelectOptions: some View {
-        ForEach(question.options, id: \.label) { option in
+        ForEach(Array(question.options.enumerated()), id: \.element.label) { index, option in
             OptionRow(
                 option: option,
+                index: index,
                 isSelected: selectedOptions.contains(option.label),
                 isMultiSelect: true,
                 action: {
@@ -142,6 +148,7 @@ struct UserQuestionView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
                 )
+                .accessibilityIdentifier(AccessibilityIdentifiers.UserQuestionView.freeformTextEditor)
         }
     }
 
@@ -153,6 +160,7 @@ struct UserQuestionView: View {
             .buttonStyle(.bordered)
             .controlSize(.large)
             .disabled(isSubmitting)
+            .accessibilityIdentifier(AccessibilityIdentifiers.UserQuestionView.skipButton)
 
             Button(action: submit) {
                 HStack(spacing: 8) {
@@ -168,6 +176,7 @@ struct UserQuestionView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(!canSubmit || isSubmitting)
+            .accessibilityIdentifier(AccessibilityIdentifiers.UserQuestionView.submitButton)
         }
     }
 
@@ -205,6 +214,7 @@ struct UserQuestionView: View {
 
 private struct OptionRow: View {
     let option: AskUserQuestionInput.Option
+    let index: Int
     let isSelected: Bool
     let isMultiSelect: Bool
     let action: () -> Void
@@ -247,6 +257,7 @@ private struct OptionRow: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(AccessibilityIdentifiers.UserQuestionView.option(index))
     }
 }
 
