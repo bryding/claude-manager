@@ -3,7 +3,7 @@ import Foundation
 final class MockClaudeCLIServiceForUITests: ClaudeCLIServiceProtocol, @unchecked Sendable {
     private static let mockModel = "claude-sonnet-4-20250514"
     private static let mockSessionId = "mock-session-id"
-    private static let messageDelayNanoseconds: UInt64 = 100_000_000
+    private static let messageDelayNs: UInt64 = 100_000_000
 
     private let scenario: TestScenario
     private var _isRunning = false
@@ -56,17 +56,20 @@ final class MockClaudeCLIServiceForUITests: ClaudeCLIServiceProtocol, @unchecked
     }
 
     func terminate() {
-        shouldTerminate = true
-        _isRunning = false
+        stop()
     }
 
     func interrupt() {
+        stop()
+    }
+
+    private func stop() {
         shouldTerminate = true
         _isRunning = false
     }
 
     private func simulateDelay() async {
-        try? await Task.sleep(nanoseconds: Self.messageDelayNanoseconds)
+        try? await Task.sleep(nanoseconds: Self.messageDelayNs)
     }
 
     // MARK: - Scenario-Based Responses
