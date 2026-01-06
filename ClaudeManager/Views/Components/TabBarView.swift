@@ -43,6 +43,7 @@ struct TabBarView: View {
                 tabManager.createTab()
             }
             .help("New Tab")
+            .accessibilityIdentifier(AccessibilityIdentifiers.TabBar.addTabButton)
     }
 }
 

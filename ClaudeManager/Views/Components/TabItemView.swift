@@ -33,6 +33,7 @@ struct TabItemView: View {
         .onHover { hovering in
             isHovering = hovering
         }
+        .accessibilityIdentifier(AccessibilityIdentifiers.TabBar.tab(tab.id.uuidString))
     }
 
     // MARK: - Subviews
@@ -41,6 +42,7 @@ struct TabItemView: View {
         Circle()
             .fill(statusColor)
             .frame(width: 8, height: 8)
+            .accessibilityIdentifier(AccessibilityIdentifiers.TabBar.tabStatusDot(tab.id.uuidString))
     }
 
     private var labelText: some View {
@@ -62,6 +64,7 @@ struct TabItemView: View {
         }
         .buttonStyle(.plain)
         .opacity(isHovering || isActive ? 1 : 0)
+        .accessibilityIdentifier(AccessibilityIdentifiers.TabBar.tabCloseButton(tab.id.uuidString))
     }
 
     // MARK: - Styling
