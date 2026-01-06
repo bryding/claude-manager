@@ -2,7 +2,16 @@ import SwiftUI
 
 @main
 struct ClaudeManagerApp: App {
-    @State private var appState = AppState()
+    @State private var appState: AppState
+
+    init() {
+        let config = TestModeConfiguration.shared
+        if config.isUITesting, let scenario = config.scenario {
+            _appState = State(initialValue: AppState.forUITesting(scenario: scenario))
+        } else {
+            _appState = State(initialValue: AppState())
+        }
+    }
 
     var body: some Scene {
         WindowGroup {
