@@ -37,6 +37,7 @@ struct ControlsView: View {
             contextIndicator
             costDisplay
         }
+        .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.controlsView)
         .alert("Error", isPresented: showingError) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -50,6 +51,7 @@ struct ControlsView: View {
             Button("Stop", role: .destructive) {
                 stateMachine.stop()
             }
+            .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.stopConfirmationDialog)
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure you want to stop? Current task progress will be lost.")
@@ -82,6 +84,11 @@ struct ControlsView: View {
         .buttonStyle(.bordered)
         .controlSize(.regular)
         .disabled(!context.canPause && !context.canResume)
+        .accessibilityIdentifier(
+            context.canResume
+                ? AccessibilityIdentifiers.ControlsView.resumeButton
+                : AccessibilityIdentifiers.ControlsView.pauseButton
+        )
     }
 
     private var stopButton: some View {
@@ -95,6 +102,7 @@ struct ControlsView: View {
         .controlSize(.regular)
         .tint(.red)
         .disabled(!context.canStop)
+        .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.stopButton)
     }
 
     private var continueButton: some View {
@@ -107,6 +115,7 @@ struct ControlsView: View {
         .buttonStyle(.bordered)
         .controlSize(.regular)
         .tint(.orange)
+        .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.continueButton)
     }
 
     private var startButton: some View {
@@ -118,6 +127,7 @@ struct ControlsView: View {
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.regular)
+        .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.startButton)
     }
 
     private var elapsedTimeDisplay: some View {
@@ -130,6 +140,7 @@ struct ControlsView: View {
                     .monospacedDigit()
             }
             .font(.callout)
+            .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.elapsedTimeDisplay)
         }
     }
 
@@ -160,6 +171,7 @@ struct ControlsView: View {
                 .monospacedDigit()
         }
         .font(.callout)
+        .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.costDisplay)
     }
 
     // MARK: - Helpers

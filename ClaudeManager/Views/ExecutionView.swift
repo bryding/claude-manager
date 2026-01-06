@@ -20,6 +20,7 @@ struct ExecutionView: View {
 
             LogView()
         }
+        .accessibilityIdentifier(AccessibilityIdentifiers.ExecutionView.executionView)
     }
 
     // MARK: - View Sections
@@ -33,6 +34,7 @@ struct ExecutionView: View {
                 hasQuestion: context.pendingQuestion != nil,
                 isInterviewComplete: context.interviewSession?.isComplete ?? false
             )
+            .accessibilityIdentifier(AccessibilityIdentifiers.ExecutionView.phaseIndicator)
 
             progressSection
 
@@ -59,10 +61,12 @@ struct ExecutionView: View {
                 Text(progressPercentage)
                     .font(.subheadline.monospacedDigit())
                     .fontWeight(.medium)
+                    .accessibilityIdentifier(AccessibilityIdentifiers.ExecutionView.progressPercentage)
             }
 
             ProgressView(value: context.progress)
                 .progressViewStyle(.linear)
+                .accessibilityIdentifier(AccessibilityIdentifiers.ExecutionView.progressBar)
         }
     }
 
