@@ -146,6 +146,7 @@ struct ControlsView: View {
                 Text(formattedElapsedTime)
                     .fontWeight(.medium)
                     .monospacedDigit()
+                    .fixedSize()
             }
             .font(.callout)
             .fixedSize()
@@ -154,18 +155,20 @@ struct ControlsView: View {
     }
 
     private var contextIndicator: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 4) {
             Circle()
                 .fill(contextStatusColor)
                 .frame(width: 8, height: 8)
 
             Text("Context:")
                 .foregroundStyle(.secondary)
+                .fixedSize()
 
             Text(formattedContextUsage)
                 .fontWeight(.medium)
                 .monospacedDigit()
                 .foregroundStyle(contextTextColor)
+                .fixedSize()
         }
         .font(.callout)
         .fixedSize()
@@ -176,9 +179,11 @@ struct ControlsView: View {
         HStack(spacing: 4) {
             Text("Cost:")
                 .foregroundStyle(.secondary)
+                .fixedSize()
             Text(formattedCost)
                 .fontWeight(.medium)
                 .monospacedDigit()
+                .fixedSize()
         }
         .font(.callout)
         .fixedSize()
