@@ -378,6 +378,7 @@ final class ExecutionStateMachineTests: XCTestCase {
     func testAnswerQuestionCallsRunLoopWhenQueueEmpty() async throws {
         context.sessionId = "test-session"
         context.projectPath = URL(fileURLWithPath: "/tmp/project")
+        context.currentInterviewQuestion = "Only question?"
         context.pendingQuestion = PendingQuestion(
             toolUseId: "tool-1",
             question: AskUserQuestionInput.Question(
@@ -390,15 +391,11 @@ final class ExecutionStateMachineTests: XCTestCase {
         context.questionQueue = []
         context.phase = .waitingForUser
         context.interviewSession = InterviewSession(featureDescription: "Test")
-        context.interviewSession?.markComplete()
 
-        mockClaudeService.executeResult = ClaudeExecutionResult(
-            result: "ok",
-            sessionId: "test-session",
-            totalCostUsd: 0.0,
-            durationMs: 100,
-            isError: false
-        )
+        mockClaudeService.messagesToSend = [
+            makeAssistantMessage(text: "INTERVIEW_COMPLETE")
+        ]
+        configureMockWithPlan(tasks: [(1, "Task", "Description")])
 
         let executeCallsBefore = mockClaudeService.executeCallCount
 
