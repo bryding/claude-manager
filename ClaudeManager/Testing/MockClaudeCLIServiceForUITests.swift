@@ -1,6 +1,10 @@
 import Foundation
 
 final class MockClaudeCLIServiceForUITests: ClaudeCLIServiceProtocol, @unchecked Sendable {
+    private static let mockModel = "claude-sonnet-4-20250514"
+    private static let mockSessionId = "mock-session-id"
+    private static let messageDelayNanoseconds: UInt64 = 100_000_000
+
     private let scenario: TestScenario
     private var _isRunning = false
     private var shouldTerminate = false
@@ -61,10 +65,8 @@ final class MockClaudeCLIServiceForUITests: ClaudeCLIServiceProtocol, @unchecked
         _isRunning = false
     }
 
-    // MARK: - Simulated Delays
-
     private func simulateDelay() async {
-        try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+        try? await Task.sleep(nanoseconds: Self.messageDelayNanoseconds)
     }
 
     // MARK: - Scenario-Based Responses
@@ -138,10 +140,10 @@ final class MockClaudeCLIServiceForUITests: ClaudeCLIServiceProtocol, @unchecked
     private func makeSystemMessage() -> ClaudeStreamMessage {
         .system(SystemMessage(
             subtype: "init",
-            sessionId: "mock-session-id",
+            sessionId: Self.mockSessionId,
             cwd: "/mock/project/path",
             tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"],
-            model: "claude-sonnet-4-20250514",
+            model: Self.mockModel,
             permissionMode: "plan",
             mcpServers: [],
             slashCommands: ["/commit", "/review"],
@@ -150,14 +152,17 @@ final class MockClaudeCLIServiceForUITests: ClaudeCLIServiceProtocol, @unchecked
         ))
     }
 
-    private func makeAssistantTextMessage(_ text: String) -> ClaudeStreamMessage {
+    private func makeAssistantMessage(
+        content: [ContentBlock],
+        stopReason: String = "end_turn"
+    ) -> ClaudeStreamMessage {
         .assistant(AssistantMessage(
             message: MessageContent(
                 id: "msg_\(UUID().uuidString.prefix(8))",
-                model: "claude-sonnet-4-20250514",
+                model: Self.mockModel,
                 role: "assistant",
-                content: [.text(TextContent(text: text))],
-                stopReason: "end_turn",
+                content: content,
+                stopReason: stopReason,
                 usage: UsageInfo(
                     inputTokens: 100,
                     outputTokens: 50,
@@ -165,9 +170,13 @@ final class MockClaudeCLIServiceForUITests: ClaudeCLIServiceProtocol, @unchecked
                     cacheReadInputTokens: nil
                 )
             ),
-            sessionId: "mock-session-id",
+            sessionId: Self.mockSessionId,
             parentToolUseId: nil
         ))
+    }
+
+    private func makeAssistantTextMessage(_ text: String) -> ClaudeStreamMessage {
+        makeAssistantMessage(content: [.text(TextContent(text: text))])
     }
 
     private func makeAskUserQuestionMessage() -> ClaudeStreamMessage {
@@ -186,28 +195,15 @@ final class MockClaudeCLIServiceForUITests: ClaudeCLIServiceProtocol, @unchecked
             ]
         ]
 
-        return .assistant(AssistantMessage(
-            message: MessageContent(
-                id: "msg_\(UUID().uuidString.prefix(8))",
-                model: "claude-sonnet-4-20250514",
-                role: "assistant",
-                content: [
-                    .toolUse(ToolUseContent(
-                        id: "toolu_\(UUID().uuidString.prefix(8))",
-                        name: "AskUserQuestion",
-                        input: AnyCodable(questionInput)
-                    ))
-                ],
-                stopReason: "tool_use",
-                usage: UsageInfo(
-                    inputTokens: 150,
-                    outputTokens: 75,
-                    cacheCreationInputTokens: nil,
-                    cacheReadInputTokens: nil
-                )
-            ),
-            sessionId: "mock-session-id",
-            parentToolUseId: nil
-        ))
+        return makeAssistantMessage(
+            content: [
+                .toolUse(ToolUseContent(
+                    id: "toolu_\(UUID().uuidString.prefix(8))",
+                    name: "AskUserQuestion",
+                    input: AnyCodable(questionInput)
+                ))
+            ],
+            stopReason: "tool_use"
+        )
     }
 }
