@@ -13,6 +13,7 @@
 		C3000002210000010000000F /* TestModeConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3000001110000010000000F /* TestModeConfiguration.swift */; };
 		C4000001210000010000000F /* MockClaudeCLIServiceForUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4000001110000010000000F /* MockClaudeCLIServiceForUITests.swift */; };
 		C1000001210000010000000F /* ClaudeManagerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000001110000010000000F /* ClaudeManagerUITests.swift */; };
+		C6000001210000010000000F /* ClaudeManagerUITestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6000001110000010000000F /* ClaudeManagerUITestCase.swift */; };
 		A9000001210000010000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A9000001110000010000000F /* Assets.xcassets */; };
 		A9000002210000010000000F /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9000002110000010000000F /* UserPreferences.swift */; };
 		B6000001210000010000000F /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6000001110000010000000F /* Tab.swift */; };
