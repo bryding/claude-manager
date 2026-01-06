@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C2000001210000010000000F /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000001110000010000000F /* AccessibilityIdentifiers.swift */; };
+		C2000002210000010000000F /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000001110000010000000F /* AccessibilityIdentifiers.swift */; };
 		C1000001210000010000000F /* ClaudeManagerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000001110000010000000F /* ClaudeManagerUITests.swift */; };
 		A9000001210000010000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A9000001110000010000000F /* Assets.xcassets */; };
 		A9000002210000010000000F /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9000002110000010000000F /* UserPreferences.swift */; };
@@ -95,6 +97,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C2000001110000010000000F /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
 		C1000000010000010000000F /* ClaudeManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClaudeManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1000001110000010000000F /* ClaudeManagerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeManagerUITests.swift; sourceTree = "<group>"; };
 		A9000001110000010000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -211,6 +214,7 @@
 				A1000003110000010000000F /* Models */,
 				A1000004110000010000000F /* Services */,
 				A1000005110000010000000F /* State */,
+				C2000003110000010000000F /* Testing */,
 				B3000002110000010000000F /* Utilities */,
 				A1000006110000010000000F /* Views */,
 			);
@@ -366,6 +370,14 @@
 			path = Mocks;
 			sourceTree = "<group>";
 		};
+		C2000003110000010000000F /* Testing */ = {
+			isa = PBXGroup;
+			children = (
+				C2000001110000010000000F /* AccessibilityIdentifiers.swift */,
+			);
+			path = Testing;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -495,6 +507,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2000001210000010000000F /* AccessibilityIdentifiers.swift in Sources */,
 				A1000001210000010000000F /* ClaudeManagerApp.swift in Sources */,
 				A1000003210000010000000F /* ClaudeStreamMessage.swift in Sources */,
 				A1000007210000010000000F /* ClaudeMessageParser.swift in Sources */,
@@ -575,6 +588,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2000002210000010000000F /* AccessibilityIdentifiers.swift in Sources */,
 				C1000001210000010000000F /* ClaudeManagerUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
