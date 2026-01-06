@@ -80,6 +80,50 @@ final class TabManagerTests: XCTestCase {
         XCTAssertEqual(tabManager.tabs[1].id, tab2.id)
     }
 
+    // MARK: - Insert Tab
+
+    func testInsertTabAddsTabToList() {
+        let tabManager = TabManager()
+        let tab = Tab.create(userPreferences: UserPreferences())
+
+        tabManager.insertTab(tab)
+
+        XCTAssertEqual(tabManager.tabs.count, 1)
+        XCTAssertEqual(tabManager.tabs.first?.id, tab.id)
+    }
+
+    func testInsertTabDoesNotSetActiveTab() {
+        let tabManager = TabManager()
+        let tab = Tab.create(userPreferences: UserPreferences())
+
+        tabManager.insertTab(tab)
+
+        XCTAssertNil(tabManager.activeTabId)
+    }
+
+    func testInsertTabPreservesExistingTabs() {
+        let tabManager = TabManager()
+        let existingTab = tabManager.createTab()
+        let newTab = Tab.create(userPreferences: UserPreferences())
+
+        tabManager.insertTab(newTab)
+
+        XCTAssertEqual(tabManager.tabs.count, 2)
+        XCTAssertTrue(tabManager.tabs.contains { $0.id == existingTab.id })
+        XCTAssertTrue(tabManager.tabs.contains { $0.id == newTab.id })
+    }
+
+    func testInsertTabAppendsToEnd() {
+        let tabManager = TabManager()
+        _ = tabManager.createTab()
+        _ = tabManager.createTab()
+        let insertedTab = Tab.create(userPreferences: UserPreferences())
+
+        tabManager.insertTab(insertedTab)
+
+        XCTAssertEqual(tabManager.tabs.last?.id, insertedTab.id)
+    }
+
     // MARK: - Close Tab
 
     func testCloseTabRemovesTab() async throws {

@@ -129,4 +129,86 @@ final class AppStateTests: XCTestCase {
         XCTAssertTrue(stateMachine2 === tab2.stateMachine)
         XCTAssertFalse(stateMachine1 === stateMachine2)
     }
+
+    // MARK: - forUITesting Factory Method
+
+    func testForUITestingCreatesAppStateWithOneTab() {
+        let appState = AppState.forUITesting(scenario: .idle)
+
+        XCTAssertEqual(appState.tabManager.tabs.count, 1)
+        XCTAssertNotNil(appState.activeTab)
+    }
+
+    func testForUITestingIdleScenarioSetsIdlePhase() {
+        let appState = AppState.forUITesting(scenario: .idle)
+
+        XCTAssertEqual(appState.context?.phase, .idle)
+        XCTAssertNil(appState.context?.projectPath)
+    }
+
+    func testForUITestingSetupWithProjectScenarioSetsProjectPath() {
+        let appState = AppState.forUITesting(scenario: .setupWithProject)
+
+        XCTAssertEqual(appState.context?.phase, .idle)
+        XCTAssertNotNil(appState.context?.projectPath)
+        XCTAssertEqual(appState.context?.projectPath?.path, "/mock/project/path")
+    }
+
+    func testForUITestingExecutingTaskScenarioConfiguresActiveExecution() {
+        let appState = AppState.forUITesting(scenario: .executingTask)
+
+        XCTAssertEqual(appState.context?.phase, .executingTask)
+        XCTAssertNotNil(appState.context?.projectPath)
+        XCTAssertEqual(appState.context?.featureDescription, "Mock feature for UI testing")
+        XCTAssertNotNil(appState.context?.startTime)
+        XCTAssertNotNil(appState.context?.plan)
+        XCTAssertEqual(appState.context?.plan?.tasks.count, 3)
+        XCTAssertEqual(appState.context?.currentTaskIndex, 0)
+    }
+
+    func testForUITestingWaitingForUserQuestionScenarioSetsPendingQuestion() {
+        let appState = AppState.forUITesting(scenario: .waitingForUserQuestion)
+
+        XCTAssertEqual(appState.context?.phase, .waitingForUser)
+        XCTAssertNotNil(appState.context?.pendingQuestion)
+        XCTAssertEqual(appState.context?.pendingQuestion?.question.header, "Approach")
+        XCTAssertEqual(appState.context?.pendingQuestion?.question.options.count, 2)
+    }
+
+    func testForUITestingCompletedScenarioSetsCompletedState() {
+        let appState = AppState.forUITesting(scenario: .completed)
+
+        XCTAssertEqual(appState.context?.phase, .completed)
+        XCTAssertEqual(appState.context?.totalCost, 0.25)
+        XCTAssertNotNil(appState.context?.plan)
+
+        let allTasksCompleted = appState.context?.plan?.tasks.allSatisfy { $0.status == .completed }
+        XCTAssertTrue(allTasksCompleted == true)
+    }
+
+    func testForUITestingFailedScenarioSetsErrorState() {
+        let appState = AppState.forUITesting(scenario: .failed)
+
+        XCTAssertEqual(appState.context?.phase, .failed)
+        XCTAssertEqual(appState.context?.currentTaskIndex, 1)
+        XCTAssertEqual(appState.context?.errors.count, 1)
+        XCTAssertEqual(appState.context?.errors.first?.message, "Mock error for UI testing")
+        XCTAssertEqual(appState.context?.errors.first?.isRecoverable, false)
+    }
+
+    func testForUITestingUsesCorrectTabLabel() {
+        let appState = AppState.forUITesting(scenario: .idle)
+
+        XCTAssertEqual(appState.activeTab?.label, "Test Tab")
+    }
+
+    func testForUITestingAllScenariosCreateValidState() {
+        for scenario in TestScenario.allCases {
+            let appState = AppState.forUITesting(scenario: scenario)
+
+            XCTAssertEqual(appState.tabManager.tabs.count, 1, "Scenario \(scenario) should have 1 tab")
+            XCTAssertNotNil(appState.activeTab, "Scenario \(scenario) should have active tab")
+            XCTAssertNotNil(appState.context, "Scenario \(scenario) should have context")
+        }
+    }
 }
