@@ -107,6 +107,7 @@
 		C4000001110000010000000F /* MockClaudeCLIServiceForUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockClaudeCLIServiceForUITests.swift; sourceTree = "<group>"; };
 		C1000000010000010000000F /* ClaudeManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClaudeManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1000001110000010000000F /* ClaudeManagerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeManagerUITests.swift; sourceTree = "<group>"; };
+		C6000001110000010000000F /* ClaudeManagerUITestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeManagerUITestCase.swift; sourceTree = "<group>"; };
 		A9000001110000010000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A9000002110000010000000F /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
 		AA000001110000010000000F /* AutonomousConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomousConfiguration.swift; sourceTree = "<group>"; };
@@ -363,6 +364,7 @@
 		C1000000510000010000000F /* ClaudeManagerUITests */ = {
 			isa = PBXGroup;
 			children = (
+				C6000001110000010000000F /* ClaudeManagerUITestCase.swift */,
 				C1000001110000010000000F /* ClaudeManagerUITests.swift */,
 			);
 			path = ClaudeManagerUITests;
@@ -604,6 +606,7 @@
 			files = (
 				C2000002210000010000000F /* AccessibilityIdentifiers.swift in Sources */,
 				C3000002210000010000000F /* TestModeConfiguration.swift in Sources */,
+				C6000001210000010000000F /* ClaudeManagerUITestCase.swift in Sources */,
 				C1000001210000010000000F /* ClaudeManagerUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
