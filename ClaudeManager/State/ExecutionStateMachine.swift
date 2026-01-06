@@ -1485,7 +1485,6 @@ final class ExecutionStateMachine {
 
         // Step 3: Clear context
         context.sessionId = nil
-        context.lastInputTokenCount = 0
         context.isHandoffInProgress = false
 
         context.addLog(type: .info, message: "Context cleared, resuming with continuation summary")

@@ -303,7 +303,7 @@ struct ControlsView: View {
     let tab = Tab.create(userPreferences: appState.userPreferences)
     tab.context.phase = .executingTask
     tab.context.totalCost = 0.42
-    tab.context.lastInputTokenCount = 180_000
+    tab.context.totalInputTokens = 180_000
     return ControlsView()
         .environment(tab)
         .padding()
@@ -314,7 +314,7 @@ struct ControlsView: View {
     let tab = Tab.create(userPreferences: appState.userPreferences)
     tab.context.phase = .executingTask
     tab.context.totalCost = 0.25
-    tab.context.lastInputTokenCount = 160_000
+    tab.context.totalInputTokens = 160_000
     return ControlsView()
         .environment(tab)
         .padding()

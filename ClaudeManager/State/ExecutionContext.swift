@@ -120,7 +120,6 @@ final class ExecutionContext {
 
     var totalInputTokens: Int = 0
     var totalOutputTokens: Int = 0
-    var lastInputTokenCount: Int = 0
 
     // MARK: - Context Window Management
 
@@ -238,8 +237,8 @@ final class ExecutionContext {
     }
 
     var contextPercentRemaining: Double {
-        guard lastInputTokenCount > 0 else { return 1.0 }
-        let used = Double(lastInputTokenCount) / Double(Self.contextWindowSize)
+        guard totalInputTokens > 0 else { return 1.0 }
+        let used = Double(totalInputTokens) / Double(Self.contextWindowSize)
         return max(0.0, 1.0 - used)
     }
 
@@ -285,7 +284,6 @@ final class ExecutionContext {
         errors = []
         totalInputTokens = 0
         totalOutputTokens = 0
-        lastInputTokenCount = 0
         continuationSummary = nil
         isHandoffInProgress = false
         currentRetryAttempt = 0
@@ -324,7 +322,6 @@ final class ExecutionContext {
         errors = []
         totalInputTokens = 0
         totalOutputTokens = 0
-        lastInputTokenCount = 0
         continuationSummary = nil
         isHandoffInProgress = false
         currentRetryAttempt = 0
@@ -423,7 +420,6 @@ final class ExecutionContext {
     func accumulateUsage(inputTokens: Int, outputTokens: Int) {
         totalInputTokens += inputTokens
         totalOutputTokens += outputTokens
-        lastInputTokenCount = inputTokens
     }
 
     // MARK: - Image Management
