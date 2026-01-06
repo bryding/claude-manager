@@ -51,6 +51,12 @@ final class TabManager {
         return tab
     }
 
+    /// Inserts a pre-configured tab into the tab list.
+    /// Used primarily for testing scenarios where tabs need custom services.
+    func insertTab(_ tab: Tab) {
+        tabs.append(tab)
+    }
+
     /// Sets the project path for a tab, creating a worktree if the project is already in use.
     func setProjectPath(_ projectPath: URL, for tab: Tab) async throws {
         let isDuplicate = tabs.contains { existingTab in
