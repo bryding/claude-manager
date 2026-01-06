@@ -171,13 +171,24 @@ private struct SelectableLogTextView: NSViewRepresentable {
 
     private func buildAttributedString(for logs: [LogEntry]) -> NSAttributedString {
         let result = NSMutableAttributedString()
-        let monoFont = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
-        let captionMonoFont = NSFont.monospacedSystemFont(ofSize: 10, weight: .regular)
-        let badgeFont = NSFont.systemFont(ofSize: 9, weight: .medium)
+        let messageFont = NSFont.monospacedSystemFont(ofSize: 13, weight: .medium)
+        let timestampFont = NSFont.monospacedSystemFont(ofSize: 10, weight: .regular)
+        let badgeFont = NSFont.monospacedSystemFont(ofSize: 9, weight: .regular)
 
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 2
-        paragraphStyle.paragraphSpacing = 4
+        paragraphStyle.lineSpacing = 3
+        paragraphStyle.paragraphSpacing = 6
+        paragraphStyle.lineBreakMode = .byWordWrapping
+
+        // Calculate indent for wrapped lines (timestamp + badge + spaces)
+        // This ensures wrapped message text aligns under the message start
+        let prefixWidth: CGFloat = 145 // Approximate width of "HH:mm:ss.SSS badge  "
+        let messageParagraphStyle = NSMutableParagraphStyle()
+        messageParagraphStyle.lineSpacing = 3
+        messageParagraphStyle.paragraphSpacing = 6
+        messageParagraphStyle.lineBreakMode = .byWordWrapping
+        messageParagraphStyle.headIndent = prefixWidth
+        messageParagraphStyle.firstLineHeadIndent = 0
 
         for (index, entry) in logs.enumerated() {
             if entry.type == .separator {
@@ -196,31 +207,31 @@ private struct SelectableLogTextView: NSViewRepresentable {
                 // Timestamp
                 let timestamp = LogTimeFormatter.shared.string(from: entry.timestamp)
                 let timestampAttrs: [NSAttributedString.Key: Any] = [
-                    .font: captionMonoFont,
-                    .foregroundColor: NSColor.secondaryLabelColor
+                    .font: timestampFont,
+                    .foregroundColor: NSColor.tertiaryLabelColor
                 ]
                 result.append(NSAttributedString(string: timestamp, attributes: timestampAttrs))
 
                 // Space
-                result.append(NSAttributedString(string: "  "))
+                result.append(NSAttributedString(string: " "))
 
-                // Type badge
+                // Type badge - subtle, lowercase, dimmed
                 let badgeAttrs: [NSAttributedString.Key: Any] = [
                     .font: badgeFont,
-                    .foregroundColor: nsColor(for: entry.type),
-                    .backgroundColor: nsColor(for: entry.type).withAlphaComponent(0.15)
+                    .foregroundColor: nsColor(for: entry.type).withAlphaComponent(0.6)
                 ]
-                let badge = entry.type.badgeLabel.padding(toLength: 6, withPad: " ", startingAt: 0)
-                result.append(NSAttributedString(string: badge, attributes: badgeAttrs))
+                let badge = entry.type.badgeLabel.lowercased()
+                let paddedBadge = badge.padding(toLength: 6, withPad: " ", startingAt: 0)
+                result.append(NSAttributedString(string: paddedBadge, attributes: badgeAttrs))
 
                 // Space
-                result.append(NSAttributedString(string: "  "))
+                result.append(NSAttributedString(string: " "))
 
-                // Message
+                // Message - prominent, full color with proper wrapping
                 let messageAttrs: [NSAttributedString.Key: Any] = [
-                    .font: monoFont,
-                    .foregroundColor: nsColor(for: entry.type),
-                    .paragraphStyle: paragraphStyle
+                    .font: messageFont,
+                    .foregroundColor: messageColor(for: entry.type),
+                    .paragraphStyle: messageParagraphStyle
                 ]
                 result.append(NSAttributedString(string: entry.message, attributes: messageAttrs))
 
@@ -235,6 +246,24 @@ private struct SelectableLogTextView: NSViewRepresentable {
     }
 
     private func nsColor(for type: LogType) -> NSColor {
+        switch type {
+        case .output:
+            return NSColor.labelColor
+        case .toolUse:
+            return NSColor.systemBlue
+        case .result:
+            return NSColor.systemGreen
+        case .error:
+            return NSColor.systemRed
+        case .info:
+            return NSColor.secondaryLabelColor
+        case .separator:
+            return NSColor.secondaryLabelColor
+        }
+    }
+
+    /// Returns a prominent color for message text (full visibility)
+    private func messageColor(for type: LogType) -> NSColor {
         switch type {
         case .output:
             return NSColor.labelColor
