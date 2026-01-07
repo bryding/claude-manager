@@ -24,6 +24,7 @@ struct AutonomousConfiguration: Sendable, Equatable, Codable {
     var runBuildAfterCommit: Bool
     var runTestsAfterCommit: Bool
     var projectContext: String
+    var maxTestDuration: TimeInterval
 
     init(
         autoAnswerEnabled: Bool = false,
@@ -31,7 +32,8 @@ struct AutonomousConfiguration: Sendable, Equatable, Codable {
         maxTaskRetries: Int = 3,
         runBuildAfterCommit: Bool = false,
         runTestsAfterCommit: Bool = false,
-        projectContext: String = ""
+        projectContext: String = "",
+        maxTestDuration: TimeInterval = 30.0
     ) {
         self.autoAnswerEnabled = autoAnswerEnabled
         self.autoFailureHandling = autoFailureHandling
@@ -39,6 +41,7 @@ struct AutonomousConfiguration: Sendable, Equatable, Codable {
         self.runBuildAfterCommit = runBuildAfterCommit
         self.runTestsAfterCommit = runTestsAfterCommit
         self.projectContext = projectContext
+        self.maxTestDuration = maxTestDuration
     }
 
     static let `default` = AutonomousConfiguration()

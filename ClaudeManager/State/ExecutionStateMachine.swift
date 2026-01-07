@@ -1163,6 +1163,7 @@ final class ExecutionStateMachine {
 
             """
 
+        let maxDuration = Int(context.autonomousConfig.maxTestDuration)
         let prompt = """
             \(projectContextSection)\(taskSection)Write unit tests for the code implemented in this task.
 
@@ -1182,6 +1183,16 @@ final class ExecutionStateMachine {
             - Invalid inputs: Test rejection of bad data
             - Failure scenarios: Test error paths are handled gracefully
             - Error messages: Verify meaningful error information
+
+            ## CRITICAL: Test Performance Requirements
+            Tests MUST be fast to keep the development loop efficient.
+            - Total test suite must complete in under \(maxDuration) seconds
+            - Individual tests should complete in milliseconds, not seconds
+            - NEVER use real network calls - use mocks or stubs
+            - NEVER use real file system operations - use in-memory alternatives
+            - NEVER use sleep/delays - use async test patterns if timing is needed
+            - Minimize expensive setup/teardown - prefer lightweight test fixtures
+            - If a test requires slow resources, mark it as a separate integration test or skip it
 
             ## Guidelines
             - Follow Arrange-Act-Assert pattern for test structure
@@ -1279,7 +1290,15 @@ final class ExecutionStateMachine {
         context.lastTestResult = result
 
         if result.success {
-            context.addLog(type: .info, message: "Tests passed")
+            let maxDuration = context.autonomousConfig.maxTestDuration
+            if result.duration > maxDuration {
+                context.addLog(
+                    type: .error,
+                    message: "Tests passed but took too long (\(String(format: "%.1f", result.duration))s > \(Int(maxDuration))s limit)"
+                )
+                throw ExecutionStateMachineError.executionFailed("runTests: slow tests")
+            }
+            context.addLog(type: .info, message: "Tests passed in \(String(format: "%.1f", result.duration))s")
         } else {
             let errorMsg = result.errorOutput ?? result.output
             context.addLog(type: .error, message: "Tests failed:\n\(errorMsg)")
@@ -1351,21 +1370,48 @@ final class ExecutionStateMachine {
             throw ExecutionStateMachineError.executionFailed("fixTestErrors: no test result")
         }
 
-        let errorOutput = testResult.errorOutput ?? testResult.output
+        let maxDuration = context.autonomousConfig.maxTestDuration
+        let isSlowTestIssue = testResult.success && testResult.duration > maxDuration
 
-        let prompt = """
-            The tests failed with the following output:
+        let prompt: String
+        if isSlowTestIssue {
+            prompt = """
+                The tests passed but took too long (\(String(format: "%.1f", testResult.duration)) seconds).
+                The maximum allowed duration is \(Int(maxDuration)) seconds.
 
-            ```
-            \(errorOutput)
-            ```
+                Please optimize or eliminate slow tests to keep the development loop efficient:
 
-            Please fix these test failures. Either fix the code if there's a bug,
-            or fix the test if it's incorrect.
-            After fixing, run /commit to commit your changes.
-            """
+                ## Options (in order of preference):
+                1. **Optimize slow tests**: Replace real I/O with mocks/stubs
+                   - Network calls → mock responses
+                   - File operations → in-memory alternatives
+                   - Database queries → in-memory test doubles
 
-        context.addLog(type: .info, message: "Asking Claude to fix test failures (attempt \(context.testAttempts))")
+                2. **Remove sleep/delays**: Use async test patterns instead of artificial waits
+
+                3. **Reduce test scope**: Split large tests into smaller, focused tests
+
+                4. **Delete slow tests**: If a test cannot be made fast, delete it entirely.
+                   A slow test that blocks the development loop has negative value.
+
+                After fixing, run /commit to commit your changes.
+                """
+            context.addLog(type: .info, message: "Asking Claude to fix slow tests (attempt \(context.testAttempts))")
+        } else {
+            let errorOutput = testResult.errorOutput ?? testResult.output
+            prompt = """
+                The tests failed with the following output:
+
+                ```
+                \(errorOutput)
+                ```
+
+                Please fix these test failures. Either fix the code if there's a bug,
+                or fix the test if it's incorrect.
+                After fixing, run /commit to commit your changes.
+                """
+            context.addLog(type: .info, message: "Asking Claude to fix test failures (attempt \(context.testAttempts))")
+        }
 
         let result = try await claudeService.execute(
             prompt: prompt,
