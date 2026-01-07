@@ -194,6 +194,40 @@ final class PlanServiceTests: XCTestCase {
         XCTAssertEqual(plan.tasks[1].status, .pending)
     }
 
+    func testParseCheckboxTaskWithZeroPrefix() {
+        // Test format from real-world plan.md with task numbers starting at 0
+        let text = """
+        - [x] **Task 0.1**: Initialize Vue 3 + Vite + TypeScript Project
+
+        **Description:** Create project foundation with folder structure.
+
+        - [x] Create new Vite project with Vue 3 + TypeScript template
+        - [x] Configure TypeScript with strict mode
+
+        - [ ] **Task 0.2**: Configure Linting & Formatting
+
+        **Description:** Set up ESLint, Prettier, and EditorConfig.
+
+        - [ ] Install ESLint with Vue plugin
+        """
+
+        let plan = service.parsePlanFromText(text)
+
+        XCTAssertEqual(plan.tasks.count, 2)
+
+        XCTAssertEqual(plan.tasks[0].number, 0)
+        XCTAssertEqual(plan.tasks[0].title, "Initialize Vue 3 + Vite + TypeScript Project")
+        XCTAssertEqual(plan.tasks[0].status, .completed)
+        XCTAssertEqual(plan.tasks[0].description, "Create project foundation with folder structure.")
+        XCTAssertEqual(plan.tasks[0].subtasks.count, 2)
+
+        XCTAssertEqual(plan.tasks[1].number, 0)
+        XCTAssertEqual(plan.tasks[1].title, "Configure Linting & Formatting")
+        XCTAssertEqual(plan.tasks[1].status, .pending)
+        XCTAssertEqual(plan.tasks[1].description, "Set up ESLint, Prettier, and EditorConfig.")
+        XCTAssertEqual(plan.tasks[1].subtasks.count, 1)
+    }
+
     func testParseMixedFormats() {
         let text = """
         ## Task 1: Standard format task

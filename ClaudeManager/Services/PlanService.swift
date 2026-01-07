@@ -12,15 +12,15 @@ enum PlanServiceError: Error {
 final class PlanService: Sendable {
 
     // Format 1: ## Task 1: Task Title
-    private static let taskPattern = /## Task (\d+): (.+)/
-    private static let descriptionPattern = /\*\*Description:\*\*\s*(.+)/
-    private static let subtaskPattern = /- \[[ xX]?\] (.+)/
+    private static let taskPattern = /\s*## Task (\d+): (.+)/
+    private static let descriptionPattern = /\s*\*\*Description:\*\*\s*(.+)/
+    private static let subtaskPattern = /\s*- \[[ xX]?\] (.+)/
 
     // Format 2: - [x] **Task 1.1**: Task description (checkbox-style)
-    private static let checkboxTaskPattern = /- \[([xX ])\] \*\*Task ([\d.]+)\*\*:\s*(.+)/
+    private static let checkboxTaskPattern = /\s*- \[([xX ])\] \*\*Task ([\d.]+)\*\*:\s*(.+)/
 
     // Format 3: - [x] ~~**Task 2.1**: Task description~~ - SKIPPED
-    private static let skippedTaskPattern = /- \[[xX]\] ~~\*\*Task ([\d.]+)\*\*:\s*(.+)~~ - SKIPPED/
+    private static let skippedTaskPattern = /\s*- \[[xX]\] ~~\*\*Task ([\d.]+)\*\*:\s*(.+)~~ - SKIPPED/
 
     func parsePlanFromFile(at url: URL) throws -> Plan {
         let text: String
