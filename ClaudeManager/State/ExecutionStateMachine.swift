@@ -235,7 +235,7 @@ final class ExecutionStateMachine {
         context.addLog(type: .info, message: "Manual input processed successfully")
 
         if context.phase != .waitingForUser && !context.phase.isTerminal {
-            await runLoop()
+            Task { await runLoop() }
         }
     }
 
