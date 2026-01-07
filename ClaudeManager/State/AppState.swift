@@ -86,10 +86,9 @@ final class AppState {
             context.pendingQuestion = makeMockPendingQuestion()
 
         case .completed:
-            configureActiveExecution(context, projectPath: mockProjectPath)
+            configureActiveExecution(context, projectPath: mockProjectPath, allTasksCompleted: true)
             context.phase = .completed
             context.startTime = Date().addingTimeInterval(-60)
-            context.plan = makeMockPlan(allCompleted: true)
             context.totalCost = 0.25
 
         case .failed:
@@ -105,11 +104,15 @@ final class AppState {
         }
     }
 
-    private static func configureActiveExecution(_ context: ExecutionContext, projectPath: URL) {
+    private static func configureActiveExecution(
+        _ context: ExecutionContext,
+        projectPath: URL,
+        allTasksCompleted: Bool = false
+    ) {
         context.projectPath = projectPath
         context.featureDescription = "Mock feature for UI testing"
         context.startTime = Date()
-        context.plan = makeMockPlan()
+        context.plan = makeMockPlan(allCompleted: allTasksCompleted)
         context.currentTaskIndex = 0
     }
 
