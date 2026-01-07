@@ -8,7 +8,6 @@ struct ManualInputView: View {
     // MARK: - Local State
 
     @State private var inputText: String = ""
-    @State private var isSubmitting = false
     @State private var errorMessage: String?
 
     // MARK: - Computed Properties
@@ -23,7 +22,6 @@ struct ManualInputView: View {
 
     private var canSubmit: Bool {
         !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !isSubmitting
             && context.isManualInputAvailable
     }
 
@@ -40,7 +38,7 @@ struct ManualInputView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
                 )
-                .disabled(!context.isManualInputAvailable || isSubmitting)
+                .disabled(!context.isManualInputAvailable)
                 .onSubmit {
                     if canSubmit {
                         submit()
@@ -48,13 +46,7 @@ struct ManualInputView: View {
                 }
 
             Button(action: submit) {
-                if isSubmitting {
-                    ProgressView()
-                        .scaleEffect(0.7)
-                        .frame(width: 16, height: 16)
-                } else {
-                    Image(systemName: "paperplane.fill")
-                }
+                Image(systemName: "paperplane.fill")
             }
             .frame(width: 32, height: 32)
             .buttonStyle(.borderedProminent)
@@ -90,7 +82,6 @@ struct ManualInputView: View {
         guard !text.isEmpty else { return }
 
         inputText = ""
-        isSubmitting = true
 
         Task {
             do {
@@ -98,7 +89,6 @@ struct ManualInputView: View {
             } catch {
                 errorMessage = error.localizedDescription
             }
-            isSubmitting = false
         }
     }
 }
