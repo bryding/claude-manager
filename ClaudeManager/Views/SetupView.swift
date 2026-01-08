@@ -52,6 +52,7 @@ struct SetupView: View {
                     existingPlanBanner
                     projectSelectionSection
                     featureDescriptionSection
+                    executionModeSection
                 }
                 .padding(24)
             }
@@ -185,6 +186,114 @@ struct SetupView: View {
             }
             .padding(.vertical, 4)
         }
+    }
+
+    private var executionModeSection: some View {
+        GroupBox("Execution Mode") {
+            VStack(alignment: .leading, spacing: 12) {
+                Picker("Command Execution", selection: commandExecutionModeBinding) {
+                    ForEach(CommandExecutionMode.allCases, id: \.self) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                Text(appState.userPreferences.autonomousConfig.commandExecutionMode.helpText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                if appState.userPreferences.autonomousConfig.commandExecutionMode != .manual {
+                    Divider()
+
+                    Toggle("Fall back on timeout", isOn: fallbackOnTimeoutBinding)
+                        .font(.callout)
+
+                    Toggle("Fall back on command failure", isOn: fallbackOnFailureBinding)
+                        .font(.callout)
+
+                    HStack {
+                        Text("Failures before fallback:")
+                            .font(.callout)
+                        Stepper(
+                            "\(appState.userPreferences.autonomousConfig.consecutiveFailuresBeforeFallback)",
+                            value: consecutiveFailuresBinding,
+                            in: 1...10
+                        )
+                    }
+
+                    HStack {
+                        Text("Command timeout:")
+                            .font(.callout)
+                        TextField(
+                            "seconds",
+                            value: commandTimeoutBinding,
+                            format: .number
+                        )
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 80)
+                        Text("seconds")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if appState.userPreferences.autonomousConfig.commandExecutionMode == .alwaysAutonomous {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.red)
+                        Text("No fallback protection. Only use in isolated environments.")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
+    private var commandExecutionModeBinding: Binding<CommandExecutionMode> {
+        Binding(
+            get: { appState.userPreferences.autonomousConfig.commandExecutionMode },
+            set: {
+                appState.userPreferences.autonomousConfig.commandExecutionMode = $0
+            }
+        )
+    }
+
+    private var fallbackOnTimeoutBinding: Binding<Bool> {
+        Binding(
+            get: { appState.userPreferences.autonomousConfig.fallbackOnTimeout },
+            set: {
+                appState.userPreferences.autonomousConfig.fallbackOnTimeout = $0
+            }
+        )
+    }
+
+    private var fallbackOnFailureBinding: Binding<Bool> {
+        Binding(
+            get: { appState.userPreferences.autonomousConfig.fallbackOnCommandFailure },
+            set: {
+                appState.userPreferences.autonomousConfig.fallbackOnCommandFailure = $0
+            }
+        )
+    }
+
+    private var consecutiveFailuresBinding: Binding<Int> {
+        Binding(
+            get: { appState.userPreferences.autonomousConfig.consecutiveFailuresBeforeFallback },
+            set: {
+                appState.userPreferences.autonomousConfig.consecutiveFailuresBeforeFallback = $0
+            }
+        )
+    }
+
+    private var commandTimeoutBinding: Binding<TimeInterval> {
+        Binding(
+            get: { appState.userPreferences.autonomousConfig.commandTimeout },
+            set: {
+                appState.userPreferences.autonomousConfig.commandTimeout = $0
+            }
+        )
     }
 
     // MARK: - Image Handling

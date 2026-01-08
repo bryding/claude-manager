@@ -31,6 +31,7 @@ struct ControlsView: View {
                 if context.appearsStuck {
                     continueButton
                 }
+                autonomousModeToggle
             }
             Spacer()
             statsGroup
@@ -124,6 +125,119 @@ struct ControlsView: View {
         .controlSize(.regular)
         .tint(.orange)
         .accessibilityIdentifier(AccessibilityIdentifiers.ControlsView.continueButton)
+    }
+
+    private var autonomousModeToggle: some View {
+        Menu {
+            Button(action: { setCommandMode(.manual) }) {
+                HStack {
+                    if context.effectiveCommandExecutionMode == .manual {
+                        Image(systemName: "checkmark")
+                    }
+                    Text("Manual Approval")
+                }
+            }
+
+            Button(action: { setCommandMode(.autonomous) }) {
+                HStack {
+                    if context.effectiveCommandExecutionMode == .autonomous {
+                        Image(systemName: "checkmark")
+                    }
+                    Text("Autonomous")
+                }
+            }
+
+            if context.isInFallbackMode {
+                Divider()
+                Button(action: { context.resetFallbackState() }) {
+                    Label("Reset Fallback", systemImage: "arrow.counterclockwise")
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: modeIconName)
+                    .foregroundStyle(modeIconColor)
+                Text(modeDisplayText)
+                    .font(.callout)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(modeBackgroundColor)
+            .clipShape(Capsule())
+        }
+        .menuStyle(.borderlessButton)
+        .help(modeHelpText)
+    }
+
+    private var modeIconName: String {
+        if context.isInFallbackMode {
+            return "exclamationmark.triangle.fill"
+        }
+        switch context.effectiveCommandExecutionMode {
+        case .manual:
+            return "hand.raised.fill"
+        case .autonomous, .alwaysAutonomous:
+            return "bolt.fill"
+        }
+    }
+
+    private var modeIconColor: Color {
+        if context.isInFallbackMode {
+            return .orange
+        }
+        switch context.effectiveCommandExecutionMode {
+        case .manual:
+            return .secondary
+        case .autonomous:
+            return .green
+        case .alwaysAutonomous:
+            return .red
+        }
+    }
+
+    private var modeDisplayText: String {
+        if context.isInFallbackMode {
+            return "Fallback"
+        }
+        switch context.effectiveCommandExecutionMode {
+        case .manual:
+            return "Manual"
+        case .autonomous:
+            return "Auto"
+        case .alwaysAutonomous:
+            return "YOLO"
+        }
+    }
+
+    private var modeBackgroundColor: Color {
+        if context.isInFallbackMode {
+            return .orange.opacity(0.2)
+        }
+        switch context.effectiveCommandExecutionMode {
+        case .manual:
+            return .secondary.opacity(0.1)
+        case .autonomous:
+            return .green.opacity(0.2)
+        case .alwaysAutonomous:
+            return .red.opacity(0.2)
+        }
+    }
+
+    private var modeHelpText: String {
+        if context.isInFallbackMode {
+            return "In fallback mode: \(context.fallbackReason?.displayMessage ?? "unknown")"
+        }
+        return context.autonomousConfig.commandExecutionMode.helpText
+    }
+
+    private func setCommandMode(_ mode: CommandExecutionMode) {
+        if mode == .manual {
+            context.autonomousModeOverride = false
+            context.triggerFallback(reason: .userToggled)
+        } else {
+            context.autonomousModeOverride = true
+            context.resetFallbackState()
+        }
     }
 
     private var startButton: some View {

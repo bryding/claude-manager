@@ -202,12 +202,7 @@ final class ExecutionStateMachine {
         context.addLog(type: .info, message: "User input: \(input)")
 
         let isInterviewPhase = context.phase == .conductingInterview
-        let permissionMode: PermissionMode = switch context.phase {
-        case .conductingInterview, .generatingInitialPlan, .rewritingPlan:
-            .plan
-        default:
-            .acceptEdits
-        }
+        let permissionMode = getPermissionMode(for: context.phase)
 
         let result = try await claudeService.execute(
             prompt: input,
@@ -272,6 +267,19 @@ final class ExecutionStateMachine {
         shouldStop = false
         phaseBeforePause = nil
         context.autonomousConfig = userPreferences.autonomousConfig
+    }
+
+    private func getExecutionPermissionMode() -> PermissionMode {
+        context.isAutonomousCommandExecution ? .bypassPermissions : .acceptEdits
+    }
+
+    private func getPermissionMode(for phase: ExecutionPhase) -> PermissionMode {
+        switch phase {
+        case .conductingInterview, .generatingInitialPlan, .rewritingPlan:
+            return .plan
+        default:
+            return getExecutionPermissionMode()
+        }
     }
 
     /// Handles phase errors with autonomous failure handling support.
@@ -373,6 +381,46 @@ final class ExecutionStateMachine {
             context.phase = .failed
             return false
         }
+    }
+
+    /// Handles execution errors with potential fallback to manual mode.
+    /// Returns true if the error was handled and execution should continue, false if the error should propagate.
+    private func handleExecutionError(_ error: ClaudeCLIServiceError) async throws -> Bool {
+        guard context.isAutonomousCommandExecution else {
+            return false
+        }
+
+        let config = context.autonomousConfig
+
+        switch error {
+        case .processError(let processError):
+            switch processError {
+            case .timedOut:
+                if config.fallbackOnTimeout && config.commandExecutionMode != .alwaysAutonomous {
+                    context.triggerFallback(reason: .timeout)
+                    context.addLog(type: .info, message: "Retrying with manual approval mode...")
+                    return false
+                }
+
+            case .nonZeroExitCode(let code, let stderr):
+                if config.fallbackOnCommandFailure && config.commandExecutionMode != .alwaysAutonomous {
+                    let didFallback = context.incrementCommandFailure()
+                    if didFallback {
+                        context.addLog(type: .info, message: "Switching to manual approval mode after failures")
+                    }
+                    let errorMsg = stderr ?? "Exit code \(code)"
+                    context.addLog(type: .error, message: "Command failed: \(errorMsg)")
+                }
+
+            default:
+                break
+            }
+
+        default:
+            break
+        }
+
+        return false
     }
 
     // MARK: - Main Loop
@@ -1044,19 +1092,30 @@ final class ExecutionStateMachine {
             - Build on work from previously completed tasks where relevant
             """
 
-        let result = try await claudeService.execute(
-            prompt: prompt,
-            workingDirectory: projectPath,
-            permissionMode: .acceptEdits,
-            sessionId: context.sessionId,
-            timeout: context.timeoutConfiguration.executionTimeout,
-            onMessage: { [weak self] message in
-                guard let self = self else { return }
-                await MainActor.run {
-                    self.handleStreamMessage(message)
+        let result: ClaudeExecutionResult
+        do {
+            result = try await claudeService.execute(
+                prompt: prompt,
+                workingDirectory: projectPath,
+                permissionMode: getExecutionPermissionMode(),
+                sessionId: context.sessionId,
+                timeout: context.isAutonomousCommandExecution
+                    ? context.autonomousConfig.commandTimeout
+                    : context.timeoutConfiguration.executionTimeout,
+                onMessage: { [weak self] message in
+                    guard let self = self else { return }
+                    await MainActor.run {
+                        self.handleStreamMessage(message)
+                    }
                 }
+            )
+            context.resetCommandFailureCount()
+        } catch let error as ClaudeCLIServiceError {
+            if try await handleExecutionError(error) {
+                return
             }
-        )
+            throw error
+        }
 
         if try await processAutoAnswerIfNeeded() {
             return
@@ -1120,7 +1179,7 @@ final class ExecutionStateMachine {
         let result = try await claudeService.execute(
             prompt: prompt,
             workingDirectory: projectPath,
-            permissionMode: .acceptEdits,
+            permissionMode: getExecutionPermissionMode(),
             sessionId: context.sessionId,
             timeout: context.timeoutConfiguration.executionTimeout,
             onMessage: { [weak self] message in
@@ -1205,7 +1264,7 @@ final class ExecutionStateMachine {
         let result = try await claudeService.execute(
             prompt: prompt,
             workingDirectory: projectPath,
-            permissionMode: .acceptEdits,
+            permissionMode: getExecutionPermissionMode(),
             sessionId: context.sessionId,
             timeout: context.timeoutConfiguration.executionTimeout,
             onMessage: { [weak self] message in
@@ -1333,7 +1392,7 @@ final class ExecutionStateMachine {
         let result = try await claudeService.execute(
             prompt: prompt,
             workingDirectory: projectPath,
-            permissionMode: .acceptEdits,
+            permissionMode: getExecutionPermissionMode(),
             sessionId: context.sessionId,
             timeout: context.timeoutConfiguration.executionTimeout,
             onMessage: { [weak self] message in
@@ -1416,7 +1475,7 @@ final class ExecutionStateMachine {
         let result = try await claudeService.execute(
             prompt: prompt,
             workingDirectory: projectPath,
-            permissionMode: .acceptEdits,
+            permissionMode: getExecutionPermissionMode(),
             sessionId: context.sessionId,
             timeout: context.timeoutConfiguration.executionTimeout,
             onMessage: { [weak self] message in
@@ -1775,7 +1834,7 @@ final class ExecutionStateMachine {
             let result = try await claudeService.execute(
                 prompt: answer,
                 workingDirectory: projectPath,
-                permissionMode: .acceptEdits,
+                permissionMode: getExecutionPermissionMode(),
                 sessionId: sessionId,
                 timeout: context.timeoutConfiguration.executionTimeout,
                 onMessage: { [weak self] message in

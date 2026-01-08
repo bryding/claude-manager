@@ -29,6 +29,10 @@ struct ExecutionView: View {
         VStack(alignment: .leading, spacing: 16) {
             projectHeader
 
+            if context.isAutonomousCommandExecution || context.isInFallbackMode {
+                autonomousModeBanner
+            }
+
             PhaseIndicatorView(
                 phase: context.phase,
                 hasQuestion: context.pendingQuestion != nil,
@@ -118,6 +122,49 @@ struct ExecutionView: View {
             .background(Color.orange.opacity(0.2))
             .foregroundStyle(.orange)
             .clipShape(Capsule())
+    }
+
+    @ViewBuilder
+    private var autonomousModeBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: context.isInFallbackMode
+                ? "exclamationmark.triangle.fill"
+                : "bolt.fill"
+            )
+            .foregroundStyle(context.isInFallbackMode ? .orange : .green)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(context.isInFallbackMode ? "Fallback Mode" : "Autonomous Mode")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+
+                if let reason = context.fallbackReason {
+                    Text(reason.displayMessage)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Commands run without approval")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+
+            if context.isInFallbackMode {
+                Button("Resume Auto") {
+                    context.resetFallbackState()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.mini)
+            }
+        }
+        .padding(8)
+        .background(
+            (context.isInFallbackMode ? Color.orange : Color.green)
+                .opacity(0.1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 }
 

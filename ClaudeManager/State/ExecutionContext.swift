@@ -50,6 +50,28 @@ struct PendingQuestion: Identifiable, Sendable {
     }
 }
 
+// MARK: - Fallback Reason
+
+enum FallbackReason: Sendable, Equatable {
+    case timeout
+    case commandFailure(String)
+    case consecutiveFailures(Int)
+    case userToggled
+
+    var displayMessage: String {
+        switch self {
+        case .timeout:
+            return "Command timed out"
+        case .commandFailure(let error):
+            return "Command failed: \(error)"
+        case .consecutiveFailures(let count):
+            return "\(count) consecutive failures"
+        case .userToggled:
+            return "User switched to manual"
+        }
+    }
+}
+
 // MARK: - Execution Error
 
 struct ExecutionError: Identifiable, Sendable {
@@ -139,6 +161,13 @@ final class ExecutionContext {
 
     var taskFailureCount: Int = 0
     var autonomousConfig: AutonomousConfiguration = .default
+
+    // MARK: - Command Execution Fallback State
+
+    var isInFallbackMode: Bool = false
+    var consecutiveCommandFailures: Int = 0
+    var fallbackReason: FallbackReason?
+    var autonomousModeOverride: Bool?
 
     // MARK: - Timeout Configuration
 
@@ -266,6 +295,20 @@ final class ExecutionContext {
         PromptContent(text: featureDescription, images: attachedImages)
     }
 
+    var effectiveCommandExecutionMode: CommandExecutionMode {
+        if let override = autonomousModeOverride {
+            return override ? .autonomous : .manual
+        }
+        if isInFallbackMode {
+            return .manual
+        }
+        return autonomousConfig.commandExecutionMode
+    }
+
+    var isAutonomousCommandExecution: Bool {
+        effectiveCommandExecutionMode != .manual
+    }
+
     // MARK: - Mutation Methods
 
     func reset() {
@@ -299,6 +342,10 @@ final class ExecutionContext {
         interviewSession = nil
         currentInterviewQuestion = nil
         attachedImages = []
+        isInFallbackMode = false
+        consecutiveCommandFailures = 0
+        fallbackReason = nil
+        autonomousModeOverride = nil
     }
 
     func resetForNewFeature() {
@@ -336,6 +383,10 @@ final class ExecutionContext {
         interviewSession = nil
         currentInterviewQuestion = nil
         attachedImages = []
+        isInFallbackMode = false
+        consecutiveCommandFailures = 0
+        fallbackReason = nil
+        autonomousModeOverride = nil
     }
 
     func resetRetryAttempt() {
@@ -434,5 +485,34 @@ final class ExecutionContext {
 
     func removeAllImages() {
         attachedImages.removeAll()
+    }
+
+    // MARK: - Fallback Management
+
+    func triggerFallback(reason: FallbackReason) {
+        isInFallbackMode = true
+        fallbackReason = reason
+        addLog(type: .info, message: "Switching to manual mode: \(reason.displayMessage)")
+    }
+
+    func resetFallbackState() {
+        isInFallbackMode = false
+        consecutiveCommandFailures = 0
+        fallbackReason = nil
+        autonomousModeOverride = nil
+    }
+
+    func incrementCommandFailure() -> Bool {
+        consecutiveCommandFailures += 1
+        let threshold = autonomousConfig.consecutiveFailuresBeforeFallback
+        if consecutiveCommandFailures >= threshold && autonomousConfig.fallbackOnCommandFailure {
+            triggerFallback(reason: .consecutiveFailures(consecutiveCommandFailures))
+            return true
+        }
+        return false
+    }
+
+    func resetCommandFailureCount() {
+        consecutiveCommandFailures = 0
     }
 }

@@ -5,14 +5,20 @@ import Foundation
 enum PermissionMode: Sendable {
     case plan
     case acceptEdits
+    case bypassPermissions
     case `default`
 
     var cliValue: String {
         switch self {
         case .plan: return "plan"
         case .acceptEdits: return "acceptEdits"
+        case .bypassPermissions: return "bypassPermissions"
         case .default: return "default"
         }
+    }
+
+    var usesDangerouslySkipPermissions: Bool {
+        self == .bypassPermissions
     }
 }
 
@@ -261,9 +267,14 @@ final class ClaudeCLIService: ClaudeCLIServiceProtocol, @unchecked Sendable {
         var args: [String] = [
             "-p",
             "--output-format", "stream-json",
-            "--verbose",
-            "--permission-mode", permissionMode.cliValue
+            "--verbose"
         ]
+
+        if permissionMode.usesDangerouslySkipPermissions {
+            args.append("--dangerously-skip-permissions")
+        } else {
+            args.append(contentsOf: ["--permission-mode", permissionMode.cliValue])
+        }
 
         if let sessionId = sessionId {
             args.append(contentsOf: ["--resume", sessionId])
