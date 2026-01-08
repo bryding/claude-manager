@@ -169,59 +169,24 @@ struct ControlsView: View {
         .help(modeHelpText)
     }
 
-    private var modeIconName: String {
+    private var modeAppearance: (icon: String, color: Color, text: String, background: Color) {
         if context.isInFallbackMode {
-            return "exclamationmark.triangle.fill"
+            return ("exclamationmark.triangle.fill", .orange, "Fallback", .orange.opacity(0.2))
         }
         switch context.effectiveCommandExecutionMode {
         case .manual:
-            return "hand.raised.fill"
-        case .autonomous, .alwaysAutonomous:
-            return "bolt.fill"
+            return ("hand.raised.fill", .secondary, "Manual", .secondary.opacity(0.1))
+        case .autonomous:
+            return ("bolt.fill", .green, "Auto", .green.opacity(0.2))
+        case .alwaysAutonomous:
+            return ("bolt.fill", .red, "YOLO", .red.opacity(0.2))
         }
     }
 
-    private var modeIconColor: Color {
-        if context.isInFallbackMode {
-            return .orange
-        }
-        switch context.effectiveCommandExecutionMode {
-        case .manual:
-            return .secondary
-        case .autonomous:
-            return .green
-        case .alwaysAutonomous:
-            return .red
-        }
-    }
-
-    private var modeDisplayText: String {
-        if context.isInFallbackMode {
-            return "Fallback"
-        }
-        switch context.effectiveCommandExecutionMode {
-        case .manual:
-            return "Manual"
-        case .autonomous:
-            return "Auto"
-        case .alwaysAutonomous:
-            return "YOLO"
-        }
-    }
-
-    private var modeBackgroundColor: Color {
-        if context.isInFallbackMode {
-            return .orange.opacity(0.2)
-        }
-        switch context.effectiveCommandExecutionMode {
-        case .manual:
-            return .secondary.opacity(0.1)
-        case .autonomous:
-            return .green.opacity(0.2)
-        case .alwaysAutonomous:
-            return .red.opacity(0.2)
-        }
-    }
+    private var modeIconName: String { modeAppearance.icon }
+    private var modeIconColor: Color { modeAppearance.color }
+    private var modeDisplayText: String { modeAppearance.text }
+    private var modeBackgroundColor: Color { modeAppearance.background }
 
     private var modeHelpText: String {
         if context.isInFallbackMode {
@@ -233,7 +198,6 @@ struct ControlsView: View {
     private func setCommandMode(_ mode: CommandExecutionMode) {
         if mode == .manual {
             context.autonomousModeOverride = false
-            context.triggerFallback(reason: .userToggled)
         } else {
             context.autonomousModeOverride = true
             context.resetFallbackState()

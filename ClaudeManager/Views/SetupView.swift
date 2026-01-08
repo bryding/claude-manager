@@ -251,49 +251,31 @@ struct SetupView: View {
         }
     }
 
-    private var commandExecutionModeBinding: Binding<CommandExecutionMode> {
+    private func autonomousConfigBinding<T>(_ keyPath: WritableKeyPath<AutonomousConfiguration, T>) -> Binding<T> {
         Binding(
-            get: { appState.userPreferences.autonomousConfig.commandExecutionMode },
-            set: {
-                appState.userPreferences.autonomousConfig.commandExecutionMode = $0
-            }
+            get: { appState.userPreferences.autonomousConfig[keyPath: keyPath] },
+            set: { appState.userPreferences.autonomousConfig[keyPath: keyPath] = $0 }
         )
+    }
+
+    private var commandExecutionModeBinding: Binding<CommandExecutionMode> {
+        autonomousConfigBinding(\.commandExecutionMode)
     }
 
     private var fallbackOnTimeoutBinding: Binding<Bool> {
-        Binding(
-            get: { appState.userPreferences.autonomousConfig.fallbackOnTimeout },
-            set: {
-                appState.userPreferences.autonomousConfig.fallbackOnTimeout = $0
-            }
-        )
+        autonomousConfigBinding(\.fallbackOnTimeout)
     }
 
     private var fallbackOnFailureBinding: Binding<Bool> {
-        Binding(
-            get: { appState.userPreferences.autonomousConfig.fallbackOnCommandFailure },
-            set: {
-                appState.userPreferences.autonomousConfig.fallbackOnCommandFailure = $0
-            }
-        )
+        autonomousConfigBinding(\.fallbackOnCommandFailure)
     }
 
     private var consecutiveFailuresBinding: Binding<Int> {
-        Binding(
-            get: { appState.userPreferences.autonomousConfig.consecutiveFailuresBeforeFallback },
-            set: {
-                appState.userPreferences.autonomousConfig.consecutiveFailuresBeforeFallback = $0
-            }
-        )
+        autonomousConfigBinding(\.consecutiveFailuresBeforeFallback)
     }
 
     private var commandTimeoutBinding: Binding<TimeInterval> {
-        Binding(
-            get: { appState.userPreferences.autonomousConfig.commandTimeout },
-            set: {
-                appState.userPreferences.autonomousConfig.commandTimeout = $0
-            }
-        )
+        autonomousConfigBinding(\.commandTimeout)
     }
 
     // MARK: - Image Handling
