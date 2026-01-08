@@ -201,7 +201,7 @@ final class ExecutionStateMachine {
     }
 
     /// Answer an interview question shown inline in the chat.
-    /// This continues the existing session instead of starting a new one.
+    /// Continues the existing Claude session to maintain conversation context.
     func answerInterviewQuestion(_ answer: String) async throws {
         guard context.pendingInterviewQuestion != nil else { return }
 
@@ -220,14 +220,23 @@ final class ExecutionStateMachine {
         context.pendingInterviewQuestion = nil
         context.addLog(type: .info, message: "Your answer: \(answer)")
 
+        // Check if max questions reached - auto-complete the interview
+        if let session = context.interviewSession,
+           session.exchanges.count >= Self.maxInterviewQuestions {
+            context.addLog(type: .info, message: "Maximum interview questions reached, completing interview")
+            context.interviewSession?.markComplete()
+            context.phase = .conductingInterview
+            await runLoop()
+            return
+        }
+
         // Check if there are more queued questions from the same response
         if context.hasQueuedQuestions {
             showNextQueuedQuestion(mode: .interview)
             return
         }
 
-        // Continue the conversation by sending the answer to Claude via the existing session
-        // This uses sendManualInput which properly resumes the session
+        // Continue the conversation by sending the answer to Claude
         context.phase = .conductingInterview
         try await sendManualInput(answer)
     }
@@ -908,6 +917,9 @@ final class ExecutionStateMachine {
 
     private static let maxInterviewQuestions = 5
 
+    /// Starts the interview by asking Claude to analyze the feature request.
+    /// This is called once to initiate the interview. Subsequent Q&A happens via
+    /// answerInterviewQuestion() -> sendManualInput() which continues the same session.
     private func conductInterview() async throws {
         questionAskedDuringPhase = false
 
@@ -920,24 +932,9 @@ final class ExecutionStateMachine {
             return
         }
 
-        let questionCount = interviewSession.exchanges.count
-
-        if questionCount >= Self.maxInterviewQuestions {
-            context.addLog(type: .info, message: "Maximum interview questions reached, proceeding to plan generation")
-            context.interviewSession?.markComplete()
+        // If interview is already complete (e.g., resumed session), skip
+        if interviewSession.isComplete {
             return
-        }
-
-        let previousExchanges: String
-        if interviewSession.exchanges.isEmpty {
-            previousExchanges = ""
-        } else {
-            previousExchanges = """
-
-                ## Previous Clarifications
-                \(interviewSession.promptContext)
-
-                """
         }
 
         let prompt = """
@@ -945,30 +942,24 @@ final class ExecutionStateMachine {
 
             ## Feature Request
             \(interviewSession.featureDescription)
-            \(previousExchanges)
+
             ## Instructions
             1. If the feature request is clear enough to proceed with planning, respond with exactly: INTERVIEW_COMPLETE
             2. Otherwise, use the AskUserQuestion tool to ask ONE important clarifying question
             3. Focus on: ambiguous requirements, technical decisions, scope boundaries
             4. Do NOT ask about implementation details you can decide yourself
-            5. Maximum \(Self.maxInterviewQuestions) questions total. You have asked \(questionCount) so far.
+            5. Maximum \(Self.maxInterviewQuestions) questions total.
             """
 
-        context.addLog(type: .info, message: "Conducting interview (question \(questionCount + 1)/\(Self.maxInterviewQuestions) max)")
+        context.addLog(type: .info, message: "Starting interview")
 
-        let isFirstCall = interviewSession.exchanges.isEmpty
-        let images = isFirstCall ? interviewSession.attachedImages : []
-        let content = PromptContent(text: prompt, images: images)
-
-        // Don't resume session for subsequent interview calls - previous Q&A is included
-        // in the prompt text via previousExchanges, so resuming would cause tool result confusion
-        let effectiveSessionId: String? = isFirstCall ? context.sessionId : nil
+        let content = PromptContent(text: prompt, images: interviewSession.attachedImages)
 
         let result = try await claudeService.execute(
             content: content,
             workingDirectory: projectPath,
             permissionMode: .plan,
-            sessionId: effectiveSessionId,
+            sessionId: nil,
             timeout: context.timeoutConfiguration.planModeTimeout,
             onMessage: { [weak self] message in
                 guard let self = self else { return }
@@ -983,13 +974,11 @@ final class ExecutionStateMachine {
             throw ExecutionStateMachineError.executionFailed("conductInterview")
         }
 
-        // Auto-complete fallback: if Claude responded without asking a question and
-        // the interview isn't already complete, mark it complete
+        // Auto-complete: if Claude responded without asking a question, mark interview complete
         if context.interviewSession?.isComplete != true
-            && context.pendingQuestion == nil
             && context.pendingInterviewQuestion == nil
             && !questionAskedDuringPhase {
-            context.addLog(type: .info, message: "Claude responded without asking more questions, completing interview")
+            context.addLog(type: .info, message: "Claude responded without asking questions, completing interview")
             context.interviewSession?.markComplete()
         }
 
@@ -1104,6 +1093,15 @@ final class ExecutionStateMachine {
         let plan = planService.parsePlanFromText(result.result)
         context.plan = plan
         context.addLog(type: .info, message: "Plan reformatted with \(plan.tasks.count) tasks")
+
+        // Save plan to disk so it can be resumed later
+        let planURL = projectPath.appendingPathComponent("plan.md")
+        do {
+            try planService.savePlan(plan, to: planURL)
+            context.addLog(type: .info, message: "Plan saved to plan.md")
+        } catch {
+            context.addLog(type: .error, message: "Failed to save plan.md: \(error.localizedDescription)")
+        }
     }
 
     private func executeCurrentTask() async throws {
