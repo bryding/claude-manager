@@ -97,23 +97,33 @@ final class ExecutionStateMachine {
     }
 
     func startWithExistingPlan() async throws {
-        guard context.projectPath != nil else {
+        guard let projectPath = context.projectPath else {
             throw ExecutionStateMachineError.noProjectPath
         }
 
-        guard let existingPlan = context.existingPlan else {
-            throw ExecutionStateMachineError.noExistingPlan
+        // Re-parse plan.md from disk to get the latest state
+        let planURL = projectPath.appendingPathComponent("plan.md")
+        let freshPlan: Plan
+        do {
+            freshPlan = try planService.parsePlanFromFile(at: planURL)
+        } catch {
+            // Fall back to cached existingPlan if file read fails
+            guard let existingPlan = context.existingPlan else {
+                throw ExecutionStateMachineError.noExistingPlan
+            }
+            freshPlan = existingPlan
         }
 
         resetState()
-        context.plan = existingPlan
+        context.plan = freshPlan
+        context.existingPlan = freshPlan
         context.startTime = Date()
-        context.addLog(type: .info, message: "Starting execution from existing plan")
+        context.addLog(type: .info, message: "Starting execution from existing plan (\(freshPlan.tasks.count) tasks)")
 
-        if let firstPendingIndex = findFirstPendingTask(in: existingPlan) {
+        if let firstPendingIndex = findFirstPendingTask(in: freshPlan) {
             context.currentTaskIndex = firstPendingIndex
             context.phase = .executingTask
-            context.addLog(type: .info, message: "Resuming from task \(existingPlan.tasks[firstPendingIndex].taskId): \(existingPlan.tasks[firstPendingIndex].title)")
+            context.addLog(type: .info, message: "Resuming from task \(freshPlan.tasks[firstPendingIndex].taskId): \(freshPlan.tasks[firstPendingIndex].title)")
         } else {
             context.phase = .completed
             context.addLog(type: .info, message: "All tasks already completed")
