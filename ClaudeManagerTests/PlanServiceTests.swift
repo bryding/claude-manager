@@ -164,14 +164,17 @@ final class PlanServiceTests: XCTestCase {
         XCTAssertEqual(plan.tasks.count, 3)
 
         XCTAssertEqual(plan.tasks[0].number, 1)
+        XCTAssertEqual(plan.tasks[0].taskId, "1.1")
         XCTAssertEqual(plan.tasks[0].title, "Implement the feature")
         XCTAssertEqual(plan.tasks[0].status, .pending)
 
         XCTAssertEqual(plan.tasks[1].number, 1)
+        XCTAssertEqual(plan.tasks[1].taskId, "1.2")
         XCTAssertEqual(plan.tasks[1].title, "Complete the setup")
         XCTAssertEqual(plan.tasks[1].status, .completed)
 
         XCTAssertEqual(plan.tasks[2].number, 2)
+        XCTAssertEqual(plan.tasks[2].taskId, "2.1")
         XCTAssertEqual(plan.tasks[2].title, "Another pending task")
         XCTAssertEqual(plan.tasks[2].status, .pending)
     }
@@ -187,15 +190,16 @@ final class PlanServiceTests: XCTestCase {
         XCTAssertEqual(plan.tasks.count, 2)
 
         XCTAssertEqual(plan.tasks[0].number, 2)
+        XCTAssertEqual(plan.tasks[0].taskId, "2.1")
         XCTAssertEqual(plan.tasks[0].title, "Migration utility")
         XCTAssertEqual(plan.tasks[0].status, .skipped)
 
         XCTAssertEqual(plan.tasks[1].number, 3)
+        XCTAssertEqual(plan.tasks[1].taskId, "3.1")
         XCTAssertEqual(plan.tasks[1].status, .pending)
     }
 
     func testParseCheckboxTaskWithZeroPrefix() {
-        // Test format from real-world plan.md with task numbers starting at 0
         let text = """
         - [x] **Task 0.1**: Initialize Vue 3 + Vite + TypeScript Project
 
@@ -216,12 +220,14 @@ final class PlanServiceTests: XCTestCase {
         XCTAssertEqual(plan.tasks.count, 2)
 
         XCTAssertEqual(plan.tasks[0].number, 0)
+        XCTAssertEqual(plan.tasks[0].taskId, "0.1")
         XCTAssertEqual(plan.tasks[0].title, "Initialize Vue 3 + Vite + TypeScript Project")
         XCTAssertEqual(plan.tasks[0].status, .completed)
         XCTAssertEqual(plan.tasks[0].description, "Create project foundation with folder structure.")
         XCTAssertEqual(plan.tasks[0].subtasks.count, 2)
 
         XCTAssertEqual(plan.tasks[1].number, 0)
+        XCTAssertEqual(plan.tasks[1].taskId, "0.2")
         XCTAssertEqual(plan.tasks[1].title, "Configure Linting & Formatting")
         XCTAssertEqual(plan.tasks[1].status, .pending)
         XCTAssertEqual(plan.tasks[1].description, "Set up ESLint, Prettier, and EditorConfig.")
@@ -245,15 +251,18 @@ final class PlanServiceTests: XCTestCase {
         XCTAssertEqual(plan.tasks.count, 3)
 
         XCTAssertEqual(plan.tasks[0].number, 1)
+        XCTAssertEqual(plan.tasks[0].taskId, "1")
         XCTAssertEqual(plan.tasks[0].title, "Standard format task")
         XCTAssertEqual(plan.tasks[0].status, .pending)
         XCTAssertEqual(plan.tasks[0].subtasks.count, 1)
 
         XCTAssertEqual(plan.tasks[1].number, 2)
+        XCTAssertEqual(plan.tasks[1].taskId, "2.1")
         XCTAssertEqual(plan.tasks[1].title, "Checkbox format completed")
         XCTAssertEqual(plan.tasks[1].status, .completed)
 
         XCTAssertEqual(plan.tasks[2].number, 2)
+        XCTAssertEqual(plan.tasks[2].taskId, "2.2")
         XCTAssertEqual(plan.tasks[2].title, "Checkbox format pending")
         XCTAssertEqual(plan.tasks[2].status, .pending)
     }

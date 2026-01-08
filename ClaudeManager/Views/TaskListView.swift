@@ -31,7 +31,7 @@ private struct TaskRowView: View {
                 .accessibilityIdentifier(AccessibilityIdentifiers.TaskListView.taskStatus(task.number))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Task \(task.number): \(task.title)")
+                Text("Task \(task.taskId): \(task.title)")
                     .font(.headline)
 
                 if task.status == .inProgress && !task.description.isEmpty {

@@ -1,7 +1,7 @@
 import Foundation
 
 struct ContinuationSummary: Sendable, Equatable {
-    let taskNumber: Int
+    let taskId: String
     let taskTitle: String
     let progressDescription: String
     let filesModified: [String]
@@ -9,14 +9,14 @@ struct ContinuationSummary: Sendable, Equatable {
     let generatedAt: Date
 
     init(
-        taskNumber: Int,
+        taskId: String,
         taskTitle: String,
         progressDescription: String,
         filesModified: [String] = [],
         pendingWork: String,
         generatedAt: Date = Date()
     ) {
-        self.taskNumber = taskNumber
+        self.taskId = taskId
         self.taskTitle = taskTitle
         self.progressDescription = progressDescription
         self.filesModified = filesModified
@@ -31,7 +31,7 @@ struct ContinuationSummary: Sendable, Equatable {
 
         return """
             [CONTINUATION FROM PREVIOUS SESSION]
-            Task: \(taskNumber) - \(taskTitle)
+            Task: \(taskId) - \(taskTitle)
 
             Previous Progress:
             \(progressDescription)

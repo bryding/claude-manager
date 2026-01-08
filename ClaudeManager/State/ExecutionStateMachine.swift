@@ -113,7 +113,7 @@ final class ExecutionStateMachine {
         if let firstPendingIndex = findFirstPendingTask(in: existingPlan) {
             context.currentTaskIndex = firstPendingIndex
             context.phase = .executingTask
-            context.addLog(type: .info, message: "Resuming from task \(firstPendingIndex + 1): \(existingPlan.tasks[firstPendingIndex].title)")
+            context.addLog(type: .info, message: "Resuming from task \(existingPlan.tasks[firstPendingIndex].taskId): \(existingPlan.tasks[firstPendingIndex].title)")
         } else {
             context.phase = .completed
             context.addLog(type: .info, message: "All tasks already completed")
@@ -328,7 +328,7 @@ final class ExecutionStateMachine {
 
             // Default behavior: pause for user input
             context.pendingTaskFailure = PendingTaskFailure(
-                taskNumber: task.number,
+                taskId: task.taskId,
                 taskTitle: task.title,
                 error: error.localizedDescription
             )
@@ -1079,7 +1079,7 @@ final class ExecutionStateMachine {
         let prompt = """
             \(continuationContext)\(projectContextSection)\(completedTasksSection)Execute the following task:
 
-            ## Task \(task.number): \(task.title)
+            ## Task \(task.taskId): \(task.title)
             \(task.description)
 
             ## Acceptance Criteria
@@ -1131,7 +1131,7 @@ final class ExecutionStateMachine {
             throw ExecutionStateMachineError.executionFailed("executeCurrentTask")
         }
 
-        context.addLog(type: .info, message: "Task \(task.number) execution completed")
+        context.addLog(type: .info, message: "Task \(task.taskId) execution completed")
     }
 
     private func runCodeReview() async throws {
@@ -1148,7 +1148,7 @@ final class ExecutionStateMachine {
 
         let taskSection = """
             ## Task Being Reviewed
-            **Task \(task.number): \(task.title)**
+            **Task \(task.taskId): \(task.title)**
             \(task.description)
 
             """
@@ -1217,7 +1217,7 @@ final class ExecutionStateMachine {
 
         let taskSection = """
             ## Task Being Tested
-            **Task \(task.number): \(task.title)**
+            **Task \(task.taskId): \(task.title)**
             \(task.description)
 
             """
@@ -1596,7 +1596,7 @@ final class ExecutionStateMachine {
     }
 
     private func createWIPCommit(for task: PlanTask, in projectPath: URL) async throws {
-        let message = "WIP: Task \(task.number) - \(task.title) (context handoff)"
+        let message = "WIP: Task \(task.taskId) - \(task.title) (context handoff)"
 
         let result = try await gitService.commitAll(message: message, in: projectPath)
 
@@ -1613,7 +1613,7 @@ final class ExecutionStateMachine {
         let prompt = """
             Generate a concise continuation summary for the current task progress.
 
-            Task: \(task.number) - \(task.title)
+            Task: \(task.taskId) - \(task.title)
             Description: \(task.description)
 
             Analyze the current state and provide:
@@ -1668,7 +1668,7 @@ final class ExecutionStateMachine {
             ?? "Previous session was interrupted due to context limits."
 
         return ContinuationSummary(
-            taskNumber: task.number,
+            taskId: task.taskId,
             taskTitle: task.title,
             progressDescription: progressDescription,
             filesModified: [],
@@ -1697,7 +1697,7 @@ final class ExecutionStateMachine {
         }
 
         return ContinuationSummary(
-            taskNumber: task.number,
+            taskId: task.taskId,
             taskTitle: task.title,
             progressDescription: response.progressDescription,
             filesModified: response.filesModified,
@@ -1720,11 +1720,11 @@ final class ExecutionStateMachine {
         }.joined(separator: "\n")
 
         let taskContext = context.currentTask.map { task in
-            "Current Task: \(task.number) - \(task.title)\nDescription: \(task.description)"
+            "Current Task: \(task.taskId) - \(task.title)\nDescription: \(task.description)"
         } ?? "No current task"
 
         let planOverview = context.plan.map { plan in
-            let taskList = plan.tasks.prefix(10).map { "\($0.number). \($0.title) [\($0.status.rawValue)]" }
+            let taskList = plan.tasks.prefix(10).map { "\($0.taskId). \($0.title) [\($0.status.rawValue)]" }
             return "Plan Tasks:\n" + taskList.joined(separator: "\n")
         } ?? "No plan available"
 

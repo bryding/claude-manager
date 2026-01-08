@@ -33,7 +33,7 @@ struct TaskFailureView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Task \(failure.taskNumber): \(failure.taskTitle)")
+                Text("Task \(failure.taskId): \(failure.taskTitle)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -90,7 +90,7 @@ struct TaskFailureView: View {
 
     let failure = PendingTaskFailure(
         id: UUID(),
-        taskNumber: 3,
+        taskId: "3",
         taskTitle: "Implement user authentication",
         error: "Build failed with 2 errors:\n- Missing import statement\n- Type 'AuthService' not found"
     )

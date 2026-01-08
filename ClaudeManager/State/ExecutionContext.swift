@@ -12,18 +12,18 @@ enum TaskFailureResponse: String {
 
 struct PendingTaskFailure: Identifiable, Sendable {
     let id: UUID
-    let taskNumber: Int
+    let taskId: String
     let taskTitle: String
     let error: String
 
     init(
         id: UUID = UUID(),
-        taskNumber: Int,
+        taskId: String,
         taskTitle: String,
         error: String
     ) {
         self.id = id
-        self.taskNumber = taskNumber
+        self.taskId = taskId
         self.taskTitle = taskTitle
         self.error = error
     }

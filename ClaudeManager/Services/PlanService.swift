@@ -36,6 +36,7 @@ final class PlanService: Sendable {
         var tasks: [PlanTask] = []
         let lines = text.components(separatedBy: .newlines)
         var currentTaskNumber: Int?
+        var currentTaskId: String?
         var currentTitle: String?
         var currentDescription: String?
         var currentSubtasks: [String] = []
@@ -45,6 +46,7 @@ final class PlanService: Sendable {
             if let number = currentTaskNumber, let title = currentTitle {
                 let task = PlanTask(
                     number: number,
+                    taskId: currentTaskId,
                     title: title,
                     description: currentDescription ?? "",
                     status: currentStatus,
@@ -59,7 +61,9 @@ final class PlanService: Sendable {
             if let match = line.wholeMatch(of: Self.taskPattern) {
                 saveCurrentTask()
 
-                currentTaskNumber = Int(match.1)
+                let taskNumber = Int(match.1) ?? tasks.count + 1
+                currentTaskNumber = taskNumber
+                currentTaskId = String(taskNumber)
                 currentTitle = String(match.2)
                 currentDescription = nil
                 currentSubtasks = []
@@ -74,6 +78,7 @@ final class PlanService: Sendable {
                 let taskNumber = Int(taskId.split(separator: ".").first ?? "") ?? tasks.count + 1
 
                 currentTaskNumber = taskNumber
+                currentTaskId = taskId
                 currentTitle = description
                 currentDescription = nil
                 currentSubtasks = []
@@ -91,6 +96,7 @@ final class PlanService: Sendable {
                 let taskNumber = Int(taskId.split(separator: ".").first ?? "") ?? tasks.count + 1
 
                 currentTaskNumber = taskNumber
+                currentTaskId = taskId
                 currentTitle = description
                 currentDescription = nil
                 currentSubtasks = []

@@ -15,6 +15,7 @@ enum TaskStatus: String, Codable, Sendable {
 struct PlanTask: Identifiable, Equatable, Sendable {
     let id: UUID
     let number: Int
+    let taskId: String
     let title: String
     let description: String
     var status: TaskStatus
@@ -23,6 +24,7 @@ struct PlanTask: Identifiable, Equatable, Sendable {
     init(
         id: UUID = UUID(),
         number: Int,
+        taskId: String? = nil,
         title: String,
         description: String,
         status: TaskStatus = .pending,
@@ -30,6 +32,7 @@ struct PlanTask: Identifiable, Equatable, Sendable {
     ) {
         self.id = id
         self.number = number
+        self.taskId = taskId ?? String(number)
         self.title = title
         self.description = description
         self.status = status

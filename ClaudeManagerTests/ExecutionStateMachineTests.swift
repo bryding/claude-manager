@@ -909,12 +909,12 @@ final class ExecutionStateMachineTests: XCTestCase {
 
     func testPendingTaskFailureHasCorrectData() async throws {
         let failure = PendingTaskFailure(
-            taskNumber: 5,
+            taskId: "5",
             taskTitle: "Implement Feature",
             error: "Connection timed out"
         )
 
-        XCTAssertEqual(failure.taskNumber, 5)
+        XCTAssertEqual(failure.taskId, "5")
         XCTAssertEqual(failure.taskTitle, "Implement Feature")
         XCTAssertEqual(failure.error, "Connection timed out")
         XCTAssertNotNil(failure.id)
@@ -925,7 +925,7 @@ final class ExecutionStateMachineTests: XCTestCase {
         context.featureDescription = "Build feature"
         context.phase = .waitingForUser
         context.pendingTaskFailure = PendingTaskFailure(
-            taskNumber: 1,
+            taskId: "1",
             taskTitle: "Test Task",
             error: "Test error"
         )
@@ -945,7 +945,7 @@ final class ExecutionStateMachineTests: XCTestCase {
         context.featureDescription = "Build feature"
         context.phase = .waitingForUser
         context.pendingTaskFailure = PendingTaskFailure(
-            taskNumber: 1,
+            taskId: "1",
             taskTitle: "Test Task",
             error: "Test error"
         )
@@ -967,7 +967,7 @@ final class ExecutionStateMachineTests: XCTestCase {
         context.featureDescription = "Build feature"
         context.phase = .waitingForUser
         context.pendingTaskFailure = PendingTaskFailure(
-            taskNumber: 1,
+            taskId: "1",
             taskTitle: "Test Task",
             error: "Test error"
         )

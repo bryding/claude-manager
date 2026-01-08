@@ -295,12 +295,19 @@ struct SetupView: View {
     private var existingPlanBanner: some View {
         if let plan = context.existingPlan {
             let taskCount = plan.tasks.count
+            let completedCount = plan.tasks.filter { $0.status == .completed }.count
+            let pendingCount = plan.tasks.filter { $0.status == .pending }.count
             HStack(spacing: 12) {
                 Image(systemName: "doc.text.fill")
                     .foregroundStyle(.blue)
 
-                Text("Found plan.md with \(taskCount) task\(taskCount == 1 ? "" : "s")")
-                    .font(.callout)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Found plan.md with \(taskCount) task\(taskCount == 1 ? "" : "s")")
+                        .font(.callout)
+                    Text("\(completedCount) completed, \(pendingCount) pending")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
 
                 Spacer()
 
