@@ -225,10 +225,10 @@ final class ExecutionContext {
         }
 
         let taskCount = Double(plan.tasks.count)
-        let baseProgress = Double(currentTaskIndex) / taskCount
-        let taskContribution = phase.progressWeight / taskCount
+        let completedCount = Double(plan.tasks.filter { $0.status == .completed || $0.status == .skipped }.count)
+        let inProgressBonus = phase == .executingTask ? 0.5 : 0.0
 
-        return min(baseProgress + taskContribution, 1.0)
+        return min((completedCount + inProgressBonus) / taskCount, 1.0)
     }
 
     var isRunning: Bool {
