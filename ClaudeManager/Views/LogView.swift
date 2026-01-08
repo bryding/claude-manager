@@ -254,6 +254,8 @@ private struct SelectableLogTextView: NSViewRepresentable {
             return NSColor.secondaryLabelColor
         case .separator:
             return NSColor.secondaryLabelColor
+        case .question:
+            return NSColor.systemOrange
         }
     }
 }

@@ -200,6 +200,38 @@ final class ExecutionStateMachine {
         await runLoop()
     }
 
+    /// Answer an interview question shown inline in the chat.
+    /// This continues the existing session instead of starting a new one.
+    func answerInterviewQuestion(_ answer: String) async throws {
+        guard context.pendingInterviewQuestion != nil else { return }
+
+        let currentQuestion = context.currentInterviewQuestion
+
+        // Store the answer in interview session
+        if let question = currentQuestion,
+           var session = context.interviewSession,
+           !session.isComplete {
+            session.addExchange(question: question, answer: answer)
+            context.interviewSession = session
+        }
+
+        // Clear the pending interview question
+        context.currentInterviewQuestion = nil
+        context.pendingInterviewQuestion = nil
+        context.addLog(type: .info, message: "Your answer: \(answer)")
+
+        // Check if there are more queued questions from the same response
+        if context.hasQueuedQuestions {
+            showNextQueuedQuestion(mode: .interview)
+            return
+        }
+
+        // Continue the conversation by sending the answer to Claude via the existing session
+        // This uses sendManualInput which properly resumes the session
+        context.phase = .conductingInterview
+        try await sendManualInput(answer)
+    }
+
     func sendManualInput(_ input: String) async throws {
         guard let projectPath = context.projectPath else {
             throw ExecutionStateMachineError.noProjectPath
@@ -238,6 +270,15 @@ final class ExecutionStateMachine {
         }
 
         context.addLog(type: .info, message: "Manual input processed successfully")
+
+        // Auto-complete interview if Claude responded without asking another question
+        if isInterviewPhase
+            && context.interviewSession?.isComplete != true
+            && context.pendingInterviewQuestion == nil
+            && !context.hasQueuedQuestions {
+            context.addLog(type: .info, message: "Claude responded without asking more questions, completing interview")
+            context.interviewSession?.markComplete()
+        }
 
         if context.phase != .waitingForUser && !context.phase.isTerminal {
             Task { await runLoop() }
@@ -836,8 +877,20 @@ final class ExecutionStateMachine {
 
         switch mode {
         case .interview:
+            // Show interview questions inline in the chat, not as a modal
             context.currentInterviewQuestion = pendingQuestion.question.question
-            context.pendingQuestion = pendingQuestion
+            context.pendingInterviewQuestion = pendingQuestion
+
+            // Format the question for display in the log
+            var questionText = "[\(pendingQuestion.question.header)] \(pendingQuestion.question.question)"
+            if !pendingQuestion.question.options.isEmpty {
+                let optionsList = pendingQuestion.question.options.enumerated().map { index, opt in
+                    "  \(index + 1). \(opt.label) - \(opt.description)"
+                }.joined(separator: "\n")
+                questionText += "\n\(optionsList)"
+            }
+            context.addLog(type: .question, message: questionText)
+
             context.phase = .waitingForUser
             questionAskedDuringPhase = true
 
@@ -934,6 +987,7 @@ final class ExecutionStateMachine {
         // the interview isn't already complete, mark it complete
         if context.interviewSession?.isComplete != true
             && context.pendingQuestion == nil
+            && context.pendingInterviewQuestion == nil
             && !questionAskedDuringPhase {
             context.addLog(type: .info, message: "Claude responded without asking more questions, completing interview")
             context.interviewSession?.markComplete()

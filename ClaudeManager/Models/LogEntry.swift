@@ -10,6 +10,7 @@ enum LogType: String, Sendable {
     case error
     case info
     case separator
+    case question
 }
 
 extension LogType {
@@ -27,6 +28,8 @@ extension LogType {
             return .secondary
         case .separator:
             return .secondary
+        case .question:
+            return .orange
         }
     }
 
@@ -38,6 +41,7 @@ extension LogType {
         case .error: return "ERROR"
         case .info: return "INFO"
         case .separator: return "SESSION"
+        case .question: return "QUESTION"
         }
     }
 }

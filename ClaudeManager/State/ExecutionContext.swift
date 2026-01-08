@@ -128,6 +128,7 @@ final class ExecutionContext {
     // MARK: - User Interaction
 
     var pendingQuestion: PendingQuestion?
+    var pendingInterviewQuestion: PendingQuestion?
     var questionQueue: [PendingQuestion] = []
 
     // MARK: - Cost Tracking
@@ -284,11 +285,18 @@ final class ExecutionContext {
     }
 
     var appearsStuck: Bool {
-        phase == .conductingInterview && pendingQuestion == nil && interviewSession?.isComplete != true
+        phase == .conductingInterview
+            && pendingQuestion == nil
+            && pendingInterviewQuestion == nil
+            && interviewSession?.isComplete != true
     }
 
     var hasQueuedQuestions: Bool {
         !questionQueue.isEmpty
+    }
+
+    var hasPendingInterviewQuestion: Bool {
+        pendingInterviewQuestion != nil
     }
 
     var promptContent: PromptContent {
@@ -322,6 +330,7 @@ final class ExecutionContext {
         startTime = nil
         logs = []
         pendingQuestion = nil
+        pendingInterviewQuestion = nil
         questionQueue = []
         totalCost = 0.0
         errors = []
@@ -364,6 +373,7 @@ final class ExecutionContext {
         sessionId = nil
         startTime = nil
         pendingQuestion = nil
+        pendingInterviewQuestion = nil
         questionQueue = []
         totalCost = 0.0
         errors = []

@@ -20,39 +20,60 @@ struct ManualInputView: View {
         tab.stateMachine
     }
 
+    private var isWaitingForInterviewAnswer: Bool {
+        context.hasPendingInterviewQuestion
+    }
+
     private var canSubmit: Bool {
-        !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && context.isManualInputAvailable
+        let hasText = !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        // Allow submission if waiting for interview answer OR if manual input is available
+        return hasText && (isWaitingForInterviewAnswer || context.isManualInputAvailable)
+    }
+
+    private var placeholderText: String {
+        if isWaitingForInterviewAnswer {
+            return "Type your answer..."
+        }
+        return "Send message to Claude..."
     }
 
     // MARK: - Body
 
     var body: some View {
-        HStack(spacing: 8) {
-            TextField("Send message to Claude...", text: $inputText)
-                .textFieldStyle(.plain)
-                .padding(8)
-                .background(Color(nsColor: .textBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-                )
-                .disabled(!context.isManualInputAvailable)
-                .onSubmit {
-                    if canSubmit {
-                        submit()
-                    }
-                }
-
-            Button(action: submit) {
-                Image(systemName: "paperplane.fill")
+        VStack(spacing: 0) {
+            if isWaitingForInterviewAnswer {
+                interviewPromptBar
             }
-            .frame(width: 32, height: 32)
-            .buttonStyle(.borderedProminent)
-            .disabled(!canSubmit)
+
+            HStack(spacing: 8) {
+                TextField(placeholderText, text: $inputText)
+                    .textFieldStyle(.plain)
+                    .padding(8)
+                    .background(Color(nsColor: .textBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(
+                                isWaitingForInterviewAnswer ? Color.orange : Color(nsColor: .separatorColor),
+                                lineWidth: isWaitingForInterviewAnswer ? 2 : 1
+                            )
+                    )
+                    .disabled(!canSubmit && !isWaitingForInterviewAnswer)
+                    .onSubmit {
+                        if canSubmit {
+                            submit()
+                        }
+                    }
+
+                Button(action: submit) {
+                    Image(systemName: "paperplane.fill")
+                }
+                .frame(width: 32, height: 32)
+                .buttonStyle(.borderedProminent)
+                .disabled(!canSubmit)
+            }
+            .padding(8)
         }
-        .padding(8)
         .onChange(of: context.suggestedManualInput) { _, newValue in
             if !newValue.isEmpty {
                 inputText = newValue
@@ -64,6 +85,26 @@ struct ManualInputView: View {
         } message: {
             Text(errorMessage ?? "")
         }
+    }
+
+    private var interviewPromptBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "questionmark.circle.fill")
+                .foregroundStyle(.orange)
+            Text("Answer the question above")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button("Skip") {
+                skipInterviewQuestion()
+            }
+            .buttonStyle(.borderless)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(Color.orange.opacity(0.1))
     }
 
     // MARK: - Error Alert Binding
@@ -85,7 +126,25 @@ struct ManualInputView: View {
 
         Task {
             do {
-                try await stateMachine.sendManualInput(text)
+                if isWaitingForInterviewAnswer {
+                    // Answer the interview question
+                    try await stateMachine.answerInterviewQuestion(text)
+                } else {
+                    // Regular manual input
+                    try await stateMachine.sendManualInput(text)
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func skipInterviewQuestion() {
+        inputText = ""
+
+        Task {
+            do {
+                try await stateMachine.answerInterviewQuestion("skipped")
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -124,6 +183,27 @@ struct ManualInputView: View {
     tab.context.sessionId = "test-session"
     tab.context.phase = .conductingInterview
     tab.context.suggestedManualInput = "Please continue with the interview."
+
+    return ManualInputView()
+        .environment(tab)
+        .frame(width: 600)
+        .padding()
+}
+
+#Preview("Interview Question Pending") {
+    let appState = AppState()
+    let tab = Tab.create(userPreferences: appState.userPreferences)
+    tab.context.sessionId = "test-session"
+    tab.context.phase = .waitingForUser
+    tab.context.pendingInterviewQuestion = PendingQuestion(
+        toolUseId: "test-1",
+        question: AskUserQuestionInput.Question(
+            question: "Which approach would you prefer?",
+            header: "Implementation",
+            options: [],
+            multiSelect: false
+        )
+    )
 
     return ManualInputView()
         .environment(tab)
